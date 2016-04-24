@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdlib>
+#include <algorithm>
 
 // shit code ahead! I am way too lazy to write nice code for parsers, sorry
 // disclaimer: this beatmap parser is meant purely for difficulty calculation 
@@ -84,19 +85,50 @@ namespace {
 	};
 }
 
-void die(const char* msg) {
-	fputs(msg, stderr);
-	fputs("\n", stderr);
-	exit(1);
-}
 
 namespace {
+	void die(const char* msg) {
+		fputs(msg, stderr);
+		fputs("\n", stderr);
+		exit(1);
+	}
+
 	// too fucking lazy to do proper buffering, I will just read the entire
 	// file into memory
 	const size_t bufsize = 2000000; // 2 mb
 	u8 buf[bufsize];
 
 	beatmap b{0};
+
+	// returns the timing point at the given time
+	timing_point* get_timing_point(i64 time) {
+		for (size_t i = b.num_timing_points - 1; i >= 0; i--) {
+			auto& cur = b.timing_points[i];
+
+			if (cur.time <= time) {
+				return &cur;
+			}
+		}
+
+		return &b.timing_points[0];
+	}
+
+	// finds the parent timing point of a given timing point
+	timing_point* get_parent(timing_point* t) {
+		if (!t->inherit) {
+			return t;
+		}
+
+		for (size_t i = b.num_timing_points - 1; i >= 0; i--) {
+			auto& cur = b.timing_points[i];
+			
+			if (cur.time <= t->time && !cur.inherit) {
+				return &cur;
+			}
+		}
+
+		die("Orphan timing section");
+	}
 }
 
 int main(int argc, char* argv[]) {
@@ -365,7 +397,7 @@ found_objects:
 		b.num_objects++;
 
 		// slider points are separated by |
-		if (!strstr(tok, "|") {	
+		if (!strstr(tok, "|")) {	
 			
 			// expected slider but no points found
 			if (ho.type == obj::slider) {
@@ -417,6 +449,22 @@ found_objects:
 
 			sl.num_points++;
 		}
+
+		// find which timing section the slider belongs to
+		auto tp = get_timing_point(ho.time);
+		auto parent = get_parent(tp);
+
+		// calculate slider velocity multiplier for inherited sections
+		f32 sv_multiplier = 1.f;
+		if (tp->inherit) {
+			sv_multiplier = (-100.f / tp->ms_per_beat);
+		}
+
+		// calculate slider end time
+		f32 px_per_beat = b.sv * 100.f * sv_multiplier;
+		f32 num_beats = (sl.length * sl.repetitions) / px_per_beat;
+		f32 duration = std::ceil(num_beats * parent->ms_per_beat);
+		ho.end_time = ho.time + duration;
 	}
 
 	// ---
@@ -468,12 +516,15 @@ found_objects:
 			case obj::slider:
 			{
 				auto& sl = ho.slider;
-				printf("%ld: Slider [Type %c, Length %g, %ld Repetitions] ", 
-					   ho.time, sl.type, sl.length, sl.repetitions);
+
+				printf("%ld-%ld: Slider [Type %c, Length %g, %ld Repetitions] ", 
+					ho.time, ho.end_time, sl.type, sl.length, sl.repetitions);
+
 				for (size_t j = 0; j < sl.num_points; j++) {
 					auto& pt = sl.points[j];
 					printf("(%g, %g) ", pt.x, pt.y);
 				}
+
 				puts("");
 				break;
 			}
