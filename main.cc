@@ -1,35 +1,35 @@
-#include <cstdio>
-#include <cstdint>
-#include <cstring>
-#include <cstdlib>
+#ifdef SLIDERTEST
+#ifdef _WIN32
+#define NEEDS_TO_INSTALL_GENTOO
+#include <Windows.h>
+#endif
+#include <GL/gl.h>
+#include <GL/freeglut.h>
+#include <unistd.h>
+#endif
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <algorithm>
+
+#include "v2f.h"
+#include "curves.h"
 
 // shit code ahead! I am way too lazy to write nice code for parsers, sorry
 // disclaimer: this beatmap parser is meant purely for difficulty calculation 
 //             and I don't support any malicious use of it.
 
 namespace {
-	typedef float f32;
-	typedef double f64;
-	typedef uint_least8_t u8;
-	typedef uint_least32_t u32;
-	typedef uint_least64_t u64;
-	typedef int_least32_t i32;
-	typedef int_least64_t i64;
-
-	struct v2f {
-		f32 x, y;
-	};
-
 	struct slider_data {
 		char type;
 
 		static const size_t max_points = 0xFF;
-		size_t num_points;
+		size_t num_points = 0;
 		v2f points[max_points];
 
-		u64 repetitions;
-		f32 length;
+		u64 repetitions = 0;
+		f32 length = 0;
 	};
 
 	enum class obj : u8 {
@@ -40,47 +40,47 @@ namespace {
 	};
 
 	struct hit_object {
-		v2f pos;
-		i64 time;
-		obj type;
-		i64 end_time; // for spinners
+		v2f pos{0};
+		i64 time = 0;
+		obj type = obj::invalid;
+		i64 end_time = 0; // for spinners
 		slider_data slider;
 	};
 
 	struct timing_point {
-		i64 time;
-		f64 ms_per_beat;
-		bool inherit;
+		i64 time = 0;
+		f64 ms_per_beat = 0;
+		bool inherit = false;
 	};
 
 	// note: values not required for diff calc will be omitted from this parser
 	// at least for now
 	struct beatmap {
-		u32 format_version;
+		u32 format_version = 0;
 
 		// general
-		f32 stack_leniency;
-		u8 mode;
+		f32 stack_leniency = 0;
+		u8 mode = 0;
 
 		// metadata
-		char title[256];
-		char artist[256];
-		char creator[256];
-		char version[256];
+		char title[256] = {0};
+		char artist[256] = {0};
+		char creator[256] = {0};
+		char version[256] = {0};
 
 		// difficulty
-		f32 hp;
-		f32 cs;
-		f32 od;
-		f32 ar;
-		f32 sv;
+		f32 hp = 1337.f;
+		f32 cs = 1337.f;
+		f32 od = 1337.f;
+		f32 ar = 1337.f;
+		f32 sv = 1337.f;
 
 		static const size_t max_timing_points = 0xFFFF;
-		size_t num_timing_points;
+		size_t num_timing_points = 0;
 		timing_point timing_points[max_timing_points];
 
 		static const size_t max_objects = 0xFFFF;
-		size_t num_objects;
+		size_t num_objects = 0;
 		hit_object objects[max_objects];
 	};
 }
@@ -98,7 +98,7 @@ namespace {
 	const size_t bufsize = 2000000; // 2 mb
 	u8 buf[bufsize];
 
-	beatmap b{0};
+	beatmap b;
 
 	// returns the timing point at the given time
 	timing_point* get_timing_point(i64 time) {
@@ -129,6 +129,44 @@ namespace {
 
 		die("Orphan timing section");
 	}
+
+#ifdef SLIDERTEST
+	// yes this is extremely bad and slow but I don't care, it's just for testin
+	const i32 screen_w = 800, screen_h = 600;
+	f32 pixels[screen_w * screen_h][3];
+
+	void slider_display() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDrawPixels(screen_w, screen_h, GL_RGB, GL_FLOAT, pixels);
+		glutSwapBuffers();
+	}
+
+	bool showing_slider;
+	void slider_keyboard(u8 key, i32 x, i32 y) {
+		showing_slider = false;
+	}
+
+	f32* get_px(const v2f& pos) {
+		i32 int_x = (int)pos.x;
+		i32 int_y = (int)pos.y;
+
+		if (int_x < 0 || int_x >= screen_w || int_y < 0 || int_y >= screen_h) {
+			return nullptr;
+		}
+
+		return (f32*)pixels[(screen_h - (i32)int_y - 1) 
+			* screen_w + (i32)int_x];
+	}
+
+	void shigeZZZ(u64 ms) {
+#ifdef NEEDS_TO_INSTALL_GENTOO
+		puts("INSTALL GENTOO");
+		Sleep(ms);
+#else
+		usleep(ms * 1000);
+#endif
+	}
+#endif
 }
 
 int main(int argc, char* argv[]) {
@@ -161,7 +199,7 @@ int main(int argc, char* argv[]) {
 
 	// ---
 
-	while (!strstr(tok, "[General]")) {
+	while (tok && *tok != '[') {
 		if (sscanf(tok, "osu file format v%d", 
 				   &b.format_version) == 1) {
 			break;
@@ -173,7 +211,18 @@ int main(int argc, char* argv[]) {
 		die("File format version not found");
 	}
 
-	// it would be best to skip to [General] here but it's not necessary
+	// ---
+	
+	while (tok) {
+		if (strstr(tok, "[General]")) {
+			goto found_general;
+		}
+		tok = strtok(nullptr, "\n");
+	}
+
+	die("Could not find General info");
+
+found_general:
 
 	// ---
 	
@@ -182,7 +231,8 @@ int main(int argc, char* argv[]) {
 	// them one by one and check for format errors.
 
 	// StackLeniency and Mode are not present in older formats
-	for (; !strstr(tok, "[Metadata]"); tok = strtok(nullptr, "\n")) {
+	tok = strtok(nullptr, "\n");
+	for (; tok && *tok != '['; tok = strtok(nullptr, "\n")) {
 
 		if (sscanf(tok, "StackLeniency: %f", &b.stack_leniency) == 1) {
 			continue;
@@ -193,11 +243,23 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	// it would be best to skip to [Metadata] here but it's not necessary
+	// ---
+
+	while (tok) {
+		if (strstr(tok, "[Metadata]")) {
+			goto found_metadata;
+		}
+		tok = strtok(nullptr, "\n");
+	}
+
+	die("Could not find metadata");
+
+found_metadata:
 
 	// ---
 	
-	for (; !strstr(tok, "[Difficulty]"); tok = strtok(nullptr, "\n")) {
+	tok = strtok(nullptr, "\n");
+	for (; tok && *tok != '['; tok = strtok(nullptr, "\n")) {
 
 		if (sscanf(tok, "Title: %[^\r\n]", b.title) == 1) {
 			continue;
@@ -233,14 +295,22 @@ int main(int argc, char* argv[]) {
 	}
 
 	// ---
+	
+	while (tok) {
+		if (strstr(tok, "[Difficulty]")) {
+			goto found_difficulty;
+		}
+		tok = strtok(nullptr, "\n");
+	}
 
-	b.hp = 1337.f;
-	b.cs = 1337.f;
-	b.od = 1337.f;
-	b.ar = 1337.f;
-	b.sv = 1337.f;
+	die("Could not find difficulty");
 
-	for (; !strstr(tok, "[TimingPoints]"); tok = strtok(nullptr, "\n")) {
+found_difficulty:
+
+	// ---
+	
+	tok = strtok(nullptr, "\n");
+	for (; tok && *tok != '['; tok = strtok(nullptr, "\n")) {
 
 		if (sscanf(tok, "HPDrainRate: %f", &b.hp) == 1) {
 			continue;
@@ -276,7 +346,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	if (b.ar > 10.f) {
-		die("Invalid or missing AR");
+		puts("warning: AR not found, defaulting to AR6");
+		b.ar = 6.f;
 	}
 
 	if (b.sv > 10.f) { // not sure what max sv is
@@ -296,12 +367,13 @@ int main(int argc, char* argv[]) {
 	die("Could not find timing points");
 
 found_timing:
-		tok = strtok(nullptr, "\n");
 
 	// ---
 
 	i32 useless;
-	for (; !strstr(tok, "[Colours]"); tok = strtok(nullptr, "\n")) {
+
+	tok = strtok(nullptr, "\n");
+	for (; *tok != '['; tok = strtok(nullptr, "\n")) {
 
 		// ghetto way to ignore empty lines, will mess up on whitespace lines
 		if (!strlen(tok) || !strcmp(tok, "\r")) {
@@ -346,10 +418,10 @@ parsed_timing_pt:
 	die("Could not find hit objects");
 
 found_objects:
-		tok = strtok(nullptr, "\n");
 
 	// ---
 
+	tok = strtok(nullptr, "\n");
 	for (; tok; tok = strtok(nullptr, "\n")) {
 
 		// ghetto way to ignore empty lines, will mess up on whitespace lines
@@ -364,9 +436,23 @@ found_objects:
 		auto& ho = b.objects[b.num_objects];
 
 		i32 type_num;
-		
+
+		// slider
+		if (sscanf(tok, "%f,%f,%ld,%d,%d,%c", 
+				   &ho.pos.x, &ho.pos.y, &ho.time, &useless, &useless, 
+				   &ho.slider.type) == 6 && 
+				ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
+			
+			// the slider type check is for old maps that have trailing 
+			// commas on circles and sliders
+
+			// x,y,time,type,hitSound,sliderType|curveX:curveY|...,repeat,
+			// 		pixelLength,edgeHitsound,edgeAddition,addition
+			ho.type = obj::slider;
+		}
+
 		// circle, or spinner
-		if (sscanf(tok, "%f,%f,%ld,%d,%d,%ld", 
+		else if (sscanf(tok, "%f,%f,%ld,%d,%d,%ld", 
 				   &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless, 
 				   &ho.end_time) == 6) {
 
@@ -380,14 +466,12 @@ found_objects:
 			}
 		}
 
-		// slider
-		else if (sscanf(tok, "%f,%f,%ld,%d,%d,%c", 
-				   &ho.pos.x, &ho.pos.y, &ho.time, &useless, &useless, 
-				   &ho.slider.type) == 6) {
+		// old circle
+		else if (sscanf(tok, "%f,%f,%ld,%d,%d", 
+			&ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless) == 5) {
 
-			// x,y,time,type,hitSound,sliderType|curveX:curveY|...,repeat,
-			// 		pixelLength,edgeHitsound,edgeAddition,addition
-			ho.type = obj::slider;
+			ho.type = obj::circle;
+			ho.end_time = ho.time;
 		}
 
 		else {
@@ -422,6 +506,8 @@ found_objects:
 		char* saveptr = nullptr;
 		char* slider_tok = strtok_r(line, "|", &saveptr);
 		slider_tok = strtok_r(nullptr, "|", &saveptr); // skip first token
+
+		sl.points[sl.num_points++] = ho.pos;
 
 		for (; slider_tok; slider_tok = strtok_r(nullptr, "|", &saveptr)) {
 
@@ -500,6 +586,19 @@ found_objects:
 		}
 	}
 
+#ifdef SLIDERTEST
+	glutInit(&argc, argv);
+
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+	glutInitWindowSize(800, 600);
+	glutCreateWindow("slider");
+	glutDisplayFunc(slider_display);
+	glutIdleFunc(slider_display);
+	glutKeyboardFunc(slider_keyboard);
+					
+	glClearColor(0.f, 0.f, 0.f, 1.f);
+#endif
+
 	printf("\n> %ld hit objects\n", b.num_objects);
 	for (size_t i = 0; i < b.num_objects; i++) {
 
@@ -526,6 +625,104 @@ found_objects:
 				}
 
 				puts("");
+
+#ifdef SLIDERTEST
+				bezier bez;
+				catmull cat;
+				curve *c = nullptr;
+				switch (sl.type) {
+					case 'B':
+						c = &bez;
+						break;
+
+					case 'C':
+						c = &cat;
+						break;
+
+					default:
+						puts("unsupported slider type");
+						continue;
+				}
+
+				puts("\n-- TEST SLIDER SIMULATION --");
+				memset(pixels, 0, screen_w * screen_h * sizeof(float) * 3);
+
+				auto duration = ho.end_time - ho.time;
+				f32 step = 1.f / duration; // 1ms step
+
+				size_t last_segment = 0;
+				for (size_t j = 0; j < sl.num_points; j++) {
+					if (j == 0) {
+						continue;
+					}
+
+					bool last = j == sl.num_points - 1;
+
+					if ((sl.points[j] - sl.points[j-1]).len() > 0.0001f && 
+						!last) {
+						
+						// not the end of a segment and not the sliderend
+						continue;
+					}
+
+					if (j == 1 && !last) {
+						// old sliders have double points on the first
+						// segment
+						// we also have to check if this is the last point
+						// so that 2-point sliders still work
+						last_segment = 1;
+						continue;
+					}
+
+
+					if (last) {
+						j++;
+					}
+
+					c->init(&sl.points[last_segment], j - last_segment);
+					last_segment = j;
+					v2f pos;
+					u64 steps = 0;
+					for (f32 t = 0; t < 1.f + step; t += step) {
+						pos = c->at(t);
+
+						if (steps % 50 == 0) {
+							printf("%ld ms - %s\n", 
+								(i64)std::round(t * duration), 
+								pos.str());
+						}
+						steps++;
+
+						pos *= 1.5f;
+						auto pix = get_px(pos);
+						if (!pix) {
+							continue;
+						}
+						pix[0] = 1.f;
+					}
+				}
+
+				// draw slider points
+				for (size_t j = 0; j < sl.num_points; j++) {
+					v2f pt = sl.points[j];
+					pt *= 1.5f;
+					auto pix = get_px(pt);
+					if (!pix) {
+						continue;
+					}
+					pix[0] = 1.f;
+					pix[1] = 1.f;
+				}
+
+				puts("Press any key in the slider window to continue...");
+				showing_slider = true;
+				while (showing_slider) {
+					glutMainLoopEvent();
+					glutPostRedisplay();
+					shigeZZZ(50);
+				}
+				puts("----------------------------\n");
+#endif
 				break;
 			}
 
