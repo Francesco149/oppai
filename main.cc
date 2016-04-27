@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <vector>
 
 #include "v2f.h"
 #include "curves.h"
@@ -27,6 +28,8 @@ namespace {
 		static const size_t max_points = 0xFF;
 		size_t num_points = 0;
 		v2f points[max_points];
+		std::vector<v2f> pos_at_ms; // position at every millisecond for
+									// bezier and catmull sliders
 
 		u64 repetitions = 0;
 		f32 length = 0;
@@ -132,7 +135,7 @@ namespace {
 
 #ifdef SLIDERTEST
 	// yes this is extremely bad and slow but I don't care, it's just for testin
-	const i32 screen_w = 800, screen_h = 600;
+	const i32 screen_w = 512, screen_h = 384;
 	f32 pixels[screen_w * screen_h][3];
 
 	void slider_display() {
@@ -168,6 +171,8 @@ namespace {
 	}
 #endif
 }
+
+v2f slider_at(hit_object& ho, i64 ms);
 
 int main(int argc, char* argv[]) {
 	if (argc != 2) {
@@ -590,7 +595,7 @@ found_objects:
 	glutInit(&argc, argv);
 
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-	glutInitWindowSize(800, 600);
+	glutInitWindowSize(screen_w, screen_h);
 	glutCreateWindow("slider");
 	glutDisplayFunc(slider_display);
 	glutIdleFunc(slider_display);
@@ -627,77 +632,20 @@ found_objects:
 				puts("");
 
 #ifdef SLIDERTEST
-				bezier bez;
-				catmull cat;
-				curve *c = nullptr;
-				switch (sl.type) {
-					case 'B':
-						c = &bez;
-						break;
-
-					case 'C':
-						c = &cat;
-						break;
-
-					default:
-						puts("unsupported slider type");
-						continue;
-				}
 
 				puts("\n-- TEST SLIDER SIMULATION --");
 				memset(pixels, 0, screen_w * screen_h * sizeof(float) * 3);
 
-				auto duration = ho.end_time - ho.time;
-				f32 step = 1.f / duration; // 1ms step
+				// draw slider curve
+				for (i64 ms = 0; ms < ho.end_time - ho.time; ms++) {
+					v2f p = slider_at(ho, ms);
 
-				size_t last_segment = 0;
-				for (size_t j = 0; j < sl.num_points; j++) {
-					if (j == 0) {
-						continue;
+					if (ms % 50 == 0) {
+						printf("%ldms %s\n", ms, p.str());
 					}
 
-					bool last = j == sl.num_points - 1;
-
-					if ((sl.points[j] - sl.points[j-1]).len() > 0.0001f && 
-						!last) {
-						
-						// not the end of a segment and not the sliderend
-						continue;
-					}
-
-					if (j == 1 && !last) {
-						// old sliders have double points on the first
-						// segment
-						// we also have to check if this is the last point
-						// so that 2-point sliders still work
-						last_segment = 1;
-						continue;
-					}
-
-
-					if (last) {
-						j++;
-					}
-
-					c->init(&sl.points[last_segment], j - last_segment);
-					last_segment = j;
-					v2f pos;
-					u64 steps = 0;
-					for (f32 t = 0; t < 1.f + step; t += step) {
-						pos = c->at(t);
-
-						if (steps % 50 == 0) {
-							printf("%ld ms - %s\n", 
-								(i64)std::round(t * duration), 
-								pos.str());
-						}
-						steps++;
-
-						pos *= 1.5f;
-						auto pix = get_px(pos);
-						if (!pix) {
-							continue;
-						}
+					f32* pix = get_px(p);
+					if (pix) {
 						pix[0] = 1.f;
 					}
 				}
@@ -705,15 +653,14 @@ found_objects:
 				// draw slider points
 				for (size_t j = 0; j < sl.num_points; j++) {
 					v2f pt = sl.points[j];
-					pt *= 1.5f;
 					auto pix = get_px(pt);
 					if (!pix) {
 						continue;
 					}
-					pix[0] = 1.f;
 					pix[1] = 1.f;
 				}
 
+				// run glut main loop until a key is pressed
 				puts("Press any key in the slider window to continue...");
 				showing_slider = true;
 				while (showing_slider) {
@@ -721,6 +668,7 @@ found_objects:
 					glutPostRedisplay();
 					shigeZZZ(50);
 				}
+
 				puts("----------------------------\n");
 #endif
 				break;
@@ -732,4 +680,148 @@ found_objects:
 	}
 
 	return 0;
+}
+
+v2f slider_at(hit_object& ho, i64 ms) {
+	auto duration = ho.end_time - ho.time;
+	auto &sl = ho.slider;
+	f32 t = (f32)ms / duration;
+
+	ms = std::max((i64)0, std::min(ms, duration));
+
+	auto one_repetition = duration / sl.repetitions;
+	bool invert = false;
+	while (ms > (i64)one_repetition) {
+		ms -= one_repetition;
+		invert ^= true;
+	}
+	if (invert) {
+		ms = one_repetition - ms;
+	}
+
+	switch (sl.type) {
+		case 'L':
+			if (sl.num_points < 2) {
+				die("Found linear slider with invalid point count");
+			}
+			if (sl.num_points > 2) {
+				// too lazy to implement it using lines, just double each 
+				// point and make it a bezier
+				
+				v2f tmp[0xFF];
+				for (size_t i = 0; i < sl.num_points; i++) {
+					tmp[i] = sl.points[i];
+				}
+
+				sl.num_points *= 2;
+				for (size_t i = 0; i < sl.num_points; i++) {
+					sl.points[i] = tmp[i / 2];
+					puts(sl.points[i].str());
+				}
+
+				sl.num_points--;
+				sl.type = 'B';
+
+				goto do_bezier;
+			}
+			return pt_on_line(sl.points[0], sl.points[1], t);
+
+		case 'P':
+			if (sl.num_points != 3) {
+				die("Found pass-through slider with invalid point count");
+			}
+			return pt_on_circular_arc(
+				sl.points[0], sl.points[1], sl.points[2], t, sl.length);
+
+		case 'B':
+		{
+			if (sl.num_points < 2) {
+				die("Found bezier slider with less than 2 points");
+			}
+
+do_bezier:
+			if (sl.pos_at_ms.size()) {
+				return sl.pos_at_ms[ms];
+			}
+
+			// pre-calc and cache all positions in millisecond granularity
+			// this is lazy and uses a lot of memory but #yolo
+			
+			bezier bez;
+			size_t last_segment = 0;
+
+			f32 px_per_ms = (sl.length * sl.repetitions) / (f32)duration;
+			std::vector<v2f> positions;
+
+			printf("px per ms %g\n", px_per_ms);
+			printf("duration %ld\n", duration);
+
+			for (size_t j = 0; j < sl.num_points; j++) {
+				if (j == 0) {
+					continue;
+				}
+
+				bool last = j == sl.num_points - 1;
+
+				if ((sl.points[j] - sl.points[j-1]).len() > 0.0001f && !last) {
+					// not the end of a segment and not the sliderend
+					continue;
+				}
+
+				if (j == 1 && !last) {
+					// old sliders have double points on the first
+					// segment
+					// we also have to check if this is the last point
+					// so that 2-point sliders still work
+					last_segment = 1;
+					continue;
+				}
+
+
+				if (last) {
+					j++;
+				}
+
+				bez.init(&sl.points[last_segment], j - last_segment);
+				last_segment = j;
+	
+				// first compute positions, then normalize them on time by
+				// calculating how much distance should be travelled for 
+				// each millisecond
+				bez.compute(&positions);
+
+				f32 total_distance = 0;
+
+				for (size_t k = 1; k < positions.size(); k++) {
+					total_distance += (positions[k] - positions[k - 1]).len();
+					if (total_distance >= px_per_ms) {
+						sl.pos_at_ms.push_back(positions[k]);
+						total_distance -= px_per_ms;
+					}
+				}
+
+				positions.clear(); // leaves vector mem allocated for reusage
+			}
+
+			while (sl.pos_at_ms.size() < (size_t)duration) {
+				sl.pos_at_ms.push_back(sl.pos_at_ms.back());
+			}
+
+			return sl.pos_at_ms[ms];
+		}
+
+		// TODO: equalize this on time like beziers
+		case 'C':
+		{
+			catmull cat;
+			cat.init(sl.points, sl.num_points);
+			return cat.at((f32)ms / duration);
+		}
+
+		default:
+			die("Unsupported slider type");
+	}
+
+	die("how did you get here");
+	return v2f{0};
 }

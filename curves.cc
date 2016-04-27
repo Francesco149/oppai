@@ -57,10 +57,12 @@ namespace {
 	}
 }
 
-v2f pt_on_circle(const v2f& p1, const v2f& p2, const v2f& p3, f32 t) {
+v2f pt_on_circular_arc(
+		const v2f& p1, const v2f& p2, const v2f& p3, f32 t, f32 len) {
+
 	circle c;
 	circum_circle(p1, p2, p3, &c);
-	f32 radians = t * M_PI * 2;
+	f32 radians = (t * len) / c.r;
 	if (is_left(p1, p2, p3)) {
 		radians *= -1;
 	}
@@ -85,7 +87,7 @@ namespace {
 
 // ---
 namespace {
-	const float curve_step = 0.0025f;
+	const float curve_step = 0.0005f;
 }
 
 const size_t curve::max_points;
@@ -113,6 +115,15 @@ f32 curve::len() const {
 	}
 
 	return res;
+}
+
+void curve::compute(std::vector<v2f>* dst) {
+	f32 step = curve_step / num_points;
+	for (f32 i = 0; i < 1.f + step; i += step) {
+		dst->push_back(at(i));
+	}
+	// TODO: implement it into each curve instead to increase performance
+	// exponentially
 }
 
 v2f bezier::at(f32 t) const {
