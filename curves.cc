@@ -14,7 +14,7 @@ bool pt_in_circle(const v2f& pt, const v2f& center, f32 r) {
 v2f pt_on_line(const v2f& p1, const v2f& p2, f32 t) {
 	f32 len = (p2 - p1).len();
 	f32 n = len - len * t;
-	return (p1 * n + p2 * len) / len;
+	return (p1 * n + p2 * len * t) / len;
 }
 
 namespace {
@@ -52,7 +52,7 @@ namespace {
 		v2f d = p - c;
 		return v2f{
 			_cos * d.x - _sin * d.y + c.x, 
-			_sin * d.x - _cos * d.y + c.y
+			_sin * d.x + _cos * d.y + c.y
 		};
 	}
 }
