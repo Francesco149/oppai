@@ -81,34 +81,7 @@ int main(int argc, char* argv[]) {
 
 				puts("");
 
-#ifdef SLIDERTEST
-
-				puts("\n-- TEST SLIDER SIMULATION --");
-
-				p_cls();
-
-				// draw slider curve
-				for (i64 ms = 0; ms < ho.end_time - ho.time; ms++) {
-					v2f p = ho.at(ms);
-
-					if (ms % 50 == 0) {
-						printf("%ldms %s\n", ms, p.str());
-					}
-
-					p_put_px(p, 255, 0, 0);
-				}
-
-				// draw slider points
-				for (size_t j = 0; j < sl.num_points; j++) {
-					p_put_px(sl.points[j], 0, 255, 0);
-				}
-
-				// run glut main loop until a key is pressed
-				puts("Press any key in the slider window to continue...");
-				p_show();
-
-				puts("----------------------------\n");
-#endif
+				p_show(ho);
 				break;
 			}
 

@@ -1,12 +1,16 @@
 #ifdef SLIDERTEST
 
 #include "preview_window.h"
+#include "beatmap.h"
+
 #ifdef _WIN32
 #define NEEDS_TO_INSTALL_GENTOO
 #include <Windows.h>
 #endif
 #include <GL/gl.h>
 #include <GL/freeglut.h>
+
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -26,7 +30,7 @@ namespace {
 		showing_slider = false;
 	}
 
-	u8* get_px(const v2f& pos) {
+	u8* p_get_px(const v2f& pos) {
 		i32 int_x = (int)pos.x;
 		i32 int_y = (int)pos.y;
 
@@ -36,6 +40,20 @@ namespace {
 
 		return (u8*)pixels[(screen_h - (i32)int_y - 1) 
 			* screen_w + (i32)int_x];
+	}
+
+	void p_cls() {
+		memset(pixels, 0, screen_w * screen_h * sizeof(pixels[0][0]) * 3);
+	}
+
+	void p_put_px(const v2f& pos, u8 r, u8 g, u8 b) {
+		auto px = p_get_px(pos);
+		if (!px) {
+			return;
+		}
+		px[0] = r;
+		px[1] = g;
+		px[2] = b;
 	}
 
 	void shigeZZZ(u64 ms) {
@@ -61,30 +79,38 @@ void p_init(int& argc, char* argv[]) {
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 }
 
-void p_cls() {
-	memset(pixels, 0, screen_w * screen_h * sizeof(pixels[0][0]) * 3);
-}
+void p_show(hit_object& ho) {
+	auto& sl = ho.slider;
+	puts("\n-- TEST SLIDER SIMULATION --");
 
-u8* p_get_px(const v2f& pos) {
-	return get_px(pos);
-}
+	p_cls();
 
-void p_put_px(const v2f& pos, u8 r, u8 g, u8 b) {
-	auto px = get_px(pos);
-	if (!px) {
-		return;
+	// draw slider curve
+	for (i64 ms = 0; ms < ho.end_time - ho.time; ms++) {
+		v2f p = ho.at(ms);
+
+		if (ms % 50 == 0) {
+			printf("%ldms %s\n", ms, p.str());
+		}
+
+		p_put_px(p, 255, 0, 0);
 	}
-	px[0] = r;
-	px[1] = g;
-	px[2] = b;
-}
 
-void p_show() {
+	// draw slider points
+	for (size_t j = 0; j < sl.num_points; j++) {
+		p_put_px(sl.points[j], 0, 255, 0);
+	}
+
+	// run glut main loop until a key is pressed
+	puts("Press any key in the slider window to continue...");
+
 	showing_slider = true;
 	while (showing_slider) {
 		glutMainLoopEvent();
 		glutPostRedisplay();
 		shigeZZZ(50);
 	}
+
+	puts("----------------------------\n");
 }
 #endif
