@@ -29,14 +29,15 @@ struct curve {
 	f32 len() const;
 
 	// compute granular positions for the entire curve
-	void compute(std::vector<v2f>* dst);
+	virtual void compute(std::vector<v2f>* dst);
 };
 
 struct bezier : curve {
 	// gets coords at point t (0-1) inside the curve
-	v2f at(f32 t) const;
+	virtual v2f at(f32 t) const;
 };
 
 struct catmull : curve {
-	v2f at(f32 t) const;
+	virtual v2f at(f32 t) const;
+	virtual void compute(std::vector<v2f>* dst);
 };

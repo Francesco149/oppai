@@ -682,6 +682,20 @@ found_objects:
 	return 0;
 }
 
+void precompute_slider(slider_data& sl, std::vector<v2f>& positions, 
+		f32 px_per_ms) {
+
+	f32 total_distance = 0;
+
+	for (size_t k = 1; k < positions.size(); k++) {
+		total_distance += (positions[k] - positions[k - 1]).len();
+		if (total_distance >= px_per_ms) {
+			sl.pos_at_ms.push_back(positions[k]);
+			total_distance -= px_per_ms;
+		}
+	}
+}
+
 v2f slider_at(hit_object& ho, i64 ms) {
 	auto duration = ho.end_time - ho.time;
 	auto &sl = ho.slider;
@@ -753,9 +767,6 @@ do_bezier:
 			f32 px_per_ms = (sl.length * sl.repetitions) / (f32)duration;
 			std::vector<v2f> positions;
 
-			printf("px per ms %g\n", px_per_ms);
-			printf("duration %ld\n", duration);
-
 			for (size_t j = 0; j < sl.num_points; j++) {
 				if (j == 0) {
 					continue;
@@ -789,17 +800,7 @@ do_bezier:
 				// calculating how much distance should be travelled for 
 				// each millisecond
 				bez.compute(&positions);
-
-				f32 total_distance = 0;
-
-				for (size_t k = 1; k < positions.size(); k++) {
-					total_distance += (positions[k] - positions[k - 1]).len();
-					if (total_distance >= px_per_ms) {
-						sl.pos_at_ms.push_back(positions[k]);
-						total_distance -= px_per_ms;
-					}
-				}
-
+				precompute_slider(sl, positions, px_per_ms);
 				positions.clear(); // leaves vector mem allocated for reusage
 			}
 
@@ -810,12 +811,21 @@ do_bezier:
 			return sl.pos_at_ms[ms];
 		}
 
-		// TODO: equalize this on time like beziers
 		case 'C':
 		{
+			if (sl.pos_at_ms.size()) {
+				return sl.pos_at_ms[ms];
+			}
+
+			f32 px_per_ms = (sl.length * sl.repetitions) / (f32)duration;
+			std::vector<v2f> positions;
+
 			catmull cat;
 			cat.init(sl.points, sl.num_points);
-			return cat.at((f32)ms / duration);
+			cat.compute(&positions);
+			precompute_slider(sl, positions, px_per_ms);
+			positions.clear();
+			return sl.pos_at_ms[ms];
 		}
 
 		default:

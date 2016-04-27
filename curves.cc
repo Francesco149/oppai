@@ -122,8 +122,6 @@ void curve::compute(std::vector<v2f>* dst) {
 	for (f32 i = 0; i < 1.f + step; i += step) {
 		dst->push_back(at(i));
 	}
-	// TODO: implement it into each curve instead to increase performance
-	// exponentially
 }
 
 v2f bezier::at(f32 t) const {
@@ -176,4 +174,31 @@ v2f catmull::at(f32 t) const {
 	}
 
 	return cur; // just return the last point
+}
+
+void catmull::compute(std::vector<v2f>* dst) {
+	v2f cur{0};
+	f32 step = curve_step;
+
+	for (size_t i = 0; i < num_points - 1; i++) {
+		for (f32 j = 0; j < 1.f + step; j += step) {
+			v2f v1 = (i >= 1 ? points[i-1] : points[i]);
+			v2f v2 = points[i];
+			v2f v3 = i + 1 < num_points
+				? points[i + 1]
+				: (v2 * 2.f - v1);
+			v2f v4 = i + 2 < num_points
+				? points[i + 2]
+				: (v3 * 2.f - v2);
+
+			cur = v2f{0};
+			cur += (v1 * -1.f + v2 * 3.f - v3 * 3.f + v4) * j * j * j;
+			cur += (v1 *  2.f - v2 * 5.f + v3 * 4.f - v4) * j * j;
+			cur += (v1 * -1.f + v3                      ) * j;
+			cur +=  v2 *  2.f;
+			cur /= 2.f;
+			
+			dst->push_back(cur);
+		}
+	}
 }
