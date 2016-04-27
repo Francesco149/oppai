@@ -753,6 +753,7 @@ v2f slider_at(hit_object& ho, i64 ms) {
 				die("Found bezier slider with less than 2 points");
 			}
 
+		case 'C':
 do_bezier:
 			if (sl.pos_at_ms.size()) {
 				return sl.pos_at_ms[ms];
@@ -761,70 +762,65 @@ do_bezier:
 			// pre-calc and cache all positions in millisecond granularity
 			// this is lazy and uses a lot of memory but #yolo
 			
-			bezier bez;
-			size_t last_segment = 0;
-
 			f32 px_per_ms = (sl.length * sl.repetitions) / (f32)duration;
 			std::vector<v2f> positions;
 
-			for (size_t j = 0; j < sl.num_points; j++) {
-				if (j == 0) {
-					continue;
-				}
-
-				bool last = j == sl.num_points - 1;
-
-				if ((sl.points[j] - sl.points[j-1]).len() > 0.0001f && !last) {
-					// not the end of a segment and not the sliderend
-					continue;
-				}
-
-				if (j == 1 && !last) {
-					// old sliders have double points on the first
-					// segment
-					// we also have to check if this is the last point
-					// so that 2-point sliders still work
-					last_segment = 1;
-					continue;
-				}
-
-
-				if (last) {
-					j++;
-				}
-
-				bez.init(&sl.points[last_segment], j - last_segment);
-				last_segment = j;
-	
-				// first compute positions, then normalize them on time by
-				// calculating how much distance should be travelled for 
-				// each millisecond
-				bez.compute(&positions);
+			if (sl.type == 'C') {
+				catmull cat;
+				cat.init(sl.points, sl.num_points);
+				cat.compute(&positions);
 				precompute_slider(sl, positions, px_per_ms);
-				positions.clear(); // leaves vector mem allocated for reusage
+				positions.clear();
+			}
+
+			else {
+				bezier bez;
+				size_t last_segment = 0;
+
+				for (size_t j = 0; j < sl.num_points; j++) {
+					if (j == 0) {
+						continue;
+					}
+
+					bool last = j == sl.num_points - 1;
+
+					if ((sl.points[j] - sl.points[j-1]).len() 
+							> 0.0001f && !last) {
+						// not the end of a segment and not the sliderend
+						continue;
+					}
+
+					if (j == 1 && !last) {
+						// old sliders have double points on the first
+						// segment
+						// we also have to check if this is the last point
+						// so that 2-point sliders still work
+						last_segment = 1;
+						continue;
+					}
+
+
+					if (last) {
+						j++;
+					}
+
+					bez.init(&sl.points[last_segment], j - last_segment);
+					last_segment = j;
+		
+					// first compute positions, then normalize them on time by
+					// calculating how much distance should be travelled for 
+					// each millisecond
+					bez.compute(&positions);
+					precompute_slider(sl, positions, px_per_ms);
+					positions.clear(); 
+					// leaves vector mem allocated for reusage
+				}
 			}
 
 			while (sl.pos_at_ms.size() < (size_t)duration) {
 				sl.pos_at_ms.push_back(sl.pos_at_ms.back());
 			}
 
-			return sl.pos_at_ms[ms];
-		}
-
-		case 'C':
-		{
-			if (sl.pos_at_ms.size()) {
-				return sl.pos_at_ms[ms];
-			}
-
-			f32 px_per_ms = (sl.length * sl.repetitions) / (f32)duration;
-			std::vector<v2f> positions;
-
-			catmull cat;
-			cat.init(sl.points, sl.num_points);
-			cat.compute(&positions);
-			precompute_slider(sl, positions, px_per_ms);
-			positions.clear();
 			return sl.pos_at_ms[ms];
 		}
 
