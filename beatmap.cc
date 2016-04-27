@@ -1,9 +1,10 @@
 #include "beatmap.h"
 
-#include "utils.h"
-#include "slider_calc.h"
 #include <string.h>
 #include <algorithm>
+
+#include "utils.h"
+#include "slider_calc.h"
 
 namespace {
 	// too fucking lazy to do proper buffering, I will just read the entire

@@ -1,8 +1,5 @@
 #ifdef SLIDERTEST
 
-#include "preview_window.h"
-#include "beatmap.h"
-
 #ifdef _WIN32
 #define NEEDS_TO_INSTALL_GENTOO
 #include <Windows.h>
@@ -13,6 +10,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+
+#include "preview_window.h"
+#include "beatmap.h"
 
 namespace {
 	// yes this is extremely bad and slow but I don't care, it's just for testin

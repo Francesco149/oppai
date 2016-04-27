@@ -1,9 +1,6 @@
 #include <stdio.h>
-#include <algorithm>
-#include <vector>
 
 #include "utils.h"
-#include "v2f.h"
 #include "beatmap.h"
 #include "preview_window.h"
 
