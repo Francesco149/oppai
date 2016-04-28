@@ -14,6 +14,7 @@ namespace {
 	const f32 single_spacing_treshold = 125.f;
 	const f32 spacing_weight_scaling[] = { 1400.f, 26.25f };
 	const i64 lazy_slider_step = 10;
+	const f32 circlesize_buff_treshold = 27.f;
 
 	namespace diff {
 		const u8 speed = 0, 
@@ -33,6 +34,13 @@ namespace {
 			this->ho = ho;
 
 			f32 scaling_factor = (52.f / radius);
+
+			// cs buff (based on osuElements, not accurate)
+			if (radius < circlesize_buff_treshold) {
+				scaling_factor *= std::min(1.1f, 
+					1.f + (circlesize_buff_treshold - radius) * 0.02f);
+			}
+
 			norm_start_pos = ho->pos * scaling_factor;
 			
 			// just a circle bro
