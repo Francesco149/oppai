@@ -13,7 +13,7 @@ namespace {
 	const f32 stream_spacing_treshold = 110.f;
 	const f32 single_spacing_treshold = 125.f;
 	const f32 spacing_weight_scaling[] = { 1400.f, 26.25f };
-	const i64 lazy_slider_step = 10;
+	const i64 lazy_slider_step = 1;
 	const f32 circlesize_buff_treshold = 27.f;
 
 	namespace diff {
@@ -50,7 +50,10 @@ namespace {
 			}
 
 			f32 follow_circle_rad = radius * 3.f;
-			i64 segment_len = (ho->end_time - ho->time) / ho->num_segments();
+
+			auto& sl = ho->slider;
+			i64 segment_len = (ho->end_time - ho->time) / sl.repetitions;
+
 			i64 segment_end_time = ho->time + segment_len;
 
 			v2f cursor = ho->pos;
@@ -73,11 +76,11 @@ namespace {
 
 			lazy_slider_len_first *= scaling_factor;
 
-			if (ho->num_segments() % 2 == 1) {
+			if (sl.repetitions % 2 == 1) {
 				norm_end_pos = cursor * scaling_factor;
 			}
 	
-			if (ho->num_segments() < 2) {
+			if (sl.repetitions < 2) {
 				return;
 			}
 
@@ -102,7 +105,7 @@ namespace {
 
 			lazy_slider_len_subseq *= scaling_factor;
 
-			if (ho->num_segments() % 2 == 1) {
+			if (sl.repetitions % 2 == 1) {
 				norm_end_pos = cursor * scaling_factor;
 			}
 		}
@@ -129,7 +132,7 @@ namespace {
 							res	= spacing_weight(
 								prev.lazy_slider_len_first +
 								prev.lazy_slider_len_subseq * 
-									(prev.ho->num_segments() - 1) +
+									(prev.ho->slider.repetitions - 1) +
 								distance(prev), diff_type) * scaling;
 							break;
 
@@ -139,7 +142,7 @@ namespace {
 									prev.lazy_slider_len_first, diff_type) +
 								spacing_weight(
 									prev.lazy_slider_len_subseq, diff_type) *
-										(prev.ho->num_segments() - 1) +
+										(prev.ho->slider.repetitions - 1) +
 								spacing_weight(distance(prev), diff_type)
 							) * scaling;
 					}

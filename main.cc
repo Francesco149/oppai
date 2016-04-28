@@ -25,6 +25,7 @@ int main(int argc, char* argv[]) {
 	puts(argv[1]);
 	puts("---\n");
 
+	p_init(argc, argv);
 	print_beatmap();
 #endif
 
@@ -69,8 +70,6 @@ namespace {
 				printf("%gx\n", -100.0 / tp.ms_per_beat);
 			}
 		}
-
-		p_init(argc, argv);
 
 		printf("\n> %ld hit objects\n", b.num_objects);
 		for (size_t i = 0; i < b.num_objects; i++) {

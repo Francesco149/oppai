@@ -10,7 +10,7 @@
 TARGET = tpdiff
 
 CXX = g++
-CXXFLAGS = -std=c++14 -Wall -Werror #-DSLIDERTEST
+CXXFLAGS = -std=c++14 -Wall -Werror #-DSHOW_BEATMAP -DSLIDERTEST
 
 LINKER = g++ -o 
 LFLAGS = #-lGL -lglut
