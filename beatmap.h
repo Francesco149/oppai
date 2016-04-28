@@ -42,6 +42,7 @@ struct hit_object {
 	// NOTE: the first call to this will be slow, as it will pre-calculate
 	//       the entire curve for subsequent calls.
 	v2f at(i64 ms);
+	i64 num_segments();
 };
 
 struct timing_point {
@@ -76,7 +77,7 @@ struct beatmap {
 	size_t num_timing_points = 0;
 	timing_point timing_points[max_timing_points];
 
-	static const size_t max_objects = 0xFFFF;
+	static const size_t max_objects = max_timing_points;
 	size_t num_objects = 0;
 	hit_object objects[max_objects];
 

@@ -3,6 +3,7 @@
 
 struct v2f {
 	f32 x = 0, y = 0;
+	char buf[42] = {0};
 
 	v2f() {}
 	v2f(f32 x, f32 y) :
@@ -12,7 +13,7 @@ struct v2f {
 	v2f(f32 v) :
 		v2f{v, v} {}
 
-	const char* str() const;
+	const char* str();
 	f32 len() const;
 	f32 dot(const v2f& other) const;
 	v2f& norm();

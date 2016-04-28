@@ -18,12 +18,84 @@ void precompute_slider(slider_data& sl, std::vector<v2f>& positions,
 	}
 }
 
+// TODO: reduce code redundancy
+
+i64 slider_segment_count(hit_object& ho) {
+	auto& sl = ho.slider;
+	switch (sl.type) {
+		case 'L':
+			if (sl.num_points > 2) {
+				// too lazy to implement it using lines, just double each 
+				// point and make it a bezier
+				
+				v2f tmp[0xFF];
+				for (size_t i = 0; i < sl.num_points; i++) {
+					tmp[i] = sl.points[i];
+				}
+
+				sl.num_points *= 2;
+				for (size_t i = 0; i < sl.num_points; i++) {
+					sl.points[i] = tmp[i / 2];
+				}
+
+				sl.num_points--;
+				sl.type = 'B';
+
+				goto segcount_bezier;
+			}
+		case 'P':
+		case 'C': // TODO: check if catmull and pass-through sliders count as 
+				  //       a single segment
+			return sl.repetitions;
+
+		case 'B':
+		{
+			if (sl.num_points < 2) {
+				die("Found bezier slider with less than 2 points");
+			}
+
+segcount_bezier:
+			i64 res = 0;
+			for (size_t j = 0; j < sl.num_points; j++) {
+				if (j == 0) {
+					continue;
+				}
+
+				bool last = j == sl.num_points - 1;
+
+				if ((sl.points[j] - sl.points[j-1]).len() 
+						> 0.0001f && !last) {
+					continue;
+				}
+
+				if (j == 1 && !last) {
+					continue;
+				}
+
+				if (last) {
+					j++;
+				}
+
+				res++;
+			}
+
+			return res * sl.repetitions;
+		}
+
+		default:
+			die("Unsupported slider type");
+	}
+
+	die("how did you get here");
+	return 0;
+}
+
 v2f slider_at(hit_object& ho, i64 ms) {
 	auto duration = ho.end_time - ho.time;
 	auto &sl = ho.slider;
-	f32 t = (f32)ms / duration;
 
 	ms = std::max((i64)0, std::min(ms, duration));
+	f32 t = (f32)ms / duration;
 
 	auto one_repetition = duration / sl.repetitions;
 	bool invert = false;

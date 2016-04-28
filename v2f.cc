@@ -3,9 +3,8 @@
 #include <stdio.h>
 #include <math.h>
 
-const char* v2f::str() const {
+const char* v2f::str() {
 	static f32 old_x, old_y;
-	static char buf[42] = {0};
 
 	if (x != old_x || y != old_y || !buf[0]) {
 		sprintf(buf, "(%g %g)", x, y);

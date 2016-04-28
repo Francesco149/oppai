@@ -14,6 +14,8 @@
 #include "preview_window.h"
 #include "beatmap.h"
 
+// TODO: just use gl's privitives to draw lines which is quicker and cleaner
+
 namespace {
 	// yes this is extremely bad and slow but I don't care, it's just for testin
 	const i32 screen_w = 512, screen_h = 384;
@@ -86,10 +88,11 @@ void p_show(hit_object& ho) {
 	p_cls();
 
 	// draw slider curve
-	for (i64 ms = 0; ms < ho.end_time - ho.time; ms++) {
+	i64 duration = ho.end_time - ho.time;
+	for (i64 ms = 0; ms <= duration; ms++) {
 		v2f p = ho.at(ms);
 
-		if (ms % 50 == 0) {
+		if (ms % 50 == 0 || ms == duration) {
 			printf("%ldms %s\n", ms, p.str());
 		}
 

@@ -41,9 +41,18 @@ timing_point* beatmap::parent_timing(timing_point* t) {
 	die("Orphan timing section");
 }
 
+i64 hit_object::num_segments() {
+	if (type != obj::slider) {
+		//puts("Warning: tried to call .num_segments on a non-slider object");
+		return 1;
+	}
+
+	return slider_segment_count(*this);
+}
+
 v2f hit_object::at(i64 ms) {
 	if (type != obj::slider) {
-		puts("Warning: tried to call .at on a non-slider object");
+		//puts("Warning: tried to call .at on a non-slider object");
 		return pos;
 	}
 
@@ -65,9 +74,6 @@ void beatmap::parse(const char* osu_file, beatmap& b) {
 	fclose(f);
 
 	buf[cb] = 0;
-	printf("%ld bytes\n\n", cb);
-
-	puts("Parsing...\n");
 
 	char* tok = strtok((char*)buf, "\n");
 

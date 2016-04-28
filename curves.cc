@@ -12,6 +12,7 @@ bool pt_in_circle(const v2f& pt, const v2f& center, f32 r) {
 }
 
 v2f pt_on_line(const v2f& p1, const v2f& p2, f32 t) {
+	t = std::min(1.f, std::max(0.f, t));
 	f32 len = (p2 - p1).len();
 	f32 n = len - len * t;
 	return (p1 * n + p2 * len * t) / len;
@@ -59,6 +60,8 @@ namespace {
 
 v2f pt_on_circular_arc(
 		const v2f& p1, const v2f& p2, const v2f& p3, f32 t, f32 len) {
+
+	t = std::min(1.f, std::max(0.f, t));
 
 	circle c;
 	circum_circle(p1, p2, p3, &c);
@@ -127,6 +130,7 @@ void curve::compute(std::vector<v2f>* dst) {
 v2f bezier::at(f32 t) const {
 	v2f res{0};
 
+	t = std::min(1.f, std::max(0.f, t));
 	size_t n = num_points - 1;
 	for (size_t i = 0; i < num_points; i++) {
 		f32 multiplier = 
@@ -145,6 +149,7 @@ v2f catmull::at(f32 t) const {
 	v2f cur{0};
 	f32 step = curve_step;
 
+	t = std::min(1.f, std::max(0.f, t));
 	t *= num_points;
 
 	for (size_t i = 0; i < num_points - 1; i++) {
