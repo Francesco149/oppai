@@ -51,7 +51,8 @@ int main(int argc, char* argv[]) {
 	stars = d_calc(b, &aim, &speed);
 	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
 
-	pp =  pp_calc(aim, speed, b, b.max_combo, mods::dt | mods::hd);
+	pp =  pp_calc(aim, speed, b, b.max_combo, mods::dt | mods::hd, b.max_combo, 
+		0, 962, 14);
 	printf("\n%gpp for HDDT SS\n", pp);
 
 	return 0;

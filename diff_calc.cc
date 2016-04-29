@@ -296,13 +296,15 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed) {
 
 	*aim = sqrtf(*aim) * star_scaling_factor;
 	*speed = sqrtf(*speed) * star_scaling_factor;
+
+	// round to 2 decimal places
+	*aim = std::floor(*aim * 100.0) / 100.0;
+	*speed = std::floor(*speed * 100.0) / 100.0;
+
 	f64 stars = *aim + *speed + 
 		std::abs(*speed - *aim) * extreme_scaling_factor;
 
-	// round to 2 decimal places
-	*aim = std::round(*aim * 100.0) / 100.0;
-	*speed = std::round(*speed * 100.0) / 100.0;
-	stars = std::round(stars * 100.0) / 100.0;
+	stars = std::floor(stars * 100.0) / 100.0;
 
 	return stars;
 }
