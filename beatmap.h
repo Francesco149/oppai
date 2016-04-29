@@ -72,6 +72,7 @@ struct beatmap {
 	f64 od = 1337.f;
 	f64 ar = 1337.f;
 	f64 sv = 1337.f;
+	f64 tick_rate = 1.f;
 
 	u16 circle_count = 0;
 	u16 slider_count = 0;

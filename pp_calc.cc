@@ -39,8 +39,10 @@ f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, u32 used_mods,
 		acc_calc(c300 - 1, 1, 0, misses);
 	epsilon *= 50.0;
 
-	while (std::abs(acc_calc(c300, c100, 0, misses) * 100.0 - acc_percent) 
-			> epsilon) {
+	f64 closest_acc;
+	while ((closest_acc = std::abs(acc_calc(c300, c100, 0, misses) * 100.0) 
+				- acc_percent) > epsilon && closest_acc < acc_percent) {
+		
 		c300--;
 		c100++;
 	}

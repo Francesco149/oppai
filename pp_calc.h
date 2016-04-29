@@ -15,7 +15,9 @@ namespace mods {
 		ht = 1 << 8,
 		nc = 1 << 9,
 		fl = 1 << 10,
-		so = 1 << 12;
+		so = 1 << 12, 
+		speed_changing = dt | ht | nc, 
+		map_changing = hr | ez | speed_changing;
 }
 
 struct beatmap;

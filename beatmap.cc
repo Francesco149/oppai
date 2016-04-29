@@ -44,10 +44,14 @@ timing_point* beatmap::parent_timing(timing_point* t) {
 
 // TODO: throw some consts in here
 void beatmap::apply_mods(u32 mods) {
+	if ((mods & mods::map_changing) == 0) {
+		return;
+	}
+
 	// playback speed
 	f64 speed = 1;
 	
-	if (mods & mods::dt) {
+	if ((mods & mods::dt) != 0 || (mods & mods::nc) != 0) {
 		speed *= 1.5;
 	}
 
@@ -111,7 +115,7 @@ void beatmap::apply_mods(u32 mods) {
 	cs *= cs_multiplier;
 	cs = std::max(0.0, std::min(10.0, cs));
 
-	if ((mods & mods::dt) == 0 && (mods & mods::ht) == 0) {
+	if ((mods & mods::speed_changing) == 0) {
 		// not speed-modifying
 		return;
 	}
@@ -286,19 +290,23 @@ found_difficulty:
 			continue;
 		}
 
-		else if (sscanf(tok, "CircleSize: %lf", &b.cs) == 1) {
+		if (sscanf(tok, "CircleSize: %lf", &b.cs) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "OverallDifficulty: %lf", &b.od) == 1) {
+		if (sscanf(tok, "OverallDifficulty: %lf", &b.od) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "ApproachRate: %lf", &b.ar) == 1) {
+		if (sscanf(tok, "ApproachRate: %lf", &b.ar) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "SliderMultiplier: %lf", &b.sv) == 1) {
+		if (sscanf(tok, "SliderMultiplier: %lf", &b.sv) == 1) {
+			continue;
+		}
+
+		if (sscanf(tok, "SliderTickRate: %lf", &b.tick_rate) == 1) {
 			continue;
 		}
 	}
@@ -453,12 +461,22 @@ found_objects:
 
 		b.num_objects++;
 
-		if (ho.type == obj::circle) {
-			b.circle_count++;
-		}
+		// increase max combo and circle/slider count
+		b.max_combo++; // slider ticks are calculated later
+		switch (ho.type) {
+			case obj::circle:
+				b.circle_count++;
+				break;
 
-		else if (ho.type == obj::slider) {
-			b.slider_count++;
+			case obj::slider:
+				b.slider_count++;
+				break;
+
+			case obj::spinner:
+				break;
+
+			case obj::invalid:
+				die("How did you get here????????");
 		}
 
 		// slider points are separated by |
@@ -532,5 +550,17 @@ found_objects:
 		f64 num_beats = (sl.length * sl.repetitions) / px_per_beat;
 		f64 duration = std::ceil(num_beats * parent->ms_per_beat);
 		ho.end_time = ho.time + duration;
+
+		// sliders get 2 + ticks combo (head, tail and ticks)
+		// each repetition adds an extra combo and an extra set of ticks
+		// the -.01 is there to prevent ceil from ceiling 1.0 to 2.0 randomly
+		u16 ticks = std::ceil(
+				(num_beats - 0.01) / sl.repetitions * b.tick_rate);
+		ticks--;
+		ticks *= sl.repetitions;
+		ticks += sl.repetitions + 1;
+		//printf("%g x %ld %hd\n", num_beats, sl.repetitions, ticks);
+
+		b.max_combo += ticks - 1; // -1 because we already did ++ earlier
 	}
 }

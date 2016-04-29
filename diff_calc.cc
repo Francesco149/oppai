@@ -292,18 +292,17 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed) {
 
 	*aim = calculate_difficulty(diff::aim);
 	*speed = calculate_difficulty(diff::speed);
-
-	*aim = sqrtf(*aim) * star_scaling_factor;
-	*speed = sqrtf(*speed) * star_scaling_factor;
+	*aim = sqrt(*aim) * star_scaling_factor;
+	*speed = sqrt(*speed) * star_scaling_factor;
 
 	// round to 2 decimal places
-	*aim = std::floor(*aim * 100.0) / 100.0;
-	*speed = std::floor(*speed * 100.0) / 100.0;
+	*aim = std::round(*aim * 100.0) / 100.0;
+	*speed = std::round(*speed * 100.0) / 100.0;
 
 	f64 stars = *aim + *speed + 
 		std::abs(*speed - *aim) * extreme_scaling_factor;
 
-	stars = std::floor(stars * 100.0) / 100.0;
+	stars = std::round(stars * 100.0) / 100.0;
 
 	return stars;
 }

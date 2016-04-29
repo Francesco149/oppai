@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <algorithm>
 
 #include "utils.h"
 #include "beatmap.h"
@@ -13,17 +15,87 @@ namespace {
 #endif
 }
 
+namespace {
+	const char* const mod_strs[] {
+		"nomod", "nf", "ez", "hd", "hr", "dt", "ht", "nc", "fl", "so"
+	};
+	const u32 mod_masks[] {
+		mods::nomod, mods::nf, mods::ez, mods::hd, mods::hr, mods::dt, mods::ht,
+		mods::nc, mods::fl, mods::so
+	};
+}
+
 int main(int argc, char* argv[]) {
-	if (argc != 3) {
-		printf("Usage: %s /path/to/difficulty.osu max_combo\n", *argv);
+	if (argc < 2) {
+		printf("Usage: %s /path/to/difficulty.osu [acc]%% +[mods] "
+				"[combo]x [misses]xmiss\n\n", *argv);
+		puts("acc: the accuracy in percent (example: 99.99%)");
+		puts("mods (optional): any combination of nomod, nf, ez, hd, hr, dt, ht"
+				", nc, fl, so (example: +hddthr)");
+		puts("combo: the highest combo (example: 1337x)");
+		puts("misses: amount of misses (example: 1xmiss)");
+		puts("(the order of the optional arguments does not matter)");
+
 		return 0;
 	}
 
-	if (sscanf(argv[2], "%hd", &b.max_combo) != 1) {
-		die("Invalid max_combo");
-	}
-
 	beatmap::parse(argv[1], b);
+
+	char* mods_str = nullptr;
+	f64 acc = 100.0;
+	u32 mods = mods::nomod;
+	u16 combo = b.max_combo;
+	u16 misses = 0;
+
+	for (int i = 2; i < argc; i++) {
+		char suff[64] = {0};
+		auto a = argv[i];
+
+		std::transform(a, a + strlen(a), a, tolower);
+
+		// acc
+		f64 tmp_acc;
+		if (sscanf(a, "%lf%s", &tmp_acc, suff) == 2 && !strcmp(suff, "%")) {
+			acc = tmp_acc;
+			continue;
+		}
+
+		// mods
+		for (size_t j = 0; j < sizeof(mod_masks) / sizeof(mod_masks[0]); j++) {
+			if (strstr(a, mod_strs[j])) {
+				mods_str = a;
+				mods |= mod_masks[j];
+			}
+		}
+
+		if (mods_str == a) {
+			if (*mods_str == '+') {
+				std::transform(mods_str, mods_str + strlen(mods_str), mods_str, 
+						toupper);
+				continue;
+			} else {
+				mods_str = nullptr;
+			}
+		}
+
+		// combo
+		u16 tmp_combo;
+		if (sscanf(a, "%hd%s", &tmp_combo, suff) == 2 && !strcmp(suff, "x")) {
+			combo = tmp_combo;
+			continue;
+		}
+
+		// misses
+		u16 tmp_misses;
+		if (sscanf(a, "%hd%s", &tmp_misses, suff) == 2 && 
+				!strcmp(suff, "xmiss")) {
+			misses = tmp_misses;
+			continue;
+		}
+
+		printf(">%s\n", a);
+		die("Invalid parameter");
+	}
 
 #ifdef SHOW_BEATMAP
 	puts("\n---");
@@ -34,16 +106,19 @@ int main(int argc, char* argv[]) {
 	print_beatmap();
 #endif
 
-	printf("\n%s - %s [%s] (%s)\n", b.artist, b.title, b.version, b.creator);
+	printf("\n%s - %s [%s] (%s) %s\n", 
+			b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "");
 
-	b.apply_mods(mods::dt | mods::hd);
+	b.apply_mods(mods);
 	printf("od%g ar%g cs%g\n", b.od, b.ar, b.cs);
+	printf("%hd/%hd combo\n", combo, b.max_combo);
+	printf("%hdxmiss\n", misses);
 
 	f64 aim, speed;
 	f64 stars = d_calc(b, &aim, &speed);
 	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
 
-	f64 pp = pp_calc_acc(aim, speed, b, 99.04, mods::dt | mods::hd);
+	f64 pp = pp_calc_acc(aim, speed, b, acc, mods, combo, misses);
 	printf("\n%gpp\n", pp);
 
 	return 0;
