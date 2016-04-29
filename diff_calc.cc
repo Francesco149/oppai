@@ -13,8 +13,8 @@ namespace {
 	const f32 stream_spacing_treshold = 110.f;
 	const f32 single_spacing_treshold = 125.f;
 	const f32 spacing_weight_scaling[] = { 1400.f, 26.25f };
-	const i64 lazy_slider_step = 1;
-	const f32 circlesize_buff_treshold = 27.f;
+	const i64 lazy_slider_step = 10;
+	const f32 circlesize_buff_treshold = 30.f;
 
 	namespace diff {
 		const u8 speed = 0, 
@@ -129,14 +129,34 @@ namespace {
 				case obj::slider:
 					switch(diff_type) {
 						case diff::speed:
+#ifdef SLIDERFIX
+							time_elapsed = ho->end_time - prev.ho->time;
+							res	= spacing_weight(
+								lazy_slider_len_first +
+								lazy_slider_len_subseq * 
+									(ho->slider.repetitions - 1) +
+								distance(prev), diff_type) * scaling;
+#else
 							res	= spacing_weight(
 								prev.lazy_slider_len_first +
 								prev.lazy_slider_len_subseq * 
 									(prev.ho->slider.repetitions - 1) +
 								distance(prev), diff_type) * scaling;
+#endif
 							break;
 
 						case diff::aim:
+#ifdef SLIDERFIX
+							time_elapsed = ho->end_time - prev.ho->time;
+							res = (
+								spacing_weight(
+									lazy_slider_len_first, diff_type) +
+								spacing_weight(
+									lazy_slider_len_subseq, diff_type) *
+										(ho->slider.repetitions - 1) +
+								spacing_weight(distance(prev), diff_type)
+							) * scaling;
+#else
 							res = (
 								spacing_weight(
 									prev.lazy_slider_len_first, diff_type) +
@@ -145,6 +165,7 @@ namespace {
 										(prev.ho->slider.repetitions - 1) +
 								spacing_weight(distance(prev), diff_type)
 							) * scaling;
+#endif
 					}
 					break;
 
@@ -245,8 +266,9 @@ namespace {
 }
 
 f32 d_calc(beatmap& b, f32* aim, f32* speed) {
-	f32 circle_radius = (playfield_width / 16.f) * (1.f - 0.7f *
-			(b.cs - 5.f) / 5.f);
+	//f32 circle_radius = (playfield_width / 16.f) * (1.f - 0.7f *
+	//		(b.cs - 5.f) / 5.f);
+	f32 circle_radius = 54.4f - b.cs * 4.48f;
 
 	num_objects = b.num_objects;
 	for (size_t i = 0; i < b.num_objects; i++) {
@@ -271,5 +293,12 @@ f32 d_calc(beatmap& b, f32* aim, f32* speed) {
 
 	*aim = sqrtf(*aim) * star_scaling_factor;
 	*speed = sqrtf(*speed) * star_scaling_factor;
-	return *aim + *speed + std::abs(*speed - *aim) * extreme_scaling_factor;
+	f32 stars = *aim + *speed + std::abs(*speed - *aim) * extreme_scaling_factor;
+
+	// round to 2 decimal places
+	*aim = std::round(*aim * 100.f) / 100.f;
+	*speed = std::round(*speed * 100.f) / 100.f;
+	stars = std::round(stars * 100.f) / 100.f;
+
+	return stars;
 }

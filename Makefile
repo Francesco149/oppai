@@ -7,10 +7,10 @@
 # Compiles all .cc, .s and .S files in SRCDIR to obj files in OBJDIR, then gets 
 # rid of unused code.
 # ------------------------------------------------------------------------------
-TARGET = tpdiff
+TARGET = oppai
 
 CXX = g++
-CXXFLAGS = -std=c++14 -Wall -Werror #-DSHOW_BEATMAP -DSLIDERTEST
+CXXFLAGS = -std=c++14 -Wall -Werror #-DSLIDERFIX #-DSHOW_BEATMAP -DSLIDERTEST
 
 LINKER = g++ -o 
 LFLAGS = #-lGL -lglut

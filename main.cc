@@ -4,6 +4,7 @@
 #include "beatmap.h"
 #include "preview_window.h"
 #include "diff_calc.h"
+#include "pp_calc.h"
 
 namespace {
 	beatmap b;
@@ -13,9 +14,13 @@ namespace {
 }
 
 int main(int argc, char* argv[]) {
-	if (argc != 2) {
-		printf("Usage: %s /path/to/difficulty.osu\n", *argv);
+	if (argc != 3) {
+		printf("Usage: %s /path/to/difficulty.osu max_combo\n", *argv);
 		return 0;
+	}
+
+	if (sscanf(argv[2], "%hd", &b.max_combo) != 1) {
+		die("Invalid max_combo");
 	}
 
 	beatmap::parse(argv[1], b);
@@ -29,12 +34,24 @@ int main(int argc, char* argv[]) {
 	print_beatmap();
 #endif
 
+	printf("\n%s - %s [%s] (%s)\n", b.artist, b.title, b.version, b.creator);
+
 	f32 aim, speed;
 	f32 stars = d_calc(b, &aim, &speed);
-	printf("\n%g stars\naim: %g, speed: %g\n", stars, aim, speed);
+	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
 
-	//f32 pp =  pp_calc(aim, speed, ...);
-	//printf("\n%gpp\n", pp);
+	f32 pp =  pp_calc(aim, speed, b, b.max_combo);
+	printf("\n%gpp for nomod SS\n", pp);
+
+	pp =  pp_calc(aim, speed, b, b.max_combo, mods::hd);
+	printf("\n%gpp for hidden SS\n", pp);
+	b.apply_mods(mods::hr);
+
+	stars = d_calc(b, &aim, &speed);
+	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
+
+	pp =  pp_calc(aim, speed, b, b.max_combo);
+	printf("\n%gpp for hard-rock SS\n", pp);
 
 	return 0;
 }
@@ -77,7 +94,8 @@ namespace {
 			auto& ho = b.objects[i];
 			switch (ho.type) {
 				case obj::circle:
-					printf("%ld: Circle (%g, %g)\n", ho.time, ho.pos.x, ho.pos.y);
+					printf("%ld: Circle (%g, %g)\n", 
+						ho.time, ho.pos.x, ho.pos.y);
 					break;
 
 				case obj::spinner:
@@ -89,7 +107,8 @@ namespace {
 					auto& sl = ho.slider;
 
 					printf(
-						"%ld-%ld: Slider [Type %c, Length %g, %ld Repetitions] ", 
+						"%ld-%ld: Slider "
+						"[Type %c, Length %g, %ld Repetitions] ", 
 						ho.time, ho.end_time, sl.type, 
 						sl.length, sl.repetitions);
 

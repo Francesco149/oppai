@@ -5,6 +5,7 @@
 
 #include "utils.h"
 #include "slider_calc.h"
+#include "pp_calc.h" // TODO: move the mods namespace elsewhere?
 
 namespace {
 	// too fucking lazy to do proper buffering, I will just read the entire
@@ -39,6 +40,97 @@ timing_point* beatmap::parent_timing(timing_point* t) {
 	}
 
 	die("Orphan timing section");
+}
+
+// TODO: throw some consts in here
+void beatmap::apply_mods(u32 mods) {
+	// playback speed
+	f32 speed = 1.f;
+	
+	if (mods & mods::dt) {
+		speed *= 1.5f;
+	}
+
+	if (mods & mods::ht) {
+		speed *= 0.75f;
+	}
+
+	// od
+	f32 od_multiplier = 1.f;
+
+	if (mods & mods::hr) {
+		od_multiplier *= 1.4f;
+	}
+
+	if (mods & mods::ez) {
+		od_multiplier *= 0.5f;
+	}
+
+	od *= od_multiplier;
+	f32 odms = 79.5f - 6.f * od;
+
+	// ar
+	f32 ar_multiplier = 1.f;
+
+	if (mods & mods::hr) {
+		ar_multiplier = 1.4f;
+	}
+
+	if (mods & mods::ez) {
+		ar_multiplier = 0.5f;
+	}
+
+	ar *= ar_multiplier;
+	f32 arms = ar <= 5.f 
+		? (1800.f - 120.f * ar) 
+		: (1200.f - 150.f * (ar - 5.f));
+
+	// cs
+	f32 cs_multiplier = 1.f;
+
+	if (mods & mods::hr) {
+		cs_multiplier = 1.3f;
+	}
+
+	if (mods & mods::ez) {
+		cs_multiplier = 0.5f;
+	}
+
+	// stats must be capped to 0-10 before HT/DT which bring them to a range
+	// of -4.42 to 11.08 for OD and -5 to 11 for AR
+	odms = std::min(79.5f, std::max(19.5f, odms));
+	arms = std::min(1800.f, std::max(450.f, arms));
+
+	odms /= speed;
+	arms /= speed;
+	od = (79.5f - odms) / 6.f;
+	ar = ar <= 5.f
+		? ((1800.f - arms) / 120.f)
+		: (5.f + (1200.f - arms) / 150.f);
+
+	cs *= cs_multiplier;
+	cs = std::max(0.f, std::min(10.f, cs));
+
+	printf("\nafter mods: od%g ar%g cs%g\n", od, ar, cs);
+
+	if ((mods & mods::dt) == 0 && (mods & mods::ht) == 0) {
+		// not speed-modifying
+		return;
+	}
+
+	for (size_t i = 0; i < num_timing_points; i++) {
+		auto &tp = timing_points[i];
+		tp.time = (i64)((f32)tp.time / speed);
+		if (!tp.inherit) {
+			tp.ms_per_beat /= speed;
+		}
+	}
+
+	for (size_t i = 0; i < num_objects; i++) {
+		auto& o = objects[i];
+		o.time = (i64)((f32)o.time / speed);
+		o.end_time = (i64)((f32)o.end_time / speed);
+	}
 }
 
 i64 hit_object::num_segments() {
@@ -88,7 +180,7 @@ void beatmap::parse(const char* osu_file, beatmap& b) {
 	}
 
 	if (!b.format_version) {
-		die("File format version not found");
+		//die("File format version not found");
 	}
 
 	// ---
@@ -226,8 +318,8 @@ found_difficulty:
 	}
 
 	if (b.ar > 10.f) {
-		puts("warning: AR not found, defaulting to AR6");
-		b.ar = 6.f;
+		puts("warning: AR not found, assuming old map and setting AR=OD");
+		b.ar = b.od;
 	}
 
 	if (b.sv > 10.f) { // not sure what max sv is
@@ -267,17 +359,20 @@ found_timing:
 		auto& tp = b.timing_points[b.num_timing_points];
 
 		u8 not_inherited = 0;
-		if (sscanf(tok, "%ld,%lf,%d,%d,%d,%d,%hhd", 
-				   &tp.time, &tp.ms_per_beat, 
+		f64 time_tmp;
+		if (sscanf(tok, "%lf,%lf,%d,%d,%d,%d,%hhd", 
+				   &time_tmp, &tp.ms_per_beat, 
 				   &useless, &useless, &useless, &useless, 
 				   &not_inherited) == 7) {
 
+			tp.time = time_tmp;
 			tp.inherit = not_inherited == 0;
 			goto parsed_timing_pt;
 		}
 
 		// older formats might not have inherit and the other info
-		if (sscanf(tok, "%ld,%lf", &tp.time, &tp.ms_per_beat) != 2) {
+		if (sscanf(tok, "%lf,%lf", &time_tmp, &tp.ms_per_beat) != 2) {
+			tp.time = time_tmp;
 			die("Invalid format for timing point");
 		}
 
@@ -359,6 +454,14 @@ found_objects:
 		}
 
 		b.num_objects++;
+
+		if (ho.type == obj::circle) {
+			b.circle_count++;
+		}
+
+		else if (ho.type == obj::slider) {
+			b.slider_count++;
+		}
 
 		// slider points are separated by |
 		if (!strstr(tok, "|")) {	

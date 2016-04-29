@@ -73,6 +73,10 @@ struct beatmap {
 	f32 ar = 1337.f;
 	f32 sv = 1337.f;
 
+	u16 circle_count = 0;
+	u16 slider_count = 0;
+	u16 max_combo = 0;
+
 	static const size_t max_timing_points = 0xFFFF;
 	size_t num_timing_points = 0;
 	timing_point timing_points[max_timing_points];
@@ -89,4 +93,7 @@ struct beatmap {
 
 	// find parent of a inherited timing point
 	timing_point* parent_timing(timing_point* tp);
+
+	// apply map-modifying mods (such as EZ, HR, DT, HT)
+	void apply_mods(u32 mods);
 };
