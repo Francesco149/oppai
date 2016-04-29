@@ -45,71 +45,71 @@ timing_point* beatmap::parent_timing(timing_point* t) {
 // TODO: throw some consts in here
 void beatmap::apply_mods(u32 mods) {
 	// playback speed
-	f32 speed = 1.f;
+	f64 speed = 1;
 	
 	if (mods & mods::dt) {
-		speed *= 1.5f;
+		speed *= 1.5;
 	}
 
 	if (mods & mods::ht) {
-		speed *= 0.75f;
+		speed *= 0.75;
 	}
 
 	// od
-	f32 od_multiplier = 1.f;
+	f64 od_multiplier = 1;
 
 	if (mods & mods::hr) {
-		od_multiplier *= 1.4f;
+		od_multiplier *= 1.4;
 	}
 
 	if (mods & mods::ez) {
-		od_multiplier *= 0.5f;
+		od_multiplier *= 0.5;
 	}
 
 	od *= od_multiplier;
-	f32 odms = 79.5f - 6.f * od;
+	f64 odms = 79.5 - 6.0 * od;
 
 	// ar
-	f32 ar_multiplier = 1.f;
+	f64 ar_multiplier = 1;
 
 	if (mods & mods::hr) {
-		ar_multiplier = 1.4f;
+		ar_multiplier = 1.4;
 	}
 
 	if (mods & mods::ez) {
-		ar_multiplier = 0.5f;
+		ar_multiplier = 0.5;
 	}
 
 	ar *= ar_multiplier;
-	f32 arms = ar <= 5.f 
-		? (1800.f - 120.f * ar) 
-		: (1200.f - 150.f * (ar - 5.f));
+	f64 arms = ar <= 5 
+		? (1800 - 120 * ar) 
+		: (1200 - 150 * (ar - 5));
 
 	// cs
-	f32 cs_multiplier = 1.f;
+	f64 cs_multiplier = 1;
 
 	if (mods & mods::hr) {
-		cs_multiplier = 1.3f;
+		cs_multiplier = 1.3;
 	}
 
 	if (mods & mods::ez) {
-		cs_multiplier = 0.5f;
+		cs_multiplier = 0.5;
 	}
 
 	// stats must be capped to 0-10 before HT/DT which bring them to a range
 	// of -4.42 to 11.08 for OD and -5 to 11 for AR
-	odms = std::min(79.5f, std::max(19.5f, odms));
-	arms = std::min(1800.f, std::max(450.f, arms));
+	odms = std::min(79.5, std::max(19.5, odms));
+	arms = std::min(1800.0, std::max(450.0, arms));
 
 	odms /= speed;
 	arms /= speed;
-	od = (79.5f - odms) / 6.f;
-	ar = ar <= 5.f
-		? ((1800.f - arms) / 120.f)
-		: (5.f + (1200.f - arms) / 150.f);
+	od = (79.5 - odms) / 6.0;
+	ar = ar <= 5.0
+		? ((1800.0 - arms) / 120.0)
+		: (5.0 + (1200.0 - arms) / 150.0);
 
 	cs *= cs_multiplier;
-	cs = std::max(0.f, std::min(10.f, cs));
+	cs = std::max(0.0, std::min(10.0, cs));
 
 	printf("\nafter mods: od%g ar%g cs%g\n", od, ar, cs);
 
@@ -120,7 +120,7 @@ void beatmap::apply_mods(u32 mods) {
 
 	for (size_t i = 0; i < num_timing_points; i++) {
 		auto &tp = timing_points[i];
-		tp.time = (i64)((f32)tp.time / speed);
+		tp.time = (i64)((f64)tp.time / speed);
 		if (!tp.inherit) {
 			tp.ms_per_beat /= speed;
 		}
@@ -128,8 +128,8 @@ void beatmap::apply_mods(u32 mods) {
 
 	for (size_t i = 0; i < num_objects; i++) {
 		auto& o = objects[i];
-		o.time = (i64)((f32)o.time / speed);
-		o.end_time = (i64)((f32)o.end_time / speed);
+		o.time = (i64)((f64)o.time / speed);
+		o.end_time = (i64)((f64)o.end_time / speed);
 	}
 }
 
@@ -206,7 +206,7 @@ found_general:
 	tok = strtok(nullptr, "\n");
 	for (; tok && *tok != '['; tok = strtok(nullptr, "\n")) {
 
-		if (sscanf(tok, "StackLeniency: %f", &b.stack_leniency) == 1) {
+		if (sscanf(tok, "StackLeniency: %lf", &b.stack_leniency) == 1) {
 			continue;
 		}
 
@@ -284,45 +284,45 @@ found_difficulty:
 	tok = strtok(nullptr, "\n");
 	for (; tok && *tok != '['; tok = strtok(nullptr, "\n")) {
 
-		if (sscanf(tok, "HPDrainRate: %f", &b.hp) == 1) {
+		if (sscanf(tok, "HPDrainRate: %lf", &b.hp) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "CircleSize: %f", &b.cs) == 1) {
+		else if (sscanf(tok, "CircleSize: %lf", &b.cs) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "OverallDifficulty: %f", &b.od) == 1) {
+		else if (sscanf(tok, "OverallDifficulty: %lf", &b.od) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "ApproachRate: %f", &b.ar) == 1) {
+		else if (sscanf(tok, "ApproachRate: %lf", &b.ar) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "SliderMultiplier: %f", &b.sv) == 1) {
+		else if (sscanf(tok, "SliderMultiplier: %lf", &b.sv) == 1) {
 			continue;
 		}
 	}
 
-	if (b.hp > 10.f) {
+	if (b.hp > 10) {
 		die("Invalid or missing HP");
 	}
 
-	if (b.cs > 10.f) {
+	if (b.cs > 10) {
 		die("Invalid or missing CS");
 	}
 
-	if (b.od > 10.f) {
+	if (b.od > 10) {
 		die("Invalid or missing OD");
 	}
 
-	if (b.ar > 10.f) {
+	if (b.ar > 10) {
 		puts("warning: AR not found, assuming old map and setting AR=OD");
 		b.ar = b.od;
 	}
 
-	if (b.sv > 10.f) { // not sure what max sv is
+	if (b.sv > 10) { // not sure what max sv is
 		die("Invalid or missing SV");
 	}
 
@@ -413,7 +413,7 @@ found_objects:
 		i32 type_num;
 
 		// slider
-		if (sscanf(tok, "%f,%f,%ld,%d,%d,%c", 
+		if (sscanf(tok, "%lf,%lf,%ld,%d,%d,%c", 
 				   &ho.pos.x, &ho.pos.y, &ho.time, &useless, &useless, 
 				   &ho.slider.type) == 6 && 
 				ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
@@ -427,7 +427,7 @@ found_objects:
 		}
 
 		// circle, or spinner
-		else if (sscanf(tok, "%f,%f,%ld,%d,%d,%ld", 
+		else if (sscanf(tok, "%lf,%lf,%ld,%d,%d,%ld", 
 				   &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless, 
 				   &ho.end_time) == 6) {
 
@@ -442,7 +442,7 @@ found_objects:
 		}
 
 		// old circle
-		else if (sscanf(tok, "%f,%f,%ld,%d,%d", 
+		else if (sscanf(tok, "%lf,%lf,%ld,%d,%d", 
 			&ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless) == 5) {
 
 			ho.type = obj::circle;
@@ -503,7 +503,7 @@ found_objects:
 			// lastcurveX:lastcurveY,repeat,pixelLength,
 			// 		edgeHitsound,edgeAddition,addition
 			if (sscanf(slider_tok, 
-				      "%f:%f,%ld,%f", 
+				      "%lf:%lf,%ld,%lf", 
 					  &pt.x, &pt.y, &sl.repetitions, &sl.length) == 4) {
 
 				sl.num_points++;
@@ -512,7 +512,7 @@ found_objects:
 			}
 			
 			// curveX:curveY
-			else if (sscanf(slider_tok, "%f:%f", &pt.x, &pt.y) != 2) {
+			else if (sscanf(slider_tok, "%lf:%lf", &pt.x, &pt.y) != 2) {
 				die("Invalid slider found");
 			}
 
@@ -524,15 +524,15 @@ found_objects:
 		auto parent = b.parent_timing(tp);
 
 		// calculate slider velocity multiplier for inherited sections
-		f32 sv_multiplier = 1.f;
+		f64 sv_multiplier = 1;
 		if (tp->inherit) {
-			sv_multiplier = (-100.f / tp->ms_per_beat);
+			sv_multiplier = (-100.0 / tp->ms_per_beat);
 		}
 
 		// calculate slider end time
-		f32 px_per_beat = b.sv * 100.f * sv_multiplier;
-		f32 num_beats = (sl.length * sl.repetitions) / px_per_beat;
-		f32 duration = std::ceil(num_beats * parent->ms_per_beat);
+		f64 px_per_beat = b.sv * 100.0 * sv_multiplier;
+		f64 num_beats = (sl.length * sl.repetitions) / px_per_beat;
+		f64 duration = std::ceil(num_beats * parent->ms_per_beat);
 		ho.end_time = ho.time + duration;
 	}
 }

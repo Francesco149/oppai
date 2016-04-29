@@ -20,7 +20,7 @@ struct slider_data {
 	// NOTE: pos_at_ms is initialized by calling .at on hit_object at least once
 
 	u64 repetitions = 0;
-	f32 length = 0;
+	f64 length = 0;
 };
 
 // hit-object type
@@ -57,7 +57,7 @@ struct beatmap {
 	u32 format_version = 0;
 
 	// general
-	f32 stack_leniency = 0;
+	f64 stack_leniency = 0;
 	u8 mode = 0;
 
 	// metadata
@@ -67,11 +67,11 @@ struct beatmap {
 	char version[256] = {0};
 
 	// difficulty
-	f32 hp = 1337.f;
-	f32 cs = 1337.f;
-	f32 od = 1337.f;
-	f32 ar = 1337.f;
-	f32 sv = 1337.f;
+	f64 hp = 1337.f;
+	f64 cs = 1337.f;
+	f64 od = 1337.f;
+	f64 ar = 1337.f;
+	f64 sv = 1337.f;
 
 	u16 circle_count = 0;
 	u16 slider_count = 0;

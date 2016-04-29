@@ -7,32 +7,32 @@
 // ported from osu-web
 // TODO: clean up this math mess
 
-bool pt_in_circle(const v2f& pt, const v2f& center, f32 r) {
+bool pt_in_circle(const v2f& pt, const v2f& center, f64 r) {
 	return (pt - center).len() <= r;
 }
 
-v2f pt_on_line(const v2f& p1, const v2f& p2, f32 t) {
-	t = std::min(1.f, std::max(0.f, t));
-	f32 len = (p2 - p1).len();
-	f32 n = len - len * t;
+v2f pt_on_line(const v2f& p1, const v2f& p2, f64 t) {
+	t = std::min(1.0, std::max(0.0, t));
+	f64 len = (p2 - p1).len();
+	f64 n = len - len * t;
 	return (p1 * n + p2 * len * t) / len;
 }
 
 namespace {
 	struct circle {
 		v2f c;
-		f32 r;
+		f64 r;
 	};
 
 	void circum_circle(const v2f& p1, const v2f& p2, const v2f& p3, circle* c) {
-		f32 D = 2.f * (p1.x * (p2.y - p3.y) + p2.x * 
+		f64 D = 2.0 * (p1.x * (p2.y - p3.y) + p2.x * 
 				     (p3.y - p1.y) + p3.x * (p1.y - p2.y));
 
-		f32 Ux = ((p1.x * p1.x + p1.y * p1.y) * 
+		f64 Ux = ((p1.x * p1.x + p1.y * p1.y) * 
 			(p2.y - p3.y) + (p2.x * p2.x + p2.y * p2.y) * 
 			(p3.y - p1.y) + (p3.x * p3.x + p3.y * p3.y) * (p1.y - p2.y)) / D;
 
-		f32 Uy = ((p1.x * p1.x + p1.y * p1.y) * 
+		f64 Uy = ((p1.x * p1.x + p1.y * p1.y) * 
 			(p3.x - p2.x) + (p2.x * p2.x + p2.y * p2.y) * 
 			(p1.x - p3.x) + (p3.x * p3.x + p3.y * p3.y) * (p2.x - p1.x)) / D;
 
@@ -47,9 +47,9 @@ namespace {
 		return diff1.y * diff2.x > diff1.x * diff2.y;
 	}
 
-	v2f rotate(const v2f& c, const v2f& p, f32 radians) {
-		f32 _cos = cos(radians);
-		f32 _sin = sin(radians);
+	v2f rotate(const v2f& c, const v2f& p, f64 radians) {
+		f64 _cos = cos(radians);
+		f64 _sin = sin(radians);
 		v2f d = p - c;
 		return v2f{
 			_cos * d.x - _sin * d.y + c.x, 
@@ -59,13 +59,13 @@ namespace {
 }
 
 v2f pt_on_circular_arc(
-		const v2f& p1, const v2f& p2, const v2f& p3, f32 t, f32 len) {
+		const v2f& p1, const v2f& p2, const v2f& p3, f64 t, f64 len) {
 
-	t = std::min(1.f, std::max(0.f, t));
+	t = std::min(1.0, std::max(0.0, t));
 
 	circle c;
 	circum_circle(p1, p2, p3, &c);
-	f32 radians = (t * len) / c.r;
+	f64 radians = (t * len) / c.r;
 	if (is_left(p1, p2, p3)) {
 		radians *= -1;
 	}
@@ -90,7 +90,7 @@ namespace {
 
 // ---
 namespace {
-	const float curve_step = 0.0005f;
+	const f64 curve_step = 0.0005;
 }
 
 const size_t curve::max_points;
@@ -101,17 +101,17 @@ void curve::init(const v2f* pts, size_t npts) {
 	memcpy(points, pts, npts * sizeof(v2f));
 }
 
-f32 curve::len() const {
-	f32 res = 0;
+f64 curve::len() const {
+	f64 res = 0;
 	v2f prev = at(0);
-	f32 step = curve_step / num_points;
+	f64 step = curve_step / num_points;
 
 	// TODO: cache length for better performance
 
 	// we calculate length by simply iterating the curve in very small steps
 	// and summing the distances between each step as if it was a series
 	// of really small straight segments
-	for (f32 i = 0; i < 1.f + step; i += step) {
+	for (f64 i = 0; i < 1.0 + step; i += step) {
 		v2f cur = at(i);
 		res += (cur - prev).len();
 		prev = cur;
@@ -121,21 +121,21 @@ f32 curve::len() const {
 }
 
 void curve::compute(std::vector<v2f>* dst) {
-	f32 step = curve_step / num_points;
-	for (f32 i = 0; i < 1.f + step; i += step) {
+	f64 step = curve_step / num_points;
+	for (f64 i = 0; i < 1.f + step; i += step) {
 		dst->push_back(at(i));
 	}
 }
 
-v2f bezier::at(f32 t) const {
+v2f bezier::at(f64 t) const {
 	v2f res{0};
 
-	t = std::min(1.f, std::max(0.f, t));
+	t = std::min(1.0, std::max(0.0, t));
 	size_t n = num_points - 1;
 	for (size_t i = 0; i < num_points; i++) {
-		f32 multiplier = 
+		f64 multiplier = 
 			binominial_coefficient(i, n) * 
-			pow(1.f - t, n - i) *
+			pow(1.0 - t, n - i) *
 			pow(t, i);
 
 		res += points[i] * multiplier;
@@ -144,31 +144,31 @@ v2f bezier::at(f32 t) const {
 	return res;
 }
 
-v2f catmull::at(f32 t) const {
-	f32 total_len = 0.f;
+v2f catmull::at(f64 t) const {
+	f64 total_len = 0.0;
 	v2f cur{0};
-	f32 step = curve_step;
+	f64 step = curve_step;
 
-	t = std::min(1.f, std::max(0.f, t));
+	t = std::min(1.0, std::max(0.0, t));
 	t *= num_points;
 
 	for (size_t i = 0; i < num_points - 1; i++) {
-		for (f32 j = 0; j < 1.f + step; j += step) {
+		for (f64 j = 0; j < 1.0 + step; j += step) {
 			v2f v1 = (i >= 1 ? points[i-1] : points[i]);
 			v2f v2 = points[i];
 			v2f v3 = i + 1 < num_points
 				? points[i + 1]
-				: (v2 * 2.f - v1);
+				: (v2 * 2.0 - v1);
 			v2f v4 = i + 2 < num_points
 				? points[i + 2]
-				: (v3 * 2.f - v2);
+				: (v3 * 2.0 - v2);
 
 			cur = v2f{0};
-			cur += (v1 * -1.f + v2 * 3.f - v3 * 3.f + v4) * j * j * j;
-			cur += (v1 *  2.f - v2 * 5.f + v3 * 4.f - v4) * j * j;
-			cur += (v1 * -1.f + v3                      ) * j;
-			cur +=  v2 *  2.f;
-			cur /= 2.f;
+			cur += (v1 * -1.0 + v2 * 3.0 - v3 * 3.0 + v4) * j * j * j;
+			cur += (v1 *  2.0 - v2 * 5.0 + v3 * 4.0 - v4) * j * j;
+			cur += (v1 * -1.0 + v3                      ) * j;
+			cur +=  v2 *  2.0;
+			cur /= 2.0;
 
 			total_len += step;
 
@@ -183,25 +183,25 @@ v2f catmull::at(f32 t) const {
 
 void catmull::compute(std::vector<v2f>* dst) {
 	v2f cur{0};
-	f32 step = curve_step;
+	f64 step = curve_step;
 
 	for (size_t i = 0; i < num_points - 1; i++) {
-		for (f32 j = 0; j < 1.f + step; j += step) {
+		for (f64 j = 0; j < 1.0 + step; j += step) {
 			v2f v1 = (i >= 1 ? points[i-1] : points[i]);
 			v2f v2 = points[i];
 			v2f v3 = i + 1 < num_points
 				? points[i + 1]
-				: (v2 * 2.f - v1);
+				: (v2 * 2.0 - v1);
 			v2f v4 = i + 2 < num_points
 				? points[i + 2]
-				: (v3 * 2.f - v2);
+				: (v3 * 2.0 - v2);
 
 			cur = v2f{0};
-			cur += (v1 * -1.f + v2 * 3.f - v3 * 3.f + v4) * j * j * j;
-			cur += (v1 *  2.f - v2 * 5.f + v3 * 4.f - v4) * j * j;
-			cur += (v1 * -1.f + v3                      ) * j;
-			cur +=  v2 *  2.f;
-			cur /= 2.f;
+			cur += (v1 * -1.0 + v2 * 3.0 - v3 * 3.0 + v4) * j * j * j;
+			cur += (v1 *  2.0 - v2 * 5.0 + v3 * 4.0 - v4) * j * j;
+			cur += (v1 * -1.0 + v3                      ) * j;
+			cur +=  v2 *  2.0;
+			cur /= 2.0;
 			
 			dst->push_back(cur);
 		}

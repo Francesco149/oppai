@@ -36,22 +36,23 @@ int main(int argc, char* argv[]) {
 
 	printf("\n%s - %s [%s] (%s)\n", b.artist, b.title, b.version, b.creator);
 
-	f32 aim, speed;
-	f32 stars = d_calc(b, &aim, &speed);
+	f64 aim, speed;
+	f64 stars = d_calc(b, &aim, &speed);
 	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
 
-	f32 pp =  pp_calc(aim, speed, b, b.max_combo);
+	f64 pp =  pp_calc((f64)aim, (f64)speed, b, b.max_combo);
 	printf("\n%gpp for nomod SS\n", pp);
 
 	pp =  pp_calc(aim, speed, b, b.max_combo, mods::hd);
 	printf("\n%gpp for hidden SS\n", pp);
-	b.apply_mods(mods::hr);
+
+	b.apply_mods(mods::dt | mods::hd);
 
 	stars = d_calc(b, &aim, &speed);
 	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
 
-	pp =  pp_calc(aim, speed, b, b.max_combo);
-	printf("\n%gpp for hard-rock SS\n", pp);
+	pp =  pp_calc(aim, speed, b, b.max_combo, mods::dt | mods::hd);
+	printf("\n%gpp for HDDT SS\n", pp);
 
 	return 0;
 }

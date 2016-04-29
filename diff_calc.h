@@ -3,4 +3,4 @@
 
 struct beatmap;
 
-f32 d_calc(beatmap& b, f32* aim, f32* speed);
+f64 d_calc(beatmap& b, f64* aim, f64* speed);

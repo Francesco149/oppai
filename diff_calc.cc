@@ -8,13 +8,13 @@
 // TODO: reduce code redudnancy and rename variables to shorter names
 
 namespace {
-	const f32 decay_base[] = { 0.3f, 0.15f };
-	const f32 almost_diameter = 90.f;
-	const f32 stream_spacing_treshold = 110.f;
-	const f32 single_spacing_treshold = 125.f;
-	const f32 spacing_weight_scaling[] = { 1400.f, 26.25f };
+	const f64 decay_base[] = { 0.3, 0.15 };
+	const f64 almost_diameter = 90;
+	const f64 stream_spacing_treshold = 110;
+	const f64 single_spacing_treshold = 125;
+	const f64 spacing_weight_scaling[] = { 1400, 26.25 };
 	const i64 lazy_slider_step = 10;
-	const f32 circlesize_buff_treshold = 30.f;
+	const f64 circlesize_buff_treshold = 30;
 
 	namespace diff {
 		const u8 speed = 0, 
@@ -24,21 +24,21 @@ namespace {
 	// diffcalc hit object
 	struct d_obj {
 		hit_object* ho;
-		f32 strains[2] = { 1.f, 1.f };
+		f64 strains[2] = { 1, 1 };
 		v2f norm_start_pos;
 		v2f norm_end_pos;
-		f32 lazy_slider_len_first = 0.f;
-		f32 lazy_slider_len_subseq = 0.f;
+		f64 lazy_slider_len_first = 0;
+		f64 lazy_slider_len_subseq = 0;
 
-		void init(hit_object* ho, f32 radius) {
+		void init(hit_object* ho, f64 radius) {
 			this->ho = ho;
 
-			f32 scaling_factor = (52.f / radius);
+			f64 scaling_factor = 52.0 / radius;
 
 			// cs buff (based on osuElements, not accurate)
 			if (radius < circlesize_buff_treshold) {
-				scaling_factor *= std::min(1.1f, 
-					1.f + (circlesize_buff_treshold - radius) * 0.02f);
+				scaling_factor *= std::min(1.1, 
+					1 + (circlesize_buff_treshold - radius) * 0.02);
 			}
 
 			norm_start_pos = ho->pos * scaling_factor;
@@ -49,20 +49,18 @@ namespace {
 				return;
 			}
 
-			f32 follow_circle_rad = radius * 3.f;
+			f64 follow_circle_rad = radius * 3;
 
 			auto& sl = ho->slider;
 			i64 segment_len = (ho->end_time - ho->time) / sl.repetitions;
-
 			i64 segment_end_time = ho->time + segment_len;
-
 			v2f cursor = ho->pos;
 
 			for (i64 t = ho->time + lazy_slider_step; t < segment_end_time; 
 					t+= lazy_slider_step) {
 				
 				v2f d = ho->at(t - ho->time) - cursor;
-				f32 dist = d.len();
+				f64 dist = d.len();
 
 				if (dist <= follow_circle_rad) {
 					continue;
@@ -75,6 +73,10 @@ namespace {
 			}
 
 			lazy_slider_len_first *= scaling_factor;
+			lazy_slider_len_first = 0.0;
+			// for some crazy reason the pp values match only if I entirely 
+			// remove slider lengths, otherwise I get too much pp
+			// TODO: ask tom about this, were slider length weights removed?
 
 			if (sl.repetitions % 2 == 1) {
 				norm_end_pos = cursor * scaling_factor;
@@ -91,7 +93,7 @@ namespace {
 					t+= lazy_slider_step) {
 				
 				v2f d = ho->at(t - ho->time) - cursor;
-				f32 dist = d.len();
+				f64 dist = d.len();
 
 				if (dist <= follow_circle_rad) {
 					continue;
@@ -104,6 +106,7 @@ namespace {
 			}
 
 			lazy_slider_len_subseq *= scaling_factor;
+			lazy_slider_len_subseq = 0.0; // see above
 
 			if (sl.repetitions % 2 == 1) {
 				norm_end_pos = cursor * scaling_factor;
@@ -116,10 +119,10 @@ namespace {
 		}
 
 		void calculate_strain(d_obj& prev, u8 diff_type) {
-			f32 res = 0.f;
+			f64 res = 0;
 			i64 time_elapsed = ho->time - prev.ho->time;
-			f32 decay = pow(decay_base[diff_type], time_elapsed / 1000.f);
-			f32 scaling = spacing_weight_scaling[diff_type];
+			f64 decay = pow(decay_base[diff_type], time_elapsed / 1000.0);
+			f64 scaling = spacing_weight_scaling[diff_type];
 
 			switch (ho->type) {
 				case obj::circle:
@@ -178,55 +181,55 @@ namespace {
 			strains[diff_type] = prev.strains[diff_type] * decay + res;
 		}
 
-		f32 spacing_weight(f32 distance, u8 diff_type) {
+		f64 spacing_weight(f64 distance, u8 diff_type) {
 			switch (diff_type) {
 				case diff::speed:
 					if (distance > single_spacing_treshold) {
-						return 2.5f;
+						return 2.5;
 					}
 					else if (distance > stream_spacing_treshold) {
-						return 1.6f + 0.9f *
+						return 1.6 + 0.9 *
 							(distance - stream_spacing_treshold) /
 							(single_spacing_treshold - stream_spacing_treshold);
 					}
 					else if (distance > almost_diameter) {
-						return 1.2f + 0.4f * (distance - almost_diameter)
+						return 1.2 + 0.4 * (distance - almost_diameter)
 							/ (stream_spacing_treshold - almost_diameter);
 					}
-					else if (distance > almost_diameter / 2.f) {
-						return 0.95f + 0.25f * 
-							(distance - (almost_diameter / 2.f)) /
-							(almost_diameter / 2.f);
+					else if (distance > almost_diameter / 2.0) {
+						return 0.95 + 0.25 * 
+							(distance - (almost_diameter / 2.0)) /
+							(almost_diameter / 2.0);
 					}
-					return 0.95f;
+					return 0.95;
 
 				case diff::aim:
-					return pow(distance, 0.99f);
+					return pow(distance, 0.99);
 
 				default:
-					return 0.f;
+					return 0.0;
 			}
 		}
 
-		f32 distance(d_obj& prev) {
+		f64 distance(d_obj& prev) {
 			return (norm_start_pos - prev.norm_end_pos).len();
 		}
 	};
 
-	const f32 star_scaling_factor = 0.0675f;
-	const f32 extreme_scaling_factor = 0.5f;
-	const f32 playfield_width = 512.f;
+	const f64 star_scaling_factor = 0.0675;
+	const f64 extreme_scaling_factor = 0.5;
+	const f64 playfield_width = 512;
 
 	const i64 strain_step = 400;
-	const f32 decay_weight = 0.9f;
+	const f64 decay_weight = 0.9;
 
 	d_obj objects[beatmap::max_objects];
 	size_t num_objects;
 
-	f32 calculate_difficulty(u8 type) {
-		std::vector<f32> highest_strains;
+	f64 calculate_difficulty(u8 type) {
+		std::vector<f64> highest_strains;
 		i64 interval_end = strain_step;
-		f32 max_strain = 0.f;
+		f64 max_strain = 0.0;
 
 		d_obj* prev = nullptr;
 		for (size_t i = 0; i < num_objects; i++) {
@@ -236,10 +239,10 @@ namespace {
 				highest_strains.push_back(max_strain);
 
 				if (!prev) {
-					max_strain = 0.f;
+					max_strain = 0.0;
 				} else {
-					f32 decay = pow(decay_base[type], 
-						(interval_end - prev->ho->time) / 1000.f);
+					f64 decay = pow(decay_base[type], 
+						(interval_end - prev->ho->time) / 1000.0);
 					max_strain = prev->strains[type] * decay;
 				}
 
@@ -250,13 +253,13 @@ namespace {
 			prev = &o;
 		}
 
-		f32 difficulty = 0;
-		f32 weight = 1.f;
+		f64 difficulty = 0;
+		f64 weight = 1.0;
 
 		std::sort(highest_strains.begin(), highest_strains.end(), 
-			std::greater<f32>());
+			std::greater<f64>());
 
-		for (const f32& strain : highest_strains) {
+		for (const f64& strain : highest_strains) {
 			difficulty += weight * strain;
 			weight *= decay_weight;
 		}
@@ -265,10 +268,10 @@ namespace {
 	}
 }
 
-f32 d_calc(beatmap& b, f32* aim, f32* speed) {
-	//f32 circle_radius = (playfield_width / 16.f) * (1.f - 0.7f *
+f64 d_calc(beatmap& b, f64* aim, f64* speed) {
+	//f64 circle_radius = (playfield_width / 16.f) * (1.f - 0.7f *
 	//		(b.cs - 5.f) / 5.f);
-	f32 circle_radius = 54.4f - b.cs * 4.48f;
+	f64 circle_radius = 54.4 - b.cs * 4.48;
 
 	num_objects = b.num_objects;
 	for (size_t i = 0; i < b.num_objects; i++) {
@@ -293,12 +296,13 @@ f32 d_calc(beatmap& b, f32* aim, f32* speed) {
 
 	*aim = sqrtf(*aim) * star_scaling_factor;
 	*speed = sqrtf(*speed) * star_scaling_factor;
-	f32 stars = *aim + *speed + std::abs(*speed - *aim) * extreme_scaling_factor;
+	f64 stars = *aim + *speed + 
+		std::abs(*speed - *aim) * extreme_scaling_factor;
 
 	// round to 2 decimal places
-	*aim = std::round(*aim * 100.f) / 100.f;
-	*speed = std::round(*speed * 100.f) / 100.f;
-	stars = std::round(stars * 100.f) / 100.f;
+	*aim = std::round(*aim * 100.0) / 100.0;
+	*speed = std::round(*speed * 100.0) / 100.0;
+	stars = std::round(stars * 100.0) / 100.0;
 
 	return stars;
 }
