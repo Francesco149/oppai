@@ -269,9 +269,8 @@ namespace {
 }
 
 f64 d_calc(beatmap& b, f64* aim, f64* speed) {
-	//f64 circle_radius = (playfield_width / 16.f) * (1.f - 0.7f *
-	//		(b.cs - 5.f) / 5.f);
-	f64 circle_radius = 54.4 - b.cs * 4.48;
+	f64 circle_radius = (playfield_width / 16.f) * (1.f - 0.7f *
+			(b.cs - 5.f) / 5.f);
 
 	num_objects = b.num_objects;
 	for (size_t i = 0; i < b.num_objects; i++) {

@@ -20,7 +20,11 @@ namespace mods {
 
 struct beatmap;
 
-f64 pp_calc(f64 aim, f64 speed, beatmap& b, u16 max_combo, 
+f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, 
+	u32 used_mods=mods::nomod, u16 combo = 0xFFFF, u16 misses = 0, 
+	u32 score_version = 1);
+
+f64 pp_calc(f64 aim, f64 speed, beatmap& b, 
 	u32 used_mods=mods::nomod, 
-	u16 combo=0xFFFF, u16 misses=0, u16 c300=0xFFFF, // 0xFFFF means SS
-	u16 c100=0, u16 c50=0, u32 score_version=1);
+	u16 combo = 0xFFFF, u16 misses = 0, u16 c300 = 0xFFFF, // 0xFFFF means SS
+	u16 c100 = 0, u16 c50 = 0, u32 score_version = 1);

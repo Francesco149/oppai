@@ -111,8 +111,6 @@ void beatmap::apply_mods(u32 mods) {
 	cs *= cs_multiplier;
 	cs = std::max(0.0, std::min(10.0, cs));
 
-	printf("\nafter mods: od%g ar%g cs%g\n", od, ar, cs);
-
 	if ((mods & mods::dt) == 0 && (mods & mods::ht) == 0) {
 		// not speed-modifying
 		return;
