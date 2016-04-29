@@ -26,14 +26,25 @@ namespace {
 }
 
 int main(int argc, char* argv[]) {
+	puts("o p p a i | v0.1.0");
+	puts("s     d n | ");
+	puts("u     v s | (looking for");
+	puts("!     a p | cool ascii");
+	puts("      n e | to put here)");
+	puts("      c c | ");
+	puts("      e t | ");
+	puts("      d o | ");
+	puts("        r |\n");
+
 	if (argc < 2) {
 		printf("Usage: %s /path/to/difficulty.osu [acc]%% +[mods] "
-				"[combo]x [misses]xmiss\n\n", *argv);
+				"[combo]x [misses]xm\n\n", *argv);
 		puts("acc: the accuracy in percent (example: 99.99%)");
-		puts("mods (optional): any combination of nomod, nf, ez, hd, hr, dt, ht"
+		puts("mods: any combination of nomod, nf, ez, hd, hr, dt, ht"
 				", nc, fl, so (example: +hddthr)");
 		puts("combo: the highest combo (example: 1337x)");
 		puts("misses: amount of misses (example: 1xmiss)");
+		puts("\narguments in [square brackets] are optional");
 		puts("(the order of the optional arguments does not matter)");
 
 		return 0;
@@ -88,7 +99,7 @@ int main(int argc, char* argv[]) {
 		// misses
 		u16 tmp_misses;
 		if (sscanf(a, "%hd%s", &tmp_misses, suff) == 2 && 
-				!strcmp(suff, "xmiss")) {
+				!strcmp(suff, "xm")) {
 			misses = tmp_misses;
 			continue;
 		}
