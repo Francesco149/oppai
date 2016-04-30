@@ -4,12 +4,12 @@
 #include <string.h>
 #include <algorithm>
 
+#if _DEBUG
+#include <stdio.h>
+#endif
+
 // ported from osu-web
 // TODO: clean up this math mess
-
-bool pt_in_circle(const v2f& pt, const v2f& center, f64 r) {
-	return (pt - center).len() <= r;
-}
 
 v2f pt_on_line(const v2f& p1, const v2f& p2, f64 t) {
 	t = std::min(1.0, std::max(0.0, t));
@@ -28,6 +28,9 @@ namespace {
 		f64 D = 2.0 * (p1.x * (p2.y - p3.y) + p2.x * 
 				     (p3.y - p1.y) + p3.x * (p1.y - p2.y));
 
+		// D can be zero, so we must prevent a division by zero!
+		D += 0.00001;
+
 		f64 Ux = ((p1.x * p1.x + p1.y * p1.y) * 
 			(p2.y - p3.y) + (p2.x * p2.x + p2.y * p2.y) * 
 			(p3.y - p1.y) + (p3.x * p3.x + p3.y * p3.y) * (p1.y - p2.y)) / D;
@@ -39,6 +42,11 @@ namespace {
   		v2f radius{Ux - p1.x, Uy - p1.y};
   		c->r = radius.len();
 		c->c = v2f{Ux, Uy};
+
+		#if _DEBUG
+		printf("D=%lf Ux=%lf Uy=%lf radius=%s r=%lf c=%s\n", 
+				D, Ux, Uy, radius.str(), c->r, c->c.str());
+		#endif
 	}
 
 	bool is_left(const v2f& a, const v2f& b, const v2f& c) {

@@ -14,9 +14,6 @@ v2f pt_on_line(const v2f& p1, const v2f& p2, f64 t);
 v2f pt_on_circular_arc(
 		const v2f& p1, const v2f& p2, const v2f& p3, f64 t, f64 len);
 
-// checks if pt is inside a circle at center with radius r
-bool pt_in_circle(const v2f& pt, const v2f& center, f64 r);
-
 struct curve {
 	static const size_t max_points = 0xFF;
 	size_t num_points = 0;
