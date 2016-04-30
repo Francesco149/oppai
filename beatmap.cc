@@ -420,7 +420,7 @@ found_objects:
 		i32 type_num;
 
 		// slider
-		if (sscanf(tok, "%lf,%lf,%lld,%d,%d,%c", 
+		if (sscanf(tok, "%lf,%lf,%" fi64 ",%d,%d,%c", 
 				   &ho.pos.x, &ho.pos.y, &ho.time, &useless, &useless, 
 				   &ho.slider.type) == 6 && 
 				ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
@@ -434,7 +434,7 @@ found_objects:
 		}
 
 		// circle, or spinner
-		else if (sscanf(tok, "%lf,%lf,%lld,%d,%d,%lld", 
+		else if (sscanf(tok, "%lf,%lf,%" fi64 ",%d,%d,%" fi64,
 				   &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless, 
 				   &ho.end_time) == 6) {
 
@@ -449,7 +449,7 @@ found_objects:
 		}
 
 		// old circle
-		else if (sscanf(tok, "%lf,%lf,%lld,%d,%d", 
+		else if (sscanf(tok, "%lf,%lf,%" fi64 ",%d,%d", 
 			&ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless) == 5) {
 
 			ho.type = obj::circle;

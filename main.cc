@@ -165,7 +165,7 @@ namespace {
 		printf("> %zd timing points\n", b.num_timing_points);
 		for (size_t i = 0; i < b.num_timing_points; i++) {
 			auto& tp = b.timing_points[i];
-			printf("%lld: ", tp.time);
+			printf("%" fi64 ": ", tp.time);
 			if (!tp.inherit) {
 				printf("%g bpm\n", 60000.0 / tp.ms_per_beat);
 			} else {
@@ -179,12 +179,13 @@ namespace {
 			auto& ho = b.objects[i];
 			switch (ho.type) {
 				case obj::circle:
-					printf("%lld: Circle (%g, %g)\n", 
+					printf("%" fi64 ": Circle (%g, %g)\n", 
 						ho.time, ho.pos.x, ho.pos.y);
 					break;
 
 				case obj::spinner:
-					printf("%lld-%lld: Spinner\n", ho.time, ho.end_time);
+					printf("%" fi64 "-%" fi64 ": Spinner\n", 
+							ho.time, ho.end_time);
 					break;
 
 				case obj::slider:
@@ -192,7 +193,7 @@ namespace {
 					auto& sl = ho.slider;
 
 					printf(
-						"%lld-%lld: Slider "
+						"%" fi64 "-%" fi64 ": Slider "
 						"[Type %c, Length %g, %hd Repetitions] ", 
 						ho.time, ho.end_time, sl.type, 
 						sl.length, sl.repetitions);

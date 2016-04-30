@@ -10,10 +10,10 @@
 TARGET = oppai
 
 CXX = g++
-CXXFLAGS = -std=c++14 -Wall -Werror #-DSLIDERFIX #-DSHOW_BEATMAP -DSLIDERTEST
+CXXFLAGS = -std=c++14 -Wall -Werror -DSHOW_BEATMAP -DSLIDERTEST #-DSLIDERFIX
 
 LINKER = g++ -o 
-LFLAGS = #-lGL -lglut
+LFLAGS = -lGL -lglut
 
 SRCDIR = .
 OBJDIR = obj

@@ -97,7 +97,7 @@ void p_show(hit_object& ho) {
 		v2f p = ho.at(ms);
 
 		if (ms % 50 == 0 || ms == duration) {
-			printf("%lldms %s\n", ms, p.str());
+			printf("%" fi64 "ms %s\n", ms, p.str());
 		}
 
 		p_put_px(p, 255, 0, 0);
