@@ -4,10 +4,12 @@
 #include "beatmap.h"
 #include "curves.h"
 
-void precompute_slider(slider_data& sl, std::vector<v2f>& positions, 
-		f32 px_per_ms) {
+#include <algorithm>
 
-	f32 total_distance = 0;
+void precompute_slider(slider_data& sl, std::vector<v2f>& positions, 
+		f64 px_per_ms) {
+
+	f64 total_distance = 0;
 
 	for (size_t k = 1; k < positions.size(); k++) {
 		total_distance += (positions[k] - positions[k - 1]).len();
@@ -91,13 +93,13 @@ segcount_bezier:
 }
 
 v2f slider_at(hit_object& ho, i64 ms) {
-	auto duration = ho.end_time - ho.time;
+	i64 duration = ho.end_time - ho.time;
 	auto &sl = ho.slider;
 
 	ms = std::max((i64)0, std::min(ms, duration));
 	f32 t = (f32)ms / duration;
 
-	auto one_repetition = duration / sl.repetitions;
+	i64 one_repetition = duration / sl.repetitions;
 	bool invert = false;
 	while (ms > (i64)one_repetition) {
 		ms -= one_repetition;
@@ -149,13 +151,13 @@ v2f slider_at(hit_object& ho, i64 ms) {
 		case 'C':
 do_bezier:
 			if (sl.pos_at_ms.size()) {
-				return sl.pos_at_ms[ms];
+				return sl.pos_at_ms[(size_t)ms];
 			}
 
 			// pre-calc and cache all positions in millisecond granularity
 			// this is lazy and uses a lot of memory but #yolo
 			
-			f32 px_per_ms = (sl.length * sl.repetitions) / (f32)duration;
+			f64 px_per_ms = (sl.length * sl.repetitions) / (f64)duration;
 			std::vector<v2f> positions;
 
 			if (sl.type == 'C') {
@@ -214,7 +216,7 @@ do_bezier:
 				sl.pos_at_ms.push_back(sl.pos_at_ms.back());
 			}
 
-			return sl.pos_at_ms[ms];
+			return sl.pos_at_ms[(size_t)ms];
 		}
 
 		default:

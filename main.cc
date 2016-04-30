@@ -1,6 +1,12 @@
+#include "common.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <algorithm>
+
+#if NEEDS_TO_INSTALL_GENTOO
+#include <ctype.h> // tolower/toupper
+#endif
 
 #include "utils.h"
 #include "beatmap.h"
@@ -23,10 +29,11 @@ namespace {
 		mods::nomod, mods::nf, mods::ez, mods::hd, mods::hr, mods::dt, mods::ht,
 		mods::nc, mods::fl, mods::so
 	};
+	const size_t num_mods = sizeof(mod_masks) / sizeof(mod_masks[0]);
 }
 
 int main(int argc, char* argv[]) {
-	puts("o p p a i | v0.1.0");
+	puts("o p p a i | v0.1.1");
 	puts("s     d n | ");
 	puts("u     v s | (looking for");
 	puts("!     a p | cool ascii");
@@ -72,21 +79,20 @@ int main(int argc, char* argv[]) {
 		}
 
 		// mods
-		for (size_t j = 0; j < sizeof(mod_masks) / sizeof(mod_masks[0]); j++) {
+		char* tmp_mods_str = nullptr;
+		for (size_t j = 0; j < num_mods; j++) {
 			if (strstr(a, mod_strs[j])) {
-				mods_str = a;
+				tmp_mods_str = a;
 				mods |= mod_masks[j];
 			}
 		}
 
-		if (mods_str == a) {
-			if (*mods_str == '+') {
-				std::transform(mods_str, mods_str + strlen(mods_str), mods_str, 
-						toupper);
-				continue;
-			} else {
-				mods_str = nullptr;
-			}
+		if (tmp_mods_str == a && *tmp_mods_str == '+') {
+			// at least one mod was found in the parameter and the prefix matches
+			mods_str = tmp_mods_str;
+			std::transform(mods_str, mods_str + strlen(mods_str), mods_str, 
+					toupper);
+			continue;
 		}
 
 		// combo
@@ -156,10 +162,10 @@ namespace {
 			b.hp, b.cs, b.od, b.ar, b.sv
 		);
 
-		printf("> %ld timing points\n", b.num_timing_points);
+		printf("> %zd timing points\n", b.num_timing_points);
 		for (size_t i = 0; i < b.num_timing_points; i++) {
 			auto& tp = b.timing_points[i];
-			printf("%ld: ", tp.time);
+			printf("%lld: ", tp.time);
 			if (!tp.inherit) {
 				printf("%g bpm\n", 60000.0 / tp.ms_per_beat);
 			} else {
@@ -167,18 +173,18 @@ namespace {
 			}
 		}
 
-		printf("\n> %ld hit objects\n", b.num_objects);
+		printf("\n> %zd hit objects\n", b.num_objects);
 		for (size_t i = 0; i < b.num_objects; i++) {
 
 			auto& ho = b.objects[i];
 			switch (ho.type) {
 				case obj::circle:
-					printf("%ld: Circle (%g, %g)\n", 
+					printf("%lld: Circle (%g, %g)\n", 
 						ho.time, ho.pos.x, ho.pos.y);
 					break;
 
 				case obj::spinner:
-					printf("%ld-%ld: Spinner\n", ho.time, ho.end_time);
+					printf("%lld-%lld: Spinner\n", ho.time, ho.end_time);
 					break;
 
 				case obj::slider:
@@ -186,8 +192,8 @@ namespace {
 					auto& sl = ho.slider;
 
 					printf(
-						"%ld-%ld: Slider "
-						"[Type %c, Length %g, %ld Repetitions] ", 
+						"%lld-%lld: Slider "
+						"[Type %c, Length %g, %hd Repetitions] ", 
 						ho.time, ho.end_time, sl.type, 
 						sl.length, sl.repetitions);
 

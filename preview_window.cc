@@ -1,15 +1,19 @@
 #ifdef SLIDERTEST
+#include "preview_window.h"
+#include "common.h"
 
-#ifdef _WIN32
-#define NEEDS_TO_INSTALL_GENTOO
+#if NEEDS_TO_INSTALL_GENTOO
 #include <Windows.h>
+#define FREEGLUT_STATIC
+#else
+#include <unistd.h>
 #endif
+
 #include <GL/gl.h>
 #include <GL/freeglut.h>
 
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "preview_window.h"
 #include "beatmap.h"
@@ -28,7 +32,7 @@ namespace {
 	}
 
 	bool showing_slider;
-	void slider_keyboard(u8 key, i32 x, i32 y) {
+	void slider_keyboard(u8, i32, i32) {
 		showing_slider = false;
 	}
 
@@ -59,9 +63,9 @@ namespace {
 	}
 
 	void shigeZZZ(u64 ms) {
-#ifdef NEEDS_TO_INSTALL_GENTOO
+#if NEEDS_TO_INSTALL_GENTOO
 		puts("INSTALL GENTOO");
-		Sleep(ms);
+		Sleep((DWORD)ms);
 #else
 		usleep(ms * 1000);
 #endif
@@ -93,7 +97,7 @@ void p_show(hit_object& ho) {
 		v2f p = ho.at(ms);
 
 		if (ms % 50 == 0 || ms == duration) {
-			printf("%ldms %s\n", ms, p.str());
+			printf("%lldms %s\n", ms, p.str());
 		}
 
 		p_put_px(p, 255, 0, 0);

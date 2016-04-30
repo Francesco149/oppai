@@ -1,8 +1,8 @@
 #include "curves.h"
 
 #include <math.h>
-#include <algorithm>
 #include <string.h>
+#include <algorithm>
 
 // ported from osu-web
 // TODO: clean up this math mess

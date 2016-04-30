@@ -1,8 +1,15 @@
 #include "diff_calc.h"
+#include "common.h"
 
-#include "beatmap.h"
 #include <math.h>
 #include <algorithm>
+
+#if NEEDS_TO_INSTALL_GENTOO
+#include <functional> // std::greater
+#endif
+
+#include "utils.h"
+#include "beatmap.h"
 
 // based on tom94's osu!tp aimod
 // TODO: reduce code redudnancy and rename variables to shorter names
@@ -30,8 +37,8 @@ namespace {
 		f64 lazy_slider_len_first = 0;
 		f64 lazy_slider_len_subseq = 0;
 
-		void init(hit_object* ho, f64 radius) {
-			this->ho = ho;
+		void init(hit_object* base_object, f64 radius) {
+			this->ho = base_object;
 
 			f64 scaling_factor = 52.0 / radius;
 

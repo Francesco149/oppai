@@ -1,4 +1,5 @@
 #include "beatmap.h"
+#include "common.h"
 
 #include <string.h>
 #include <algorithm>
@@ -365,20 +366,20 @@ found_timing:
 		auto& tp = b.timing_points[b.num_timing_points];
 
 		u8 not_inherited = 0;
-		f64 time_tmp;
+		f64 time_tmp; // I'm rounding times to milliseconds. not sure if making them floats will matter for diff calc.
 		if (sscanf(tok, "%lf,%lf,%d,%d,%d,%d,%hhd", 
 				   &time_tmp, &tp.ms_per_beat, 
 				   &useless, &useless, &useless, &useless, 
 				   &not_inherited) == 7) {
 
-			tp.time = time_tmp;
+			tp.time = (i64)time_tmp;
 			tp.inherit = not_inherited == 0;
 			goto parsed_timing_pt;
 		}
 
 		// older formats might not have inherit and the other info
 		if (sscanf(tok, "%lf,%lf", &time_tmp, &tp.ms_per_beat) != 2) {
-			tp.time = time_tmp;
+			tp.time = (i64)time_tmp;
 			die("Invalid format for timing point");
 		}
 
@@ -419,7 +420,7 @@ found_objects:
 		i32 type_num;
 
 		// slider
-		if (sscanf(tok, "%lf,%lf,%ld,%d,%d,%c", 
+		if (sscanf(tok, "%lf,%lf,%lld,%d,%d,%c", 
 				   &ho.pos.x, &ho.pos.y, &ho.time, &useless, &useless, 
 				   &ho.slider.type) == 6 && 
 				ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
@@ -433,7 +434,7 @@ found_objects:
 		}
 
 		// circle, or spinner
-		else if (sscanf(tok, "%lf,%lf,%ld,%d,%d,%ld", 
+		else if (sscanf(tok, "%lf,%lf,%lld,%d,%d,%lld", 
 				   &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless, 
 				   &ho.end_time) == 6) {
 
@@ -448,7 +449,7 @@ found_objects:
 		}
 
 		// old circle
-		else if (sscanf(tok, "%lf,%lf,%ld,%d,%d", 
+		else if (sscanf(tok, "%lf,%lf,%lld,%d,%d", 
 			&ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless) == 5) {
 
 			ho.type = obj::circle;
@@ -519,7 +520,7 @@ found_objects:
 			// lastcurveX:lastcurveY,repeat,pixelLength,
 			// 		edgeHitsound,edgeAddition,addition
 			if (sscanf(slider_tok, 
-				      "%lf:%lf,%ld,%lf", 
+				      "%lf:%lf,%hd,%lf", 
 					  &pt.x, &pt.y, &sl.repetitions, &sl.length) == 4) {
 
 				sl.num_points++;
@@ -548,13 +549,14 @@ found_objects:
 		// calculate slider end time
 		f64 px_per_beat = b.sv * 100.0 * sv_multiplier;
 		f64 num_beats = (sl.length * sl.repetitions) / px_per_beat;
-		f64 duration = std::ceil(num_beats * parent->ms_per_beat);
+		i64 duration = (i64)std::ceil(num_beats * parent->ms_per_beat);
 		ho.end_time = ho.time + duration;
 
 		// sliders get 2 + ticks combo (head, tail and ticks)
 		// each repetition adds an extra combo and an extra set of ticks
-		// the -.01 is there to prevent ceil from ceiling 1.0 to 2.0 randomly
-		u16 ticks = std::ceil(
+		// the -.01 is there to prevent ceil from ceiling whole values
+		// like 1.0 to 2.0 randomly
+		u16 ticks = (u16)std::ceil(
 				(num_beats - 0.01) / sl.repetitions * b.tick_rate);
 		ticks--;
 		ticks *= sl.repetitions;

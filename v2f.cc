@@ -1,12 +1,11 @@
 #include "v2f.h"
 
 #include <stdio.h>
-#include <math.h>
+#include <cmath>
 
 const char* v2f::str() {
-	static f64 old_x, old_y;
-
-	if (x != old_x || y != old_y || !buf[0]) {
+	static const f64 epsilon = 0.00001;
+	if (std::abs(x - old_x) > epsilon || std::abs(y - old_y) > epsilon || !buf[0]) {
 		sprintf(buf, "(%g %g)", x, y);
 	}
 

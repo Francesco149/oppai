@@ -19,7 +19,7 @@ struct slider_data {
 	
 	// NOTE: pos_at_ms is initialized by calling .at on hit_object at least once
 
-	u64 repetitions = 0;
+	u16 repetitions = 0;
 	f64 length = 0;
 };
 

@@ -33,15 +33,18 @@ f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, u32 used_mods,
 	u16 combo, u16 misses, u32 score_version) {
 
 	acc_percent = std::max(0.0, std::min(100.0, acc_percent));
-	u16 c300 = b.num_objects, c100 = 0;
+	u16 c300 = (u16)b.num_objects - misses, c100 = 0;
 
+	// epsilon is half of the smallest accuracy step that you can get by changing 100 count
+	// the given accuracy is rounded to the closest possible acc that you can actually get on the map
 	f64 epsilon = acc_calc(c300, 0, 0, misses) - 
 		acc_calc(c300 - 1, 1, 0, misses);
+
 	epsilon *= 50.0;
 
 	f64 closest_acc;
 	while ((closest_acc = std::abs(acc_calc(c300, c100, 0, misses) * 100.0) 
-				- acc_percent) > epsilon && closest_acc < acc_percent) {
+				- acc_percent) >= epsilon && closest_acc < acc_percent) {
 		
 		c300--;
 		c100++;
@@ -61,7 +64,7 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 	u16 circles = b.circle_count;
 
 	if (c300 == 0xFFFF) {
-		c300 = b.num_objects;
+		c300 = (u16)b.num_objects - c100 - c50 - misses;
 	}
 
 	if (combo == 0xFFFF) {
@@ -70,7 +73,13 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 
 	// input validation
 	if (!b.max_combo) {
-		die("max combo cannot be zero!");
+		die("Max combo cannot be zero");
+	}
+
+	u16 total_hits = c300 + c100 + c50 + misses;
+	if (total_hits != b.num_objects) {
+		printf("warning: total hits(%hd) don't match hit-object count (%zd)\n",
+			total_hits, b.num_objects);
 	}
 
 	// accuracy (not in percentage, ranges between 0 and 1)
@@ -81,7 +90,6 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 	f64 aim_value = base_strain(aim);
 
 	// length bonus (reused in speed pp)
-	u16 total_hits = c300 + c100 + c50 + misses;
 	f64 total_hits_over_2k = (f64)total_hits / 2000.0;
 	f64 length_bonus = 0.95 + 
 		0.4 * std::min(1.0, total_hits_over_2k) +

@@ -3,6 +3,10 @@
 
 struct v2f {
 	f64 x = 0, y = 0;
+
+	// these are used purely for formatting with str() 
+	// without having to pass copies of the string around
+	f64 old_x, old_y;
 	char buf[42] = {0};
 
 	v2f() {}
@@ -15,7 +19,7 @@ struct v2f {
 
 	const char* str();
 	f64 len() const;
-	v2f& norm();
+	v2f& norm/*ies*/();
 
 #define do_op(o) \
 	inline void operator o##= (const v2f& v) { x o##= v.x; y o##= v.y; } 	   \
