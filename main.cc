@@ -33,7 +33,7 @@ namespace {
 }
 
 int main(int argc, char* argv[]) {
-	puts("o p p a i | v0.1.3");
+	puts("o p p a i | v0.1.4");
 	puts("s     d n | ");
 	puts("u     v s | (looking for");
 	puts("!     a p | cool ascii");
@@ -45,12 +45,13 @@ int main(int argc, char* argv[]) {
 
 	if (argc < 2) {
 		printf("Usage: %s /path/to/difficulty.osu [acc]%% +[mods] "
-				"[combo]x [misses]xm\n\n", *argv);
+				"[combo]x [misses]m scorev[scoring_version]\n\n", *argv);
 		puts("acc: the accuracy in percent (example: 99.99%)");
 		puts("mods: any combination of nomod, nf, ez, hd, hr, dt, ht"
 				", nc, fl, so (example: +hddthr)");
 		puts("combo: the highest combo (example: 1337x)");
-		puts("misses: amount of misses (example: 1xmiss)");
+		puts("misses: amount of misses (example: 1m)");
+		puts("scoring_version: can only be 1 or 2 (example: scorev2)");
 		puts("\narguments in [square brackets] are optional");
 		puts("(the order of the optional arguments does not matter)");
 
@@ -64,6 +65,7 @@ int main(int argc, char* argv[]) {
 	u32 mods = mods::nomod;
 	u16 combo = b.max_combo;
 	u16 misses = 0;
+	u32 scoring = 1;
 
 	dbgputs("\nparsing arguments");
 	for (int i = 2; i < argc; i++) {
@@ -106,8 +108,16 @@ int main(int argc, char* argv[]) {
 		// misses
 		u16 tmp_misses;
 		if (sscanf(a, "%hd%s", &tmp_misses, suff) == 2 && 
-				!strcmp(suff, "xm")) {
+				(!strcmp(suff, "xm") || !strcmp(suff, "xmiss") ||
+				 !strcmp(suff, "m"))) {
 			misses = tmp_misses;
+			continue;
+		}
+
+		// scorev1 / scorev2
+		u32 tmp_scoring;
+		if (sscanf(a, "scorev%" fu32, &tmp_scoring) == 1) {
+			scoring = tmp_scoring;
 			continue;
 		}
 
@@ -130,13 +140,16 @@ int main(int argc, char* argv[]) {
 	b.apply_mods(mods);
 	printf("od%g ar%g cs%g\n", b.od, b.ar, b.cs);
 	printf("%hd/%hd combo\n", combo, b.max_combo);
+	printf("%hd circles, %hd sliders %hd spinners\n", 
+			b.num_circles, b.num_sliders, b.num_spinners);
 	printf("%hdxmiss\n", misses);
+	printf("scorev%" fu32, scoring);
 
 	f64 aim, speed;
 	f64 stars = d_calc(b, &aim, &speed);
 	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
 
-	f64 pp = pp_calc_acc(aim, speed, b, acc, mods, combo, misses);
+	f64 pp = pp_calc_acc(aim, speed, b, acc, mods, combo, misses, scoring);
 	printf("\n%gpp\n", pp);
 
 	return 0;

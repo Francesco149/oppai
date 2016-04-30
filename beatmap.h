@@ -71,8 +71,10 @@ struct beatmap {
 	f64 sv = 1337.f;
 	f64 tick_rate = 1.f;
 
-	u16 circle_count = 0;
-	u16 slider_count = 0;
+	u16 num_circles = 0;
+	u16 num_sliders = 0;
+	u16 num_spinners = 0;
+
 	u16 max_combo = 0;
 
 	static const size_t max_timing_points = 0xFFFF;

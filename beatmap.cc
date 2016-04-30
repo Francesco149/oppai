@@ -462,16 +462,17 @@ found_objects:
 		switch (ho.type) {
 			case obj::circle:
 				dbgputs("it's a circle!");
-				b.circle_count++;
+				b.num_circles++;
 				break;
 
 			case obj::slider:
 				dbgputs("it's a slider!");
-				b.slider_count++;
+				b.num_sliders++;
 				break;
 
 			case obj::spinner:
 				dbgputs("it's a spinner!");
+				b.num_spinners++;
 				break;
 
 			case obj::invalid:

@@ -35,8 +35,9 @@ f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, u32 used_mods,
 	acc_percent = std::max(0.0, std::min(100.0, acc_percent));
 	u16 c300 = (u16)b.num_objects - misses, c100 = 0;
 
-	// epsilon is half of the smallest accuracy step that you can get by changing 100 count
-	// the given accuracy is rounded to the closest possible acc that you can actually get on the map
+	// epsilon is half of the smallest accuracy step that you can get by 
+	// changing 100 count the given accuracy is rounded to the closest possible
+	// acc that you can actually get on the map
 	f64 epsilon = acc_calc(c300, 0, 0, misses) - 
 		acc_calc(c300 - 1, 1, 0, misses);
 
@@ -61,7 +62,7 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 
 	f64 od = b.od;
 	f64 ar = b.ar;
-	u16 circles = b.circle_count;
+	u16 circles = b.num_circles;
 
 	if (c300 == 0xFFFF) {
 		c300 = (u16)b.num_objects - c100 - c50 - misses;
@@ -80,6 +81,10 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 	if (total_hits != b.num_objects) {
 		printf("warning: total hits(%hd) don't match hit-object count (%zd)\n",
 			total_hits, b.num_objects);
+	}
+
+	if (score_version != 1 && score_version != 2) {
+		die("this score version does not exist or isn't supported");
 	}
 
 	// accuracy (not in percentage, ranges between 0 and 1)
