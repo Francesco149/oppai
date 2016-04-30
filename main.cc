@@ -33,7 +33,7 @@ namespace {
 }
 
 int main(int argc, char* argv[]) {
-	puts("o p p a i | v0.1.2");
+	puts("o p p a i | v0.1.3");
 	puts("s     d n | ");
 	puts("u     v s | (looking for");
 	puts("!     a p | cool ascii");
@@ -65,6 +65,7 @@ int main(int argc, char* argv[]) {
 	u16 combo = b.max_combo;
 	u16 misses = 0;
 
+	dbgputs("\nparsing arguments");
 	for (int i = 2; i < argc; i++) {
 		char suff[64] = {0};
 		auto a = argv[i];
@@ -198,7 +199,7 @@ namespace {
 						ho.time, ho.end_time, sl.type, 
 						sl.length, sl.repetitions);
 
-					for (size_t j = 0; j < sl.num_points; j++) {
+					for (size_t j = 0; j < sl.points.size(); j++) {
 						auto& pt = sl.points[j];
 						printf("(%g, %g) ", pt.x, pt.y);
 					}

@@ -1,4 +1,5 @@
 #include "curves.h"
+#include "common.h"
 
 #include <math.h>
 #include <string.h>
@@ -43,10 +44,8 @@ namespace {
   		c->r = radius.len();
 		c->c = v2f{Ux, Uy};
 
-		#if _DEBUG
-		printf("D=%lf Ux=%lf Uy=%lf radius=%s r=%lf c=%s\n", 
+		dbgprintf("D=%lf Ux=%lf Uy=%lf radius=%s r=%lf c=%s\n", 
 				D, Ux, Uy, radius.str(), c->r, c->c.str());
-		#endif
 	}
 
 	bool is_left(const v2f& a, const v2f& b, const v2f& c) {

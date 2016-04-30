@@ -20,78 +20,6 @@ void precompute_slider(slider_data& sl, std::vector<v2f>& positions,
 	}
 }
 
-// TODO: reduce code redundancy
-
-i64 slider_segment_count(hit_object& ho) {
-	auto& sl = ho.slider;
-	switch (sl.type) {
-		case 'L':
-			if (sl.num_points > 2) {
-				// too lazy to implement it using lines, just double each 
-				// point and make it a bezier
-				
-				v2f tmp[0xFF];
-				for (size_t i = 0; i < sl.num_points; i++) {
-					tmp[i] = sl.points[i];
-				}
-
-				sl.num_points *= 2;
-				for (size_t i = 0; i < sl.num_points; i++) {
-					sl.points[i] = tmp[i / 2];
-				}
-
-				sl.num_points--;
-				sl.type = 'B';
-
-				goto segcount_bezier;
-			}
-		case 'P':
-		case 'C': // TODO: check if catmull and pass-through sliders count as 
-				  //       a single segment
-			return sl.repetitions;
-
-		case 'B':
-		{
-			if (sl.num_points < 2) {
-				die("Found bezier slider with less than 2 points");
-			}
-
-segcount_bezier:
-			i64 res = 0;
-			for (size_t j = 0; j < sl.num_points; j++) {
-				if (j == 0) {
-					continue;
-				}
-
-				bool last = j == sl.num_points - 1;
-
-				if ((sl.points[j] - sl.points[j-1]).len() 
-						> 0.0001f && !last) {
-					continue;
-				}
-
-				if (j == 1 && !last) {
-					continue;
-				}
-
-				if (last) {
-					j++;
-				}
-
-				res++;
-			}
-
-			return res * sl.repetitions;
-		}
-
-		default:
-			die("Unsupported slider type");
-	}
-
-	die("how did you get here");
-	return 0;
-}
-
 v2f slider_at(hit_object& ho, i64 ms) {
 	i64 duration = ho.end_time - ho.time;
 	auto &sl = ho.slider;
@@ -111,24 +39,21 @@ v2f slider_at(hit_object& ho, i64 ms) {
 
 	switch (sl.type) {
 		case 'L':
-			if (sl.num_points < 2) {
+			if (sl.points.size() < 2) {
 				die("Found linear slider with invalid point count");
 			}
-			if (sl.num_points > 2) {
+			if (sl.points.size() > 2) {
 				// too lazy to implement it using lines, just double each 
 				// point and make it a bezier
-				
-				v2f tmp[0xFF];
-				for (size_t i = 0; i < sl.num_points; i++) {
-					tmp[i] = sl.points[i];
+
+				std::vector<v2f> tmp = sl.points;
+
+				sl.points.clear();
+				for (size_t i = 0; i < tmp.size() * 2; i++) {
+					sl.points.push_back(tmp[i / 2]);
 				}
 
-				sl.num_points *= 2;
-				for (size_t i = 0; i < sl.num_points; i++) {
-					sl.points[i] = tmp[i / 2];
-				}
-
-				sl.num_points--;
+				sl.points.pop_back();
 				sl.type = 'B';
 
 				goto do_bezier;
@@ -136,7 +61,7 @@ v2f slider_at(hit_object& ho, i64 ms) {
 			return pt_on_line(sl.points[0], sl.points[1], t);
 
 		case 'P':
-			if (sl.num_points != 3) {
+			if (sl.points.size() != 3) {
 				die("Found pass-through slider with invalid point count");
 			}
 			return pt_on_circular_arc(
@@ -144,7 +69,7 @@ v2f slider_at(hit_object& ho, i64 ms) {
 
 		case 'B':
 		{
-			if (sl.num_points < 2) {
+			if (sl.points.size() < 2) {
 				die("Found bezier slider with less than 2 points");
 			}
 
@@ -162,7 +87,7 @@ do_bezier:
 
 			if (sl.type == 'C') {
 				catmull cat;
-				cat.init(sl.points, sl.num_points);
+				cat.init(&sl.points[0], sl.points.size());
 				cat.compute(&positions);
 				precompute_slider(sl, positions, px_per_ms);
 				positions.clear();
@@ -172,12 +97,12 @@ do_bezier:
 				bezier bez;
 				size_t last_segment = 0;
 
-				for (size_t j = 0; j < sl.num_points; j++) {
+				for (size_t j = 0; j < sl.points.size(); j++) {
 					if (j == 0) {
 						continue;
 					}
 
-					bool last = j == sl.num_points - 1;
+					bool last = j == sl.points.size() - 1;
 
 					if ((sl.points[j] - sl.points[j-1]).len() 
 							> 0.0001f && !last) {

@@ -276,10 +276,15 @@ namespace {
 }
 
 f64 d_calc(beatmap& b, f64* aim, f64* speed) {
+	dbgputs("\ndiff calc");
+
 	f64 circle_radius = (playfield_width / 16.f) * (1.f - 0.7f *
 			(b.cs - 5.f) / 5.f);
 
+	dbgprintf("circle radius: %g\n", circle_radius);
+
 	num_objects = b.num_objects;
+	dbgputs("initializing objects");
 	for (size_t i = 0; i < b.num_objects; i++) {
 		objects[i].init(&b.objects[i], circle_radius);
 	}
@@ -288,12 +293,12 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed) {
 	for (size_t i = 1; i < b.num_objects; i++) {
 		auto& o = objects[i];
 		o.calculate_strains(*prev);
-		/*printf("%ld %d %g %g %g %g %s %s %s %s\n", 
+		dbgprintf("%" fi64 ": type %d, strains %g %g, slider lens %g %g, "
+				"norm pos %s-%s, pos %s-%s\n", 
 				o.ho->time, (int)o.ho->type, o.strains[0], o.strains[1], 
 				o.lazy_slider_len_first, o.lazy_slider_len_subseq, 
 				o.norm_start_pos.str(), o.norm_end_pos.str(), o.ho->pos.str(), 
-				o.ho->at(o.ho->end_time - o.ho->time).str());*/
-		//getchar();
+				o.ho->at(o.ho->end_time - o.ho->time).str());
 		prev = &o;
 	}
 

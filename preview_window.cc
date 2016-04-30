@@ -104,7 +104,7 @@ void p_show(hit_object& ho) {
 	}
 
 	// draw slider points
-	for (size_t j = 0; j < sl.num_points; j++) {
+	for (size_t j = 0; j < sl.points.size(); j++) {
 		p_put_px(sl.points[j], 0, 255, 0);
 	}
 

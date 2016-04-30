@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <algorithm>
+#include <string>
 
 #include "utils.h"
 #include "slider_calc.h"
@@ -136,15 +137,6 @@ void beatmap::apply_mods(u32 mods) {
 	}
 }
 
-i64 hit_object::num_segments() {
-	if (type != obj::slider) {
-		//puts("Warning: tried to call .num_segments on a non-slider object");
-		return 1;
-	}
-
-	return slider_segment_count(*this);
-}
-
 v2f hit_object::at(i64 ms) {
 	if (type != obj::slider) {
 		//puts("Warning: tried to call .at on a non-slider object");
@@ -166,6 +158,7 @@ void beatmap::parse(const char* osu_file, beatmap& b) {
 			"fuck who can't parse files the proper way");
 	}
 
+	dbgprintf("%zd bytes\n", cb);
 	fclose(f);
 
 	buf[cb] = 0;
@@ -462,19 +455,23 @@ found_objects:
 		}
 
 		b.num_objects++;
+		dbgprintf("\n\nobject %zd\n", b.num_objects);
 
 		// increase max combo and circle/slider count
 		b.max_combo++; // slider ticks are calculated later
 		switch (ho.type) {
 			case obj::circle:
+				dbgputs("it's a circle!");
 				b.circle_count++;
 				break;
 
 			case obj::slider:
+				dbgputs("it's a slider!");
 				b.slider_count++;
 				break;
 
 			case obj::spinner:
+				dbgputs("it's a spinner!");
 				break;
 
 			case obj::invalid:
@@ -482,12 +479,14 @@ found_objects:
 		}
 
 		// slider points are separated by |
-		if (!strstr(tok, "|")) {	
+		if (!strstr(tok, "|")) {
 			
 			// expected slider but no points found
 			if (ho.type == obj::slider) {
 				die("Slider is missing points");
 			}
+
+			dbgputs("no slider points, we're done here");
 
 			continue;
 		}
@@ -501,22 +500,20 @@ found_objects:
 
 		// gotta make a copy of the line to tokenize sliders without affecting
 		// the current line-by-line tokenization
-		char line[2048];
-		strcpy(line, tok);
+		std::string sline{tok};
+		char* line = &sline[0];
 
 		char* saveptr = nullptr;
 		char* slider_tok = strtok_r(line, "|", &saveptr);
 		slider_tok = strtok_r(nullptr, "|", &saveptr); // skip first token
 
-		sl.points[sl.num_points++] = ho.pos;
+		// TODO: prevent useless copying here and in other vector usages
+		sl.points.push_back(ho.pos);
+		dbgputs("first slider point");
 
 		for (; slider_tok; slider_tok = strtok_r(nullptr, "|", &saveptr)) {
-
-			if (sl.num_points >= slider_data::max_points) {
-				die("Too many slider points for the internal buffer");
-			}
-
-			auto& pt = sl.points[sl.num_points];
+			sl.points.push_back(v2f{});
+			auto& pt = sl.points[sl.points.size() - 1];
 
 			// lastcurveX:lastcurveY,repeat,pixelLength,
 			// 		edgeHitsound,edgeAddition,addition
@@ -524,7 +521,7 @@ found_objects:
 				      "%lf:%lf,%hd,%lf", 
 					  &pt.x, &pt.y, &sl.repetitions, &sl.length) == 4) {
 
-				sl.num_points++;
+				dbgputs("last slider point");
 				// end of point list
 				break;
 			}
@@ -534,7 +531,7 @@ found_objects:
 				die("Invalid slider found");
 			}
 
-			sl.num_points++;
+			dbgprintf("slider point %zd\n", sl.points.size());
 		}
 
 		// find which timing section the slider belongs to
@@ -566,4 +563,6 @@ found_objects:
 
 		b.max_combo += ticks - 1; // -1 because we already did ++ earlier
 	}
+
+	dbgputs("\nparsing done");
 }

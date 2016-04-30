@@ -11,9 +11,7 @@
 struct slider_data {
 	char type;
 
-	static const size_t max_points = 0xFF;
-	size_t num_points = 0;
-	v2f points[max_points];
+	std::vector<v2f> points;
 	std::vector<v2f> pos_at_ms; // position at every millisecond for
 								// bezier and catmull sliders
 	
@@ -42,7 +40,6 @@ struct hit_object {
 	// NOTE: the first call to this will be slow, as it will pre-calculate
 	//       the entire curve for subsequent calls.
 	v2f at(i64 ms);
-	i64 num_segments();
 };
 
 struct timing_point {
