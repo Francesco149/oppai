@@ -10,13 +10,13 @@
 TARGET = oppai
 
 CXX = g++
-CXXFLAGS = -std=c++14 -Wall -Werror 
+CXXFLAGS = -std=c++14 -Wall -Werror
 #CXXFLAGS += -D_DEBUG 
 #CXXFLAGS += -DSHOW_BEATMAP -DSLIDERTEST
 #CXXFLAGS = $(CXXFLAGS) -DSLIDERFIX
 
-LINKER = g++ -o 
-LFLAGS = -lGL -lglut
+LINKER = g++ -o
+LFLAGS = #-lGL -lglut
 
 SRCDIR = .
 OBJDIR = obj
