@@ -366,7 +366,8 @@ found_timing:
 		auto& tp = b.timing_points[b.num_timing_points];
 
 		u8 not_inherited = 0;
-		f64 time_tmp; // I'm rounding times to milliseconds. not sure if making them floats will matter for diff calc.
+		f64 time_tmp; // I'm rounding times to milliseconds. 
+					  // not sure if making them floats will matter for diff calc.
 		if (sscanf(tok, "%lf,%lf,%d,%d,%d,%d,%hhd", 
 				   &time_tmp, &tp.ms_per_beat, 
 				   &useless, &useless, &useless, &useless, 
@@ -542,7 +543,7 @@ found_objects:
 
 		// calculate slider velocity multiplier for inherited sections
 		f64 sv_multiplier = 1;
-		if (tp->inherit) {
+		if (tp->inherit && tp->ms_per_beat < 0) {
 			sv_multiplier = (-100.0 / tp->ms_per_beat);
 		}
 
