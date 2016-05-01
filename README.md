@@ -4,17 +4,16 @@ to do is supply it with the map's .osu file.
 
 # Getting started
 Demonstration usage video on windows and linux: 
-[https://my.mixtape.moe/wasune.webm](here).
+[here](https://my.mixtape.moe/wasune.webm).
 
 * Download the latest binaries for your OS from 
-[https://github.com/Francesco149/oppai/releases](here).
+[here](https://github.com/Francesco149/oppai/releases).
 * Extract the archive and place the executable anywhere you like (a good place
 would be your osu! folder). Advanced users are free to add oppai to their PATH
 to use it anywhere.
-* Open cmd (or your favorite terminal emulator if you're on linux) and
-```cd /path/to/your/oppai/folder``` (forward slashes might be backwards on 
+* Open cmd (or your favorite terminal emulator if you're on linux) and `cd /path/to/your/oppai/folder` (forward slashes might be backwards on 
 windows)
-* Type ```./oppai``` for a list of possible parameters.
+* Type `./oppai` for a list of possible parameters.
 * Remember that you can tab-complete folder names and file names by pressing 
   tab after typing the first few letters.
 
