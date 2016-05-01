@@ -21,7 +21,8 @@ windows)
 # Compiling from source (Linux)
 ```bash
 git clone https://github.com/Francesco149/oppai.git
-make```
+make
+```
 
 To cross compile, you can edit the makefile and add, for example, ```-m32``` 
 after g++ in CXX.
