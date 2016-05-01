@@ -64,9 +64,14 @@ v2f slider_at(hit_object& ho, i64 ms) {
 			return pt_on_line(sl.points[0], sl.points[1], t);
 
 		case 'P':
-			if (sl.points.size() != 3) {
+			if (sl.points.size() < 2) {
 				die("Found pass-through slider with invalid point count");
 				return v2f{0};
+			}
+			if (sl.points.size() != 3) {
+				sl.type = 'B';
+				goto do_precomputed_curve;
+				// apparently there's 2-point passthrough sliders... wtf?
 			}
 			goto do_precomputed_curve;
 

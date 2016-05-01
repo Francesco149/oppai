@@ -39,7 +39,7 @@ namespace {
 }
 
 int main(int argc, char* argv[]) {
-	puts("o p p a i | v0.1.5");
+	puts("o p p a i | v0.1.6");
 	puts("s     d n | ");
 	puts("u     v s | (looking for");
 	puts("!     a p | cool ascii");
