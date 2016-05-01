@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (tmp_mods_str == a && *tmp_mods_str == '+') {
-			// at least one mod was found in the parameter and the prefix matches
+			// at least one mod found in the parameter and the prefix matches
 			mods_str = tmp_mods_str;
 			std::transform(mods_str, mods_str + strlen(mods_str), mods_str, 
 					toupper);
@@ -107,7 +107,9 @@ int main(int argc, char* argv[]) {
 
 		// combo
 		u16 tmp_combo;
-		if (sscanf(a, "%" fu16 "%s", &tmp_combo, suff) == 2 && !strcmp(suff, "x")) {
+		if (sscanf(a, "%" fu16 "%s", &tmp_combo, suff) == 2 && 
+			!strcmp(suff, "x")) {
+
 			combo = tmp_combo;
 			continue;
 		}

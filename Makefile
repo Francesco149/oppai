@@ -15,7 +15,7 @@ CXXFLAGS = -std=c++14 -Wall -Werror
 #CXXFLAGS += -DSHOW_BEATMAP -DSLIDERTEST
 #CXXFLAGS = $(CXXFLAGS) -DSLIDERFIX
 
-LINKER = g++ -o
+LINKER = $(CXX) -o
 LFLAGS = #-lGL -lglut
 
 SRCDIR = .
