@@ -35,7 +35,8 @@ You will also need visual studio 2015.
 Open git bash and type:
 
 ```bash
-git clone https://github.com/Francesco149/oppai.git```
+git clone https://github.com/Francesco149/oppai.git
+```
 
 Now navigate to the oppai folder and go to win/oppai. You will fin a visual 
 studio 2015 solution file that you can open and compile for x86 and x64.
