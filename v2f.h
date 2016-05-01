@@ -1,13 +1,9 @@
 #pragma once
 #include "types.h"
 
-struct v2f {
+class v2f {
+public:
 	f64 x = 0, y = 0;
-
-	// these are used purely for formatting with str() 
-	// without having to pass copies of the string around
-	f64 old_x, old_y;
-	char buf[42] = {0};
 
 	v2f() {}
 	v2f(f64 x, f64 y) :
@@ -34,4 +30,9 @@ struct v2f {
 	do_op(/)
 
 #undef do_op
+
+protected:
+	// this is used for formatting with str() 
+	// without having to pass copies of the string around
+	char buf[42] = { 0 };
 };

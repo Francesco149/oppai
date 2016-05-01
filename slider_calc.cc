@@ -41,7 +41,9 @@ v2f slider_at(hit_object& ho, i64 ms) {
 		case 'L':
 			if (sl.points.size() < 2) {
 				die("Found linear slider with invalid point count");
+				return v2f{0};
 			}
+
 			if (sl.points.size() > 2) {
 				// too lazy to implement it using lines, just double each 
 				// point and make it a bezier
@@ -56,44 +58,66 @@ v2f slider_at(hit_object& ho, i64 ms) {
 				sl.points.pop_back();
 				sl.type = 'B';
 
-				goto do_bezier;
+				goto do_precomputed_curve;
 			}
+
 			return pt_on_line(sl.points[0], sl.points[1], t);
 
 		case 'P':
 			if (sl.points.size() != 3) {
 				die("Found pass-through slider with invalid point count");
+				return v2f{0};
 			}
-			return pt_on_circular_arc(
-				sl.points[0], sl.points[1], sl.points[2], t, sl.length);
+			goto do_precomputed_curve;
 
+		case 'C':
 		case 'B':
 		{
 			if (sl.points.size() < 2) {
-				die("Found bezier slider with less than 2 points");
+				die("Found catmull or bezier slider with less than 2 points");
+				return v2f{0};
 			}
 
-		case 'C':
-do_bezier:
+do_precomputed_curve:
 			if (sl.pos_at_ms.size()) {
 				return sl.pos_at_ms[(size_t)ms];
 			}
 
 			// pre-calc and cache all positions in millisecond granularity
-			// this is lazy and uses a lot of memory but #yolo
+			// this uses a lot of memory but should boost performance over 
+			// calculating positions on demand
 			
 			f64 px_per_ms = (sl.length * sl.repetitions) / (f64)duration;
 			std::vector<v2f> positions;
 
-			if (sl.type == 'C') {
+			if (sl.type != 'B') {
+				curve *c = nullptr;
+				circular_arc arc;
 				catmull cat;
-				cat.init(&sl.points[0], sl.points.size());
-				cat.compute(&positions);
+
+				switch (sl.type) {
+				case 'C':
+					cat.init(&sl.points[0], sl.points.size());
+					c = &cat;
+					break;
+				case 'P':
+					arc.init(&sl.points[0], sl.length);
+					c = &arc;
+					break;
+				default:
+					die("How did you get here????????");
+					return v2f{0};
+				}
+
+				c->compute(&positions);
 				precompute_slider(sl, positions, px_per_ms);
 				positions.clear();
 			}
 
 			else {
+				// bezier sliders can have multiple segments and each segment is
+				// a separate bezier. overlapped slider points mark the end of 
+				// a segment.
 				bezier bez;
 				size_t last_segment = 0;
 
@@ -102,6 +126,7 @@ do_bezier:
 						continue;
 					}
 
+					// is this the last point in the slider?
 					bool last = j == sl.points.size() - 1;
 
 					if ((sl.points[j] - sl.points[j-1]).len() 
@@ -124,30 +149,24 @@ do_bezier:
 						j++;
 					}
 
+					// compute this segment
 					bez.init(&sl.points[last_segment], j - last_segment);
 					last_segment = j;
 		
-					// first compute positions, then normalize them on time by
-					// calculating how much distance should be travelled for 
-					// each millisecond
 					bez.compute(&positions);
 					precompute_slider(sl, positions, px_per_ms);
-					positions.clear(); 
-					// leaves vector mem allocated for reusage
 				}
 			}
 
+			// just in case we end up with less positions than the slider len
 			while (sl.pos_at_ms.size() < (size_t)duration) {
 				sl.pos_at_ms.push_back(sl.pos_at_ms.back());
 			}
 
 			return sl.pos_at_ms[(size_t)ms];
 		}
-
-		default:
-			die("Unsupported slider type");
 	}
 
-	die("how did you get here");
+	die("Unsupported slider type");
 	return v2f{0};
 }

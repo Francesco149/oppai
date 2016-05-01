@@ -1,9 +1,17 @@
 #include "utils.h"
-#include <stdio.h>
-#include <stdlib.h>
 
-void die(const char* msg) {
-	fputs(msg, stderr);
-	fputs("\n", stderr);
-	exit(1);
+namespace {
+	const char* last_err = nullptr;
+}
+
+void die_impl(const char* msg) {
+	if (last_err) {
+		return;
+	}
+
+	last_err = msg;
+}
+
+const char* err() {
+	return last_err;
 }

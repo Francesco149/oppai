@@ -55,8 +55,6 @@ f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, u32 used_mods,
 		score_version);
 }
 
-
-
 f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods, 
 	u16 combo, u16 misses, u16 c300, u16 c100, u16 c50, u32 score_version) {
 
@@ -75,21 +73,23 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 	// input validation
 	if (!b.max_combo) {
 		die("Max combo cannot be zero");
+		return 0;
 	}
 
 	u16 total_hits = c300 + c100 + c50 + misses;
 	if (total_hits != b.num_objects) {
-		printf("warning: total hits(%hd) don't match hit-object count (%zd)\n",
-			total_hits, b.num_objects);
+		vbprintf("warning: total hits(%" fu16 ") don't "
+			"match hit-object count (%zd)\n", total_hits, b.num_objects);
 	}
 
 	if (score_version != 1 && score_version != 2) {
-		die("this score version does not exist or isn't supported");
+		die("This score version does not exist or isn't supported");
+		return 0;
 	}
 
 	// accuracy (not in percentage, ranges between 0 and 1)
 	f64 acc = acc_calc(c300, c100, c50, misses);
-	printf("\naccuracy: %g%%\n", acc * 100.0);
+	vbprintf("\naccuracy: %g%%\n", acc * 100.0);
 
 	// aim pp ------------------------------------------------------------------
 	f64 aim_value = base_strain(aim);
@@ -150,7 +150,7 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 	aim_value *= acc_bonus;
 	aim_value *= od_bonus;
 
-	printf("aim: %g\n", aim_value);
+	vbprintf("aim: %g\n", aim_value);
 
 	// speed pp ----------------------------------------------------------------
 	f64 speed_value = base_strain(speed);
@@ -161,7 +161,7 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 	speed_value *= acc_bonus;
 	speed_value *= od_bonus;
 
-	printf("speed: %g\n", speed_value);
+	vbprintf("speed: %g\n", speed_value);
 
 	// acc pp ------------------------------------------------------------------
 	f64 real_acc = 0.0; // accuracy calculation changes from scorev1 to scorev2
@@ -200,7 +200,7 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 		acc_value *= 1.02;
 	}
 
-	printf("acc: %g\n", acc_value);
+	vbprintf("acc: %g\n", acc_value);
 
 	// total pp ----------------------------------------------------------------
 	f64 final_multiplier = 1.12;

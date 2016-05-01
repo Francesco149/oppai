@@ -6,35 +6,59 @@
 
 // ported from osu-web
 
-// gets coords at point t (0-1) on a line
+// gets a point on a line.
+//
+// p1, p2: the two points that define the line
+// t: how far into the line we are (0.0 would be p1 and 1.0 would be p2)
 v2f pt_on_line(const v2f& p1, const v2f& p2, f64 t);
 
-// gets coords at point t (0-1) on a circular arc of length len of a circle
-// that intersects p1, p2, p3, starting at p1.
-v2f pt_on_circular_arc(
-		const v2f& p1, const v2f& p2, const v2f& p3, f64 t, f64 len);
-
-struct curve {
-	static const size_t max_points = 0xFF;
-	size_t num_points = 0;
-	v2f points[max_points];
-
+// generic curve code that can be reused in all curves
+class curve {
+public:
+	// copies pts to the curve's points
 	void init(const v2f* pts, size_t npts);
+
+	// calculates a point on the curve.
+	// t: how far into the curve we are (0.0-1.0)
 	virtual v2f at(f64 t) const = 0;
 
-	// approximates the length of the curve
-	f64 len() const;
+	// compute points for the entire curve at a fixed internal granularity.
+	// (calls .at to do this by default)
+	// dst: the vector that will store the points.
+	virtual void compute(std::vector<v2f>* dst) const;
 
-	// compute granular positions for the entire curve
-	virtual void compute(std::vector<v2f>* dst);
+protected:
+	std::vector<v2f> points;
 };
 
-struct bezier : curve {
-	// gets coords at point t (0-1) inside the curve
+struct circle {
+	v2f c; // center
+	f64 r; // radius
+};
+
+class circular_arc : public curve {
+public:
+	// copies 3 points from pts to the curve's points and sets length.
+	// len is the length of the circular arc, in the same units and scale as the
+	// points.
+	void init(const v2f* pts, f64 len);
+	virtual v2f at(f64 t) const;
+
+protected:
+	f64 len;
+	circle c;
+};
+
+class bezier : public curve {
+public:
 	virtual v2f at(f64 t) const;
 };
 
-struct catmull : curve {
+class catmull : public curve {
+public:
 	virtual v2f at(f64 t) const;
-	virtual void compute(std::vector<v2f>* dst);
+	virtual void compute(std::vector<v2f>* dst) const;
+
+protected:
+	v2f compute_single_point(size_t i, f64 t) const;
 };

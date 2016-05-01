@@ -6,7 +6,15 @@
 
 // shit code ahead! I am way too lazy to write nice code for parsers, sorry
 // disclaimer: this beatmap parser is meant purely for difficulty calculation 
-//             and I don't support any malicious use of it.
+//             and I don't support any malicious use of it
+
+// hit-object type
+enum class obj : u8 {
+	invalid = 0,
+	circle,
+	spinner,
+	slider,
+};
 
 struct slider_data {
 	char type;
@@ -21,22 +29,16 @@ struct slider_data {
 	f64 length = 0;
 };
 
-// hit-object type
-enum class obj : u8 {
-	invalid = 0,
-	circle, 
-	spinner, 
-	slider, 
-};
-
 struct hit_object {
 	v2f pos{0};
 	i64 time = 0;
 	obj type = obj::invalid;
-	i64 end_time = 0; // for spinners
+	i64 end_time = 0; // for spinners and sliders
 	slider_data slider;
 
-	// get position at given millisecond offset (for sliders)
+	// get position at given millisecond offset (for sliders).
+	// the offset is relative to the object's time, which means that it ranges 
+	// from 0 to end_time - time.
 	// NOTE: the first call to this will be slow, as it will pre-calculate
 	//       the entire curve for subsequent calls.
 	v2f at(i64 ms);

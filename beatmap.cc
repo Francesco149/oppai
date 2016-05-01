@@ -14,6 +14,16 @@ namespace {
 	// file into memory
 	const size_t bufsize = 2000000; // 2 mb
 	u8 buf[bufsize];
+
+	const f64	od0_ms = 79.5,
+				od10_ms = 19.5,
+				ar0_ms = 1800,
+				ar5_ms = 1200,
+				ar10_ms = 450;
+
+	const f64	od_ms_step = 6,
+				ar_ms_step1 = 120, // ar0-5
+				ar_ms_step2 = 150; // ar5-10
 }
 
 timing_point* beatmap::timing(i64 time) {
@@ -42,9 +52,9 @@ timing_point* beatmap::parent_timing(timing_point* t) {
 	}
 
 	die("Orphan timing section");
+	return nullptr;
 }
 
-// TODO: throw some consts in here
 void beatmap::apply_mods(u32 mods) {
 	if ((mods & mods::map_changing) == 0) {
 		return;
@@ -73,7 +83,7 @@ void beatmap::apply_mods(u32 mods) {
 	}
 
 	od *= od_multiplier;
-	f64 odms = 79.5 - 6.0 * od;
+	f64 odms = od0_ms - od_ms_step * od;
 
 	// ar
 	f64 ar_multiplier = 1;
@@ -87,9 +97,11 @@ void beatmap::apply_mods(u32 mods) {
 	}
 
 	ar *= ar_multiplier;
+
+	// convert AR into its milliseconds value
 	f64 arms = ar <= 5 
-		? (1800 - 120 * ar) 
-		: (1200 - 150 * (ar - 5));
+		? (ar0_ms - ar_ms_step1 *  ar     ) 
+		: (ar5_ms - ar_ms_step2 * (ar - 5));
 
 	// cs
 	f64 cs_multiplier = 1;
@@ -104,15 +116,18 @@ void beatmap::apply_mods(u32 mods) {
 
 	// stats must be capped to 0-10 before HT/DT which bring them to a range
 	// of -4.42 to 11.08 for OD and -5 to 11 for AR
-	odms = std::min(79.5, std::max(19.5, odms));
-	arms = std::min(1800.0, std::max(450.0, arms));
+	odms = std::min(od0_ms, std::max(od10_ms, odms));
+	arms = std::min(ar0_ms, std::max(ar10_ms, arms));
 
+	// apply speed-changing mods
 	odms /= speed;
 	arms /= speed;
-	od = (79.5 - odms) / 6.0;
+
+	// convert OD and AR back into their stat form
+	od = (od0_ms - odms) / od_ms_step;
 	ar = ar <= 5.0
-		? ((1800.0 - arms) / 120.0)
-		: (5.0 + (1200.0 - arms) / 150.0);
+		? (      (ar0_ms - arms) / ar_ms_step1)
+		: (5.0 + (ar5_ms - arms) / ar_ms_step2);
 
 	cs *= cs_multiplier;
 	cs = std::max(0.0, std::min(10.0, cs));
@@ -121,6 +136,8 @@ void beatmap::apply_mods(u32 mods) {
 		// not speed-modifying
 		return;
 	}
+
+	// apply speed-changing mods
 
 	for (size_t i = 0; i < num_timing_points; i++) {
 		auto &tp = timing_points[i];
@@ -139,7 +156,7 @@ void beatmap::apply_mods(u32 mods) {
 
 v2f hit_object::at(i64 ms) {
 	if (type != obj::slider) {
-		//puts("Warning: tried to call .at on a non-slider object");
+		//vbputs("Warning: tried to call .at on a non-slider object");
 		return pos;
 	}
 
@@ -150,47 +167,69 @@ void beatmap::parse(const char* osu_file, beatmap& b) {
 	auto f = fopen(osu_file, "rb");
 	if (!f) {
 		die("Failed to open beatmap");
+		return;
 	}
 
 	auto cb = fread(buf, 1, bufsize, f);
 	if (cb == bufsize) {
 		die("Beatmap is too big for the internal buffer because I am a lazy "
 			"fuck who can't parse files the proper way");
+		return;
 	}
 
 	dbgprintf("%zd bytes\n", cb);
 	fclose(f);
 
+	// just to be safe
 	buf[cb] = 0;
-
-	char* tok = strtok((char*)buf, "\n");
 
 	// ---
 
-	while (tok && *tok != '[') {
-		if (sscanf(tok, "osu file format v%d", 
+	char* tok = strtok((char*)buf, "\n");
+
+	auto fwd = [&tok]() { 
+		// skips 1 line
+		tok = strtok(nullptr, "\n"); 
+	};
+
+	auto find_fwd = [&tok, fwd](const char* str) -> bool {
+		// skips forward until tok is the line right after 
+		// the one that contains str
+		dbgprintf("skipping until %s", str);
+		while (tok) {
+			if (strstr(tok, str)) {
+				fwd();
+				return true;
+			}
+			fwd();
+		}
+		return false;
+	};
+
+	auto not_section = [&tok]() -> bool {
+		return tok && *tok != '[';
+	};
+	
+	// ---
+
+	while (not_section()) {
+		if (sscanf(tok, "osu file format v%" fi32 "", 
 				   &b.format_version) == 1) {
 			break;
 		}
-		tok = strtok(nullptr, "\n");
+		fwd();
 	}
 
 	if (!b.format_version) {
-		//die("File format version not found");
+		vbputs("Warning: File format version not found");
 	}
 
 	// ---
 	
-	while (tok) {
-		if (strstr(tok, "[General]")) {
-			goto found_general;
-		}
-		tok = strtok(nullptr, "\n");
+	if (!find_fwd("[General]")) {
+		die("Could not find General info");
+		return;
 	}
-
-	die("Could not find General info");
-
-found_general:
 
 	// ---
 	
@@ -199,86 +238,77 @@ found_general:
 	// them one by one and check for format errors.
 
 	// StackLeniency and Mode are not present in older formats
-	tok = strtok(nullptr, "\n");
-	for (; tok && *tok != '['; tok = strtok(nullptr, "\n")) {
+	for (; not_section(); fwd()) {
 
 		if (sscanf(tok, "StackLeniency: %lf", &b.stack_leniency) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "Mode: %hhd", &b.mode) == 1) {
+		if (sscanf(tok, "Mode: %" fu8 "", &b.mode) == 1) {
 			continue;
 		}
 	}
 
 	// ---
 
-	while (tok) {
-		if (strstr(tok, "[Metadata]")) {
-			goto found_metadata;
-		}
-		tok = strtok(nullptr, "\n");
+	if (!find_fwd("[Metadata]")) {
+		die("Could not find Metadata");
+		return;
 	}
-
-	die("Could not find metadata");
-
-found_metadata:
 
 	// ---
 	
-	tok = strtok(nullptr, "\n");
-	for (; tok && *tok != '['; tok = strtok(nullptr, "\n")) {
+	for (; not_section(); fwd()) {
 
+		// %[^\r\n] means accept all characters except \r\n
+		// which means that it'll grab the string until it finds \r or \n
 		if (sscanf(tok, "Title: %[^\r\n]", b.title) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "Artist: %[^\r\n]", b.artist) == 1) {
+		if (sscanf(tok, "Artist: %[^\r\n]", b.artist) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "Creator: %[^\r\n]", b.creator) == 1) {
+		if (sscanf(tok, "Creator: %[^\r\n]", b.creator) == 1) {
 			continue;
 		}
 
-		else if (sscanf(tok, "Version: %[^\r\n]", b.version) == 1) {
+		if (sscanf(tok, "Version: %[^\r\n]", b.version) == 1) {
 			continue;
 		}
 	}
 
 	if (!strlen(b.title)) {
 		die("Missing title in metadata");
+		return;
 	}
 
 	if (!strlen(b.artist)) {
 		die("Missing artist in metadata");
+		return;
 	}
 
 	if (!strlen(b.creator)) {
 		die("Missing creator in metadata");
+		return;
 	}
 
 	if (!strlen(b.version)) {
 		die("Missing version in metadata");
+		return;
 	}
 
 	// ---
 	
-	while (tok) {
-		if (strstr(tok, "[Difficulty]")) {
-			goto found_difficulty;
-		}
-		tok = strtok(nullptr, "\n");
+	if (!find_fwd("[Difficulty]")) {
+		die("Could not find Difficulty");
+		return;
 	}
-
-	die("Could not find difficulty");
-
-found_difficulty:
 
 	// ---
 	
-	tok = strtok(nullptr, "\n");
-	for (; tok && *tok != '['; tok = strtok(nullptr, "\n")) {
+	for (; not_section(); fwd()) {
 
 		if (sscanf(tok, "HPDrainRate: %lf", &b.hp) == 1) {
 			continue;
@@ -307,61 +337,70 @@ found_difficulty:
 
 	if (b.hp > 10) {
 		die("Invalid or missing HP");
+		return;
 	}
 
 	if (b.cs > 10) {
 		die("Invalid or missing CS");
+		return;
 	}
 
 	if (b.od > 10) {
 		die("Invalid or missing OD");
+		return;
 	}
 
 	if (b.ar > 10) {
-		puts("warning: AR not found, assuming old map and setting AR=OD");
+		vbputs("Warning: AR not found, assuming old map and setting AR=OD");
 		b.ar = b.od;
 	}
 
 	if (b.sv > 10) { // not sure what max sv is
 		die("Invalid or missing SV");
+		return;
 	}
 
 	// ---
 	
-	// skip until the TimingPoints section
-	while (tok) {
-		if (strstr(tok, "[TimingPoints]")) {
-			goto found_timing;
-		}
-		tok = strtok(nullptr, "\n");
+	if (!find_fwd("[TimingPoints]")) {
+		die("Could not find TimingPoints");
+		return;
 	}
-
-	die("Could not find timing points");
-
-found_timing:
 
 	// ---
 
 	i32 useless;
 
-	tok = strtok(nullptr, "\n");
-	for (; *tok != '['; tok = strtok(nullptr, "\n")) {
+	// TODO: move this func elsewhere
+	auto whitespace = [](const char* s) -> bool {
+		while (*s) {
+			if (!isspace(*s)) {
+				return false;
+			}
+			s++;
+		}
+		return true;
+	};
 
-		// ghetto way to ignore empty lines, will mess up on whitespace lines
-		if (!strlen(tok) || !strcmp(tok, "\r")) {
+	for (; not_section(); fwd()) {
+
+		if (whitespace(tok)) {
+			dbgputs("skipping whitespace line");
 			continue;
 		}
 
 		if (b.num_timing_points >= beatmap::max_timing_points) {
 			die("Too many timing points for the internal buffer");
+			return;
 		}
 
 		auto& tp = b.timing_points[b.num_timing_points];
 
 		u8 not_inherited = 0;
 		f64 time_tmp; // I'm rounding times to milliseconds. 
-					  // not sure if making them floats will matter for diff calc.
-		if (sscanf(tok, "%lf,%lf,%d,%d,%d,%d,%hhd", 
+					  // not sure if making them floats will matter for diffcalc
+
+		if (sscanf(tok, "%lf,%lf,%" fi32 ",%" fi32 ",%" fi32 ",%" fi32 ",%" fu8, 
 				   &time_tmp, &tp.ms_per_beat, 
 				   &useless, &useless, &useless, &useless, 
 				   &not_inherited) == 7) {
@@ -375,6 +414,7 @@ found_timing:
 		if (sscanf(tok, "%lf,%lf", &time_tmp, &tp.ms_per_beat) != 2) {
 			tp.time = (i64)time_tmp;
 			die("Invalid format for timing point");
+			return;
 		}
 
 parsed_timing_pt:
@@ -383,30 +423,23 @@ parsed_timing_pt:
 
 	// ---
 	
-	// skip until the HitObjects section
-	while (tok) {
-		if (strstr(tok, "[HitObjects]")) {
-			goto found_objects;
-		}
-		tok = strtok(nullptr, "\n");
+	if (!find_fwd("[HitObjects]")) {
+		die("Could not find HitObjects");
+		return;
 	}
-
-	die("Could not find hit objects");
-
-found_objects:
 
 	// ---
 
-	tok = strtok(nullptr, "\n");
-	for (; tok; tok = strtok(nullptr, "\n")) {
+	for (; tok; fwd()) {
 
-		// ghetto way to ignore empty lines, will mess up on whitespace lines
-		if (!strlen(tok) || !strcmp(tok, "\r")) {
+		if (whitespace(tok)) {
+			dbgputs("skipping whitespace line");
 			continue;
 		}
 
 		if (b.num_objects >= beatmap::max_objects) {
 			die("Too many hit objects for the internal buffer");
+			return;
 		}
 
 		auto& ho = b.objects[b.num_objects];
@@ -414,10 +447,10 @@ found_objects:
 		i32 type_num;
 
 		// slider
-		if (sscanf(tok, "%lf,%lf,%" fi64 ",%d,%d,%c", 
+		if (sscanf(tok, "%lf,%lf,%" fi64 ",%" fi32 ",%" fi32 ",%c", 
 				   &ho.pos.x, &ho.pos.y, &ho.time, &useless, &useless, 
 				   &ho.slider.type) == 6 && 
-				ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
+					ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
 			
 			// the slider type check is for old maps that have trailing 
 			// commas on circles and sliders
@@ -428,7 +461,7 @@ found_objects:
 		}
 
 		// circle, or spinner
-		else if (sscanf(tok, "%lf,%lf,%" fi64 ",%d,%d,%" fi64,
+		else if (sscanf(tok, "%lf,%lf,%" fi64 ",%" fi32 ",%" fi32 ",%" fi64,
 				   &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless, 
 				   &ho.end_time) == 6) {
 
@@ -443,7 +476,7 @@ found_objects:
 		}
 
 		// old circle
-		else if (sscanf(tok, "%lf,%lf,%" fi64 ",%d,%d", 
+		else if (sscanf(tok, "%lf,%lf,%" fi64 ",%" fi32 ",%" fi32 "", 
 			&ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless) == 5) {
 
 			ho.type = obj::circle;
@@ -452,6 +485,7 @@ found_objects:
 
 		else {
 			die("Invalid hit object found");
+			return;
 		}
 
 		b.num_objects++;
@@ -477,6 +511,7 @@ found_objects:
 
 			case obj::invalid:
 				die("How did you get here????????");
+				return;
 		}
 
 		// slider points are separated by |
@@ -485,6 +520,7 @@ found_objects:
 			// expected slider but no points found
 			if (ho.type == obj::slider) {
 				die("Slider is missing points");
+				return;
 			}
 
 			dbgputs("no slider points, we're done here");
@@ -495,6 +531,7 @@ found_objects:
 		// not a slider yet slider points were found
 		if (ho.type != obj::slider) {
 			die("Invalid slider found");
+			return;
 		}
 
 		auto& sl = ho.slider;
@@ -519,7 +556,7 @@ found_objects:
 			// lastcurveX:lastcurveY,repeat,pixelLength,
 			// 		edgeHitsound,edgeAddition,addition
 			if (sscanf(slider_tok, 
-				      "%lf:%lf,%hd,%lf", 
+				      "%lf:%lf,%" fu16 ",%lf", 
 					  &pt.x, &pt.y, &sl.repetitions, &sl.length) == 4) {
 
 				dbgputs("last slider point");
@@ -530,6 +567,7 @@ found_objects:
 			// curveX:curveY
 			else if (sscanf(slider_tok, "%lf:%lf", &pt.x, &pt.y) != 2) {
 				die("Invalid slider found");
+				return;
 			}
 
 			dbgprintf("slider point %zd\n", sl.points.size());
@@ -538,6 +576,9 @@ found_objects:
 		// find which timing section the slider belongs to
 		auto tp = b.timing(ho.time);
 		auto parent = b.parent_timing(tp);
+		if (err()) {
+			return;
+		}
 
 		// calculate slider velocity multiplier for inherited sections
 		f64 sv_multiplier = 1;
@@ -553,14 +594,25 @@ found_objects:
 
 		// sliders get 2 + ticks combo (head, tail and ticks)
 		// each repetition adds an extra combo and an extra set of ticks
+
+		// calculate the number of slider ticks for one repetition
+		// ---
+		// example: a 3.75 beats slider at 1x tick rate will go:
+		// beat0 (head), beat1 (tick), beat2(tick), beat3(tick), beat3.75(tail)
+		// so all we have to do is ceil the number of beats and subtract 1 to
+		// take out the tail
+		// ---
 		// the -.01 is there to prevent ceil from ceiling whole values
 		// like 1.0 to 2.0 randomly
 		u16 ticks = (u16)std::ceil(
 				(num_beats - 0.01) / sl.repetitions * b.tick_rate);
 		ticks--;
-		ticks *= sl.repetitions;
-		ticks += sl.repetitions + 1;
-		//printf("%g x %ld %hd\n", num_beats, sl.repetitions, ticks);
+
+		ticks *= sl.repetitions; // multiply slider ticks by repetitions
+		ticks += sl.repetitions + 1; // add heads and tails
+
+		dbgprintf("%g beats x %" fu16 " = %" fu16 " combo\n", 
+			num_beats, sl.repetitions, ticks);
 
 		b.max_combo += ticks - 1; // -1 because we already did ++ earlier
 	}

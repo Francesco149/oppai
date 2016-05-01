@@ -16,12 +16,8 @@
 
 namespace {
 	beatmap b;
-#ifdef SHOW_BEATMAP
 	void print_beatmap();
-#endif
-}
 
-namespace {
 	const char* const mod_strs[] {
 		"nomod", "nf", "ez", "hd", "hr", "dt", "ht", "nc", "fl", "so"
 	};
@@ -30,10 +26,20 @@ namespace {
 		mods::nc, mods::fl, mods::so
 	};
 	const size_t num_mods = sizeof(mod_masks) / sizeof(mod_masks[0]);
+
+	void chk() {
+		if (!err()) {
+			return;
+		}
+
+		fputs(err(), stderr);
+		fputs("\n", stderr);
+		exit(1);
+	}
 }
 
 int main(int argc, char* argv[]) {
-	puts("o p p a i | v0.1.4");
+	puts("o p p a i | v0.1.5");
 	puts("s     d n | ");
 	puts("u     v s | (looking for");
 	puts("!     a p | cool ascii");
@@ -59,6 +65,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	beatmap::parse(argv[1], b);
+	chk();
 
 	char* mods_str = nullptr;
 	f64 acc = 100.0;
@@ -100,14 +107,14 @@ int main(int argc, char* argv[]) {
 
 		// combo
 		u16 tmp_combo;
-		if (sscanf(a, "%hd%s", &tmp_combo, suff) == 2 && !strcmp(suff, "x")) {
+		if (sscanf(a, "%" fu16 "%s", &tmp_combo, suff) == 2 && !strcmp(suff, "x")) {
 			combo = tmp_combo;
 			continue;
 		}
 
 		// misses
 		u16 tmp_misses;
-		if (sscanf(a, "%hd%s", &tmp_misses, suff) == 2 && 
+		if (sscanf(a, "%" fu16 "%s", &tmp_misses, suff) == 2 && 
 				(!strcmp(suff, "xm") || !strcmp(suff, "xmiss") ||
 				 !strcmp(suff, "m"))) {
 			misses = tmp_misses;
@@ -123,45 +130,49 @@ int main(int argc, char* argv[]) {
 
 		printf(">%s\n", a);
 		die("Invalid parameter");
+		break;
 	}
 
-#ifdef SHOW_BEATMAP
-	puts("\n---");
-	puts(argv[1]);
-	puts("---\n");
+	chk();
 
 	p_init(argc, argv);
+	chk();
+
 	print_beatmap();
-#endif
+	chk();
 
 	printf("\n%s - %s [%s] (%s) %s\n", 
 			b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "");
 
 	b.apply_mods(mods);
+	chk();
+
 	printf("od%g ar%g cs%g\n", b.od, b.ar, b.cs);
-	printf("%hd/%hd combo\n", combo, b.max_combo);
-	printf("%hd circles, %hd sliders %hd spinners\n", 
+	printf("%" fu16 "/%" fu16 " combo\n", combo, b.max_combo);
+	printf("%" fu16 " circles, %" fu16 " sliders %" fu16 " spinners\n", 
 			b.num_circles, b.num_sliders, b.num_spinners);
-	printf("%hdxmiss\n", misses);
-	printf("scorev%" fu32, scoring);
+	printf("%" fu16 "xmiss\n", misses);
+	printf("scorev%" fu32"\n\n", scoring);
 
 	f64 aim, speed;
 	f64 stars = d_calc(b, &aim, &speed);
+	chk();
 	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
 
 	f64 pp = pp_calc_acc(aim, speed, b, acc, mods, combo, misses, scoring);
+	chk();
 	printf("\n%gpp\n", pp);
 
 	return 0;
 }
 
-#ifdef SHOW_BEATMAP
 namespace {
 	void print_beatmap() {
+#ifdef SHOW_BEATMAP
 		printf(
-			"Format version: %d\n"
+			"Format version: %" fi32 "\n"
 			"Stack Leniency: %g\n"
-			"Mode: %d\n"
+			"Mode: %" fi32 "\n"
 			"Title: %s\n"
 			"Artist: %s\n"
 			"Version: %s\n"
@@ -188,10 +199,12 @@ namespace {
 		}
 
 		printf("\n> %zd hit objects\n", b.num_objects);
+#endif
 		for (size_t i = 0; i < b.num_objects; i++) {
 
 			auto& ho = b.objects[i];
 			switch (ho.type) {
+#ifdef SHOW_BEATMAP
 				case obj::circle:
 					printf("%" fi64 ": Circle (%g, %g)\n", 
 						ho.time, ho.pos.x, ho.pos.y);
@@ -201,14 +214,20 @@ namespace {
 					printf("%" fi64 "-%" fi64 ": Spinner\n", 
 							ho.time, ho.end_time);
 					break;
+#else
+			case obj::circle:
+			case obj::spinner:
+				break;
+#endif
 
 				case obj::slider:
 				{
+#ifdef SHOW_BEATMAP
 					auto& sl = ho.slider;
 
 					printf(
 						"%" fi64 "-%" fi64 ": Slider "
-						"[Type %c, Length %g, %hd Repetitions] ", 
+						"[Type %c, Length %g, %" fu16 " Repetitions] ", 
 						ho.time, ho.end_time, sl.type, 
 						sl.length, sl.repetitions);
 
@@ -218,15 +237,16 @@ namespace {
 					}
 
 					puts("");
+#endif
 
-					p_show(ho);
+					p_show(ho)
 					break;
 				}
 
 				default:
 					die("Invalid object type");
+					return;
 			}
 		}
 	}
 }
-#endif

@@ -22,13 +22,33 @@ namespace mods {
 
 struct beatmap;
 
+// rounds acc_percent to the closest possible 100-count and calculates ppv2.
+//
+// aim: aim difficulty
+// speed: speed difficulty
+// b: the beatmap with map-modifying mods already applied
+// acc_percent: the desired accuracy in percent (0-100)
+// used_mods: the mods bitmask (see namespace mods)
+// combo: desired combo. 0xFFFF will assume full combo.
+// misses: amount of misses
+// score_version: 1 or 2, affects accuracy pp.
 f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, 
 	u32 used_mods=mods::nomod, u16 combo = 0xFFFF, u16 misses = 0, 
 	u32 score_version = 1);
 
+// calculates ppv2.
+//
+// aim: aim difficulty
+// speed: speed difficulty
+// b: the beatmap with map-modifying mods already applied
+// used_mods: the mods bitmask (see namespace mods)
+// combo: desired combo. 0xFFFF will assume full combo.
+// misses: amount of misses
+// c300: amount of 300s. 0xFFFF will automatically calculate this value based on
+//       the number of misses, 100s and 50s.
+// c100, c50: number of 100s and 50s.
+// score_version: 1 or 2, affects accuracy pp.
 f64 pp_calc(f64 aim, f64 speed, beatmap& b, 
 	u32 used_mods=mods::nomod, 
 	u16 combo = 0xFFFF, u16 misses = 0, u16 c300 = 0xFFFF, 
 	u16 c100 = 0, u16 c50 = 0, u32 score_version = 1);
-// 0xFFFF means max combo for combo and automatically calculates
-// 300s based on 100, 50, miss count for c300

@@ -4,11 +4,7 @@
 #include <cmath>
 
 const char* v2f::str() {
-	static const f64 epsilon = 0.00001;
-	if (std::abs(x - old_x) > epsilon || std::abs(y - old_y) > epsilon || !buf[0]) {
-		sprintf(buf, "(%g %g)", x, y);
-	}
-
+	sprintf(buf, "(%g %g)", x, y);
 	return buf;
 }
 
