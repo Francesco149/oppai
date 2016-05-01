@@ -344,10 +344,12 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed) {
 			return 0;
 		}
 
+#if _DEBUG
 		v2f endpos = o.ho->at(o.ho->end_time - o.ho->time);
 		if (err()) {
 			return 0;
 		}
+#endif
 
 		dbgprintf("%" fi64 ": type %" fi32 ", strains %g %g, slider lens %g %g, "
 				"norm pos %s-%s, pos %s-%s\n", 

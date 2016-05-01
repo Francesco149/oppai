@@ -241,7 +241,7 @@ namespace {
 					puts("");
 #endif
 
-					p_show(ho)
+					p_show(ho);
 					break;
 				}
 
