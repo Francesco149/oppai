@@ -97,7 +97,7 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 	f64 total_hits_over_2k = (f64)total_hits / 2000.0;
 	f64 length_bonus = 0.95 + 
 		0.4 * std::min(1.0, total_hits_over_2k) +
-		(b.max_combo > 2000 ? std::log10(total_hits_over_2k) * 0.5 : 0.0);
+		(total_hits > 2000 ? std::log10(total_hits_over_2k) * 0.5 : 0.0);
 
 	// miss penality (reused in speed pp)
 	f64 miss_penality = std::pow(0.97, misses);
