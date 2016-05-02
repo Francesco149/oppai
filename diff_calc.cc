@@ -3,10 +3,7 @@
 
 #include <cmath>
 #include <algorithm>
-
-#if NEEDS_TO_INSTALL_GENTOO
 #include <functional> // std::greater
-#endif
 
 #include "utils.h"
 #include "beatmap.h"
