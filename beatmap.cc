@@ -2,7 +2,7 @@
 #include "common.h"
 
 #include <string.h>
-#include <algorithm>
+#include <cmath>
 #include <string>
 
 #include "utils.h"
@@ -27,7 +27,7 @@ namespace {
 }
 
 timing_point* beatmap::timing(i64 time) {
-	for (size_t i = num_timing_points - 1; i >= 0; i--) {
+	for (i64 i = (i64)num_timing_points - 1; i >= 0; i--) {
 		auto& cur = timing_points[i];
 
 		if (cur.time <= time) {
@@ -43,7 +43,7 @@ timing_point* beatmap::parent_timing(timing_point* t) {
 		return t;
 	}
 
-	for (size_t i = num_timing_points - 1; i >= 0; i--) {
+	for (i64 i = (i64)num_timing_points - 1; i >= 0; i--) {
 		auto& cur = timing_points[i];
 		
 		if (cur.time <= t->time && !cur.inherit) {

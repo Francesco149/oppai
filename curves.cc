@@ -1,8 +1,7 @@
 #include "curves.h"
 
-#include <math.h>
+#include <cmath>
 #include <string.h>
-#include <algorithm>
 
 #if _DEBUG
 #include <stdio.h>

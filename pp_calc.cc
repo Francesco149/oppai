@@ -3,9 +3,8 @@
 #include "beatmap.h"
 #include "utils.h"
 
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
-#include <algorithm>
 
 // various utility funcs to reduce code redundancy
 namespace {

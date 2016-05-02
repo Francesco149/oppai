@@ -4,7 +4,7 @@
 #include "beatmap.h"
 #include "curves.h"
 
-#include <algorithm>
+#include <cmath>
 
 void precompute_slider(slider_data& sl, std::vector<v2f>& positions, 
 		f64 px_per_ms) {

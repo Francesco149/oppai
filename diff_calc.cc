@@ -1,7 +1,7 @@
 #include "diff_calc.h"
 #include "common.h"
 
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 
 #if NEEDS_TO_INSTALL_GENTOO
