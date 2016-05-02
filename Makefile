@@ -16,7 +16,7 @@ CXXFLAGS = -std=c++14 -Wall -Werror
 #CXXFLAGS = $(CXXFLAGS) -DSLIDERFIX
 
 LINKER = $(CXX) -o
-LFLAGS = #-lGL -lglut
+LFLAGS = -lm -lstdc++ #-lGL -lglut
 
 SRCDIR = .
 OBJDIR = obj
