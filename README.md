@@ -11,7 +11,8 @@ Demonstration usage video on windows and linux:
 * Extract the archive and place the executable anywhere you like (a good place
 would be your osu! folder). Advanced users are free to add oppai to their PATH
 to use it anywhere.
-* Open cmd (or your favorite terminal emulator if you're on linux) and `cd /path/to/your/oppai/folder` (forward slashes might be backwards on 
+* Open cmd (or your favorite terminal emulator if you're on linux) and 
+`cd /path/to/your/oppai/folder` (forward slashes might be backwards on 
 windows)
 * Type `./oppai` for a list of possible parameters.
 * Remember that you can tab-complete folder names and file names by pressing 
@@ -20,6 +21,7 @@ windows)
 # Compiling from source (Linux)
 ```bash
 git clone https://github.com/Francesco149/oppai.git
+cd oppai
 make
 ```
 
