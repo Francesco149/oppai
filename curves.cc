@@ -2,6 +2,9 @@
 
 #include <cmath>
 #include <string.h>
+#if NEEDS_TO_INSTALL_GENTOO
+#include <algorithm>
+#endif
 
 #if _DEBUG
 #include <stdio.h>

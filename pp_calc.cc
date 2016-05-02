@@ -5,6 +5,9 @@
 
 #include <cmath>
 #include <stdio.h>
+#if NEEDS_TO_INSTALL_GENTOO
+#include <algorithm>
+#endif
 
 // various utility funcs to reduce code redundancy
 namespace {

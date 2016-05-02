@@ -4,6 +4,9 @@
 #include <string.h>
 #include <cmath>
 #include <string>
+#if NEEDS_TO_INSTALL_GENTOO
+#include <algorithm>
+#endif
 
 #include "utils.h"
 #include "slider_calc.h"
