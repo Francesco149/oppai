@@ -5,6 +5,9 @@
 #include "curves.h"
 
 #include <cmath>
+#if NEEDS_TO_INSTALL_GENTOO
+#include <algorithm>
+#endif
 
 void precompute_slider(slider_data& sl, std::vector<v2f>& positions, 
 		f64 px_per_ms) {
