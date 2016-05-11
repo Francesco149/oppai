@@ -9,7 +9,7 @@
 #include "beatmap.h"
 
 // based on tom94's osu!tp aimod
-// TODO: reduce code redudnancy and rename variables to shorter names
+// TODO: some code cleanup
 
 namespace {
 	// how much strains decay per interval (if the previous interval's peak
@@ -28,8 +28,10 @@ namespace {
 	// used to keep speed and aim balanced between eachother
 	const f64 weight_scaling[] = { 1400, 26.25 };
 
+#ifndef OPPAI_FAST
 	// step in milliseconds used to compute lazy movement for sliders
 	const i64 slider_step = 10;
+#endif
 
 	// non-normalized diameter where the circlesize buff starts
 	const f64 circlesize_buff_treshold = 30;
@@ -50,11 +52,13 @@ namespace {
 		v2f norm_start;
 		v2f norm_end;
 
+#ifndef OPPAI_FAST
 		// length of the lazy movement for the 1st repeat
 		f64 lazy_len_1st = 0; 
 
 		// length of the lazy movement for each of the remaining repetitions
 		f64 lazy_len_rest = 0; 
+#endif
 
 		void init(hit_object* base_object, f64 radius) {
 			this->ho = base_object;
@@ -63,29 +67,47 @@ namespace {
 			// if everything was the same circlesize
 			f64 scaling_factor = 52.0 / radius;
 
-			// cs buff (based on osuElements, not accurate)
-			// TODO: find out real high CS buff
+			// cs buff (based on osuElements, pretty accurate but not 100% sure)
+			//
+			// some high cs data I've collected:
+			//
+			// cs5.85 on RoR:
+			// 1.822916667% aim stars increase
+			// 2.752293578% speed stars increase
+			// 4.799627961% pp increase
+			//
+			// cd6.5 on defenders
+			// 18.143683959% pp increase
+			// 4.62962963% aim stars increase
+			// 9.039548023% speed stars increase
 			if (radius < circlesize_buff_treshold) {
-				scaling_factor *= std::min(1.1, 
-					1 + (circlesize_buff_treshold - radius) * 0.02);
+				scaling_factor *= 
+					1 + (circlesize_buff_treshold - radius) * 0.02;
 			}
 
 			norm_start = ho->pos * scaling_factor;
-			
+
+#ifdef OPPAI_FAST
+			norm_end = norm_start;
+			// ignoring slider lengths doesn't seem to affect star rating too
+			// much and speeds up the calculation exponentially
+			// actually, I believe this is how diff calc works now and slider
+			// lengths were dropped since osu!tp
+#else
 			// just a circle bro
 			if (ho->type != obj::slider) {
 				norm_end = norm_start;
 				return;
 			}
-
+			
 			// compute the minimum lazy slider movement required to stay within
 			// the follow circle.
+			auto& sl = ho->slider;
+			i64 repetition_len = (ho->end_time - ho->time) / sl.repetitions;
+
 
 			v2f cursor = ho->pos;
 			f64 follow_circle_rad = radius * 3;
-
-			auto& sl = ho->slider;
-			i64 repetition_len = (ho->end_time - ho->time) / sl.repetitions;
 
 			for (i64 t = slider_step; t < repetition_len; t+= slider_step) {
 				v2f p = ho->at(t);
@@ -109,9 +131,8 @@ namespace {
 			lazy_len_1st *= scaling_factor;
 
 			// -----------------------------------------------------------------
-			lazy_len_1st = 0.0;
-			// for some crazy reason the pp values match only if I entirely 
-			// remove slider lengths, otherwise I get too much pp
+			//lazy_len_1st = 0.0;
+			// for some maps, removing slider lengths entirely fixes inaccuracy
 			// TODO: ask tom about this, were slider length weights removed?
 			// -----------------------------------------------------------------
 
@@ -148,13 +169,14 @@ namespace {
 			lazy_len_rest *= scaling_factor;
 
 			// -----------------------------------------------------------------
-			lazy_len_rest = 0.0; // see above
+			//lazy_len_rest = 0.0; // see above
 			// -----------------------------------------------------------------
 
 			if (sl.repetitions % 2 == 1) {
 				norm_end = cursor * scaling_factor;
 				// end position = start position for odd amount of repetitions
 			}
+#endif
 		}
 
 		void calculate_strains(d_obj& prev) {
@@ -173,11 +195,8 @@ namespace {
 			f64 scaling = weight_scaling[dtype];
 
 			switch (ho->type) {
-				case obj::circle:
-					res = spacing_weight(distance(prev), dtype) * scaling;
-					break;
-
 				case obj::slider:
+#ifndef OPPAI_FAST
 				{
 					u16 reps = prev.ho->slider.repetitions - 1;
 
@@ -200,6 +219,10 @@ namespace {
 					}
 					break;
 				}
+#endif
+				case obj::circle:
+					res = spacing_weight(distance(prev), dtype) * scaling;
+					break;
 
 				case obj::spinner:
 					break;

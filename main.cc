@@ -40,7 +40,7 @@ namespace {
 }
 
 int main(int argc, char* argv[]) {
-	puts("o p p a i | v0.2.0");
+	puts("o p p a i | v0.3.0");
 	puts("s     d n | ");
 	puts("u     v s | (looking for");
 	puts("!     a p | cool ascii");
@@ -51,9 +51,11 @@ int main(int argc, char* argv[]) {
 	puts("        r |\n");
 
 	if (argc < 2) {
-		printf("Usage: %s /path/to/difficulty.osu [acc]%% +[mods] "
+		printf("Usage: %s /path/to/difficulty.osu "
+				"{[acc]%% or [num_100s]x100 [num_50s]x50} +[mods] "
 				"[combo]x [misses]m scorev[scoring_version]\n\n", *argv);
 		puts("acc: the accuracy in percent (example: 99.99%)");
+		puts("num_100s, num_50s: used to specify accuracy in 100 and 50 count");
 		puts("mods: any combination of nomod, nf, ez, hd, hr, dt, ht"
 				", nc, fl, so (example: +hddthr)");
 		puts("combo: the highest combo (example: 1337x)");
@@ -69,11 +71,13 @@ int main(int argc, char* argv[]) {
 	chk();
 
 	char* mods_str = nullptr;
-	f64 acc = 100.0;
+	f64 acc = 0;
 	u32 mods = mods::nomod;
 	u16 combo = b.max_combo;
 	u16 misses = 0;
 	u32 scoring = 1;
+	u16 c100 = 0, c50 = 0;
+	bool no_percent = false;
 
 	dbgputs("\nparsing arguments");
 	for (int i = 2; i < argc; i++) {
@@ -86,6 +90,24 @@ int main(int argc, char* argv[]) {
 		f64 tmp_acc;
 		if (sscanf(a, "%lf%s", &tmp_acc, suff) == 2 && !strcmp(suff, "%")) {
 			acc = tmp_acc;
+			continue;
+		}
+
+		// 100s, 50s
+		u16 tmp_c100 = 0, tmp_c50 = 0;
+		if (sscanf(a, "%" fu16 "%s", &tmp_c100, suff) == 2 && 
+			!strcmp(suff, "x100")) {
+
+			c100 = tmp_c100;
+			no_percent = true;
+			continue;
+		}
+
+		if (sscanf(a, "%" fu16 "%s", &tmp_c50, suff) == 2 && 
+			!strcmp(suff, "x50")) {
+
+			c50 = tmp_c50;
+			no_percent = true;
 			continue;
 		}
 
@@ -162,7 +184,9 @@ int main(int argc, char* argv[]) {
 	chk();
 	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
 
-	f64 pp = pp_calc_acc(aim, speed, b, acc, mods, combo, misses, scoring);
+	f64 pp = no_percent ? 
+		pp_calc(aim, speed, b, mods, combo, misses, 0xFFFF, c100, c50, scoring)
+	  : pp_calc_acc(aim, speed, b, acc, mods, combo, misses, scoring);
 	chk();
 	printf("\n%gpp\n", pp);
 

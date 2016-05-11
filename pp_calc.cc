@@ -35,25 +35,25 @@ f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, u32 used_mods,
 	u16 combo, u16 misses, u32 score_version) {
 
 	acc_percent = std::max(0.0, std::min(100.0, acc_percent));
-	u16 c300 = (u16)b.num_objects - misses, c100 = 0;
+	u16 c300 = (u16)b.num_objects - misses, c50 = 0, c100 = 0;
 
 	// epsilon is half of the smallest accuracy step that you can get by 
 	// changing 100 count the given accuracy is rounded to the closest possible
 	// acc that you can actually get on the map
-	f64 epsilon = acc_calc(c300, 0, 0, misses) - 
-		acc_calc(c300 - 1, 1, 0, misses);
+	f64 epsilon = acc_calc(c300, c100, c50, misses) - 
+		acc_calc(c300 - 1, c100 + 1, c50, misses);
 
 	epsilon *= 50.0;
 
 	f64 closest_acc;
-	while ((closest_acc = std::abs(acc_calc(c300, c100, 0, misses) * 100.0) 
-				- acc_percent) >= epsilon && closest_acc < acc_percent) {
+	while (std::abs((closest_acc = acc_calc(c300, c100, 0, misses) * 100.0 
+				- acc_percent)) >= epsilon && closest_acc < acc_percent) {
 		
 		c300--;
 		c100++;
 	}
 
-	return pp_calc(aim, speed, b, used_mods, combo, misses, c300, c100, 0, 
+	return pp_calc(aim, speed, b, used_mods, combo, misses, c300, c100, c50, 
 		score_version);
 }
 
@@ -177,7 +177,7 @@ f64 pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 			real_acc = (
 					(c300 - (total_hits - circles)) * 300.0 +
 					c100 * 100.0 +
-					c50 * 500.0
+					c50 * 50.0
 				) / (circles * 300);
 		}
 
