@@ -4,10 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <algorithm>
-
-#if NEEDS_TO_INSTALL_GENTOO
 #include <ctype.h> // tolower/toupper
-#endif
 
 #include "utils.h"
 #include "beatmap.h"
@@ -40,7 +37,7 @@ namespace {
 }
 
 int main(int argc, char* argv[]) {
-	puts("o p p a i | v0.3.0");
+	puts("o p p a i | v0.3.1");
 	puts("s     d n | ");
 	puts("u     v s | (looking for");
 	puts("!     a p | cool ascii");
