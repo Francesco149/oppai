@@ -86,7 +86,7 @@ void beatmap::apply_mods(u32 mods) {
 	}
 
 	od *= od_multiplier;
-	f64 odms = od0_ms - od_ms_step * od;
+	f64 odms = od0_ms - std::ceil(od_ms_step * od);
 
 	// ar
 	f64 ar_multiplier = 1;
@@ -127,10 +127,13 @@ void beatmap::apply_mods(u32 mods) {
 	arms /= speed;
 
 	// convert OD and AR back into their stat form
-	od = (-(odms - od0_ms)) / od_ms_step;
+	//od = (-(odms - od0_ms)) / od_ms_step;
+	od = (od0_ms - odms) / od_ms_step;
 	ar = ar <= 5.0
-		? (      (-(arms - ar0_ms)) / ar_ms_step1)
-		: (5.0 + (-(arms - ar5_ms)) / ar_ms_step2);
+		//? (      (-(arms - ar0_ms)) / ar_ms_step1)
+		//: (5.0 + (-(arms - ar5_ms)) / ar_ms_step2);
+		? (      (ar0_ms - arms) / ar_ms_step1)
+		: (5.0 + (ar5_ms - arms) / ar_ms_step2);
 
 	cs *= cs_multiplier;
 	cs = std::max(0.0, std::min(10.0, cs));
