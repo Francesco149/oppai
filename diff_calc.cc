@@ -273,7 +273,7 @@ namespace {
 
 	const f64 star_scaling_factor = 0.0675;
 	const f64 extreme_scaling_factor = 0.5;
-	const f64 playfield_width = 512; // in osu!pixels
+	const f32 playfield_width = 512.f; // in osu!pixels
 
 	// strains are calculated by analyzing the map in chunks and then taking the
 	// peak strains in each chunk.
@@ -341,8 +341,8 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed) {
 		return 0;
 	}
 
-	f64 circle_radius = (playfield_width / 16.f) * (1.f - 0.7f *
-			(b.cs - 5.f) / 5.f);
+	f32 circle_radius = (playfield_width / 16.f) * (1.f - 0.7f *
+		((f32)b.cs - 5.f) / 5.f);
 
 	dbgprintf("circle radius: %g\n", circle_radius);
 

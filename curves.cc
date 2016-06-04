@@ -58,9 +58,9 @@ namespace {
 			(p3.x - p2.x) + (p2.x * p2.x + p2.y * p2.y) *
 			(p1.x - p3.x) + (p3.x * p3.x + p3.y * p3.y) * (p2.x - p1.x)) / D;
 
-		v2f radius{ Ux - p1.x, Uy - p1.y };
+		v2f radius{ (f32)(Ux - p1.x), (f32)(Uy - p1.y) };
 		c->r = radius.len();
-		c->c = v2f{ Ux, Uy };
+		c->c = v2f{ (f32)Ux, (f32)Uy };
 	}
 
 	bool is_counter_clockwise(const v2f& a, const v2f& b, const v2f& c) {
@@ -75,8 +75,8 @@ namespace {
 		f64 _sin = sin(radians);
 		v2f d = p - c;
 		return v2f{
-			_cos * d.x - _sin * d.y + c.x,
-			_sin * d.x + _cos * d.y + c.y
+			(f32)(_cos * d.x - _sin * d.y + c.x),
+			(f32)(_sin * d.x + _cos * d.y + c.y)
 		};
 	}
 }
@@ -127,7 +127,7 @@ v2f bezier::at(f64 t) const {
 			pow(1.0 - t, n - i) *
 			pow(t, i);
 
-		res += points[i] * multiplier;
+		res += points[i] * (f32)multiplier;
 	}
 
 	return res;

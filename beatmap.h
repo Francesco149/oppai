@@ -66,12 +66,12 @@ struct beatmap {
 	char version[256] = {0};
 
 	// difficulty
-	f64 hp = 1337.f;
-	f64 cs = 1337.f;
-	f64 od = 1337.f;
-	f64 ar = 1337.f;
-	f64 sv = 1337.f;
-	f64 tick_rate = 1.f;
+	f64 hp = 1337;
+	f64 cs = 1337;
+	f64 od = 1337;
+	f64 ar = 1337;
+	f64 sv = 1337;
+	f64 tick_rate = 1;
 
 	u16 num_circles = 0;
 	u16 num_sliders = 0;

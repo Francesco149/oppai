@@ -8,7 +8,7 @@ const char* v2f::str() {
 	return buf;
 }
 
-f64 v2f::len() const {
+f32 v2f::len() const {
 	return sqrt(x * x + y * y);
 }
 

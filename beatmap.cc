@@ -127,10 +127,10 @@ void beatmap::apply_mods(u32 mods) {
 	arms /= speed;
 
 	// convert OD and AR back into their stat form
-	od = (od0_ms - odms) / od_ms_step;
+	od = (-(odms - od0_ms)) / od_ms_step;
 	ar = ar <= 5.0
-		? (      (ar0_ms - arms) / ar_ms_step1)
-		: (5.0 + (ar5_ms - arms) / ar_ms_step2);
+		? (      (-(arms - ar0_ms)) / ar_ms_step1)
+		: (5.0 + (-(arms - ar5_ms)) / ar_ms_step2);
 
 	cs *= cs_multiplier;
 	cs = std::max(0.0, std::min(10.0, cs));
@@ -450,7 +450,7 @@ parsed_timing_pt:
 		i32 type_num;
 
 		// slider
-		if (sscanf(tok, "%lf,%lf,%" fi64 ",%" fi32 ",%" fi32 ",%c", 
+		if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 ",%c", 
 				   &ho.pos.x, &ho.pos.y, &ho.time, &useless, &useless, 
 				   &ho.slider.type) == 6 && 
 					ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
@@ -464,7 +464,7 @@ parsed_timing_pt:
 		}
 
 		// circle, or spinner
-		else if (sscanf(tok, "%lf,%lf,%" fi64 ",%" fi32 ",%" fi32 ",%" fi64,
+		else if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 ",%" fi64,
 				   &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless, 
 				   &ho.end_time) == 6) {
 
@@ -479,7 +479,7 @@ parsed_timing_pt:
 		}
 
 		// old circle
-		else if (sscanf(tok, "%lf,%lf,%" fi64 ",%" fi32 ",%" fi32 "", 
+		else if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 "", 
 			&ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless) == 5) {
 
 			ho.type = obj::circle;
@@ -559,7 +559,7 @@ parsed_timing_pt:
 			// lastcurveX:lastcurveY,repeat,pixelLength,
 			// 		edgeHitsound,edgeAddition,addition
 			if (sscanf(slider_tok, 
-				      "%lf:%lf,%" fu16 ",%lf", 
+				      "%f:%f,%" fu16 ",%lf", 
 					  &pt.x, &pt.y, &sl.repetitions, &sl.length) == 4) {
 
 				dbgputs("last slider point");
@@ -568,7 +568,7 @@ parsed_timing_pt:
 			}
 			
 			// curveX:curveY
-			else if (sscanf(slider_tok, "%lf:%lf", &pt.x, &pt.y) != 2) {
+			else if (sscanf(slider_tok, "%f:%f", &pt.x, &pt.y) != 2) {
 				die("Invalid slider found");
 				return;
 			}
