@@ -36,10 +36,21 @@ f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, u32 used_mods,
 
 	acc_percent = std::max(0.0, std::min(100.0, acc_percent));
 
-	u16 c100 = std::round(-3.0 * ((acc_percent * 0.01 - 1.0) * b.num_objects + misses) * 0.5);
-	u16 c300 = b.num_objects - c100 - misses;
+	u16 c50 = 0;
+	u16 c100 = std::round(-3.0 * ((acc_percent * 0.01 - 1.0) * 
+		b.num_objects + misses) * 0.5);
 
-	return pp_calc(aim, speed, b, used_mods, combo, misses, c300, c100, 0, 
+	if (c100 > b.num_objects) {
+		c100 = 0;
+		c50 = std::round(-6.0 * ((acc_percent * 0.01 - 1.0) * 
+			b.num_objects + misses) * 0.2);
+
+		c50 = std::min((u16)b.num_objects, c50);
+	}
+
+	u16 c300 = b.num_objects - c100 - c50 - misses;
+
+	return pp_calc(aim, speed, b, used_mods, combo, misses, c300, c100, c50, 
 		score_version);
 }
 
