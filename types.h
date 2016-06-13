@@ -14,12 +14,12 @@ typedef uint_least32_t	u32;
 typedef uint_least16_t	u16;
 typedef uint_least8_t		u8;
 
-#define fi64 "ld"
+#define fi64 PRIdLEAST64
 #define fi32 "d"
 #define fi16 "hd"
 #define fi8	 "hhd"
 
-#define fu64 "llu"
+#define fu64 PRIuLEAST64
 #define fu32 "u"
 #define fu16 "hu"
 #define fu8  "hhu"
