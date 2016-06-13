@@ -34,18 +34,30 @@ namespace {
 f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, u32 used_mods, 
 	u16 combo, u16 misses, u32 score_version) {
 
-	acc_percent = std::max(0.0, std::min(100.0, acc_percent));
+	// cap misses to num objects
+	misses = std::min((u16)b.num_objects, misses);
 
+	// cap acc to max acc with the given amount of misses
+	u16 max300 = (u16)(b.num_objects - misses);
+
+	acc_percent = std::max(0.0, 
+			std::min(acc_calc(max300, 0, 0, misses) * 100.0, acc_percent));
+
+	// round acc to the closest amount of 100s or 50s
 	u16 c50 = 0;
 	u16 c100 = std::round(-3.0 * ((acc_percent * 0.01 - 1.0) * 
 		b.num_objects + misses) * 0.5);
 
-	if (c100 > b.num_objects) {
+	if (c100 > b.num_objects - misses) {
+		// acc lower than all 100s, use 50s
 		c100 = 0;
 		c50 = std::round(-6.0 * ((acc_percent * 0.01 - 1.0) * 
 			b.num_objects + misses) * 0.2);
 
-		c50 = std::min((u16)b.num_objects, c50);
+		c50 = std::min(max300, c50);
+	}
+	else {
+		c100 = std::min(max300, c100);
 	}
 
 	u16 c300 = b.num_objects - c100 - c50 - misses;
