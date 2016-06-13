@@ -44,3 +44,17 @@ Now navigate to the oppai folder and go to win/oppai. You will fin a visual
 studio 2015 solution file that you can open and compile for x86 and x64.
 
 I recommend compiling in Release mode unless you want all that debug info.
+
+# Compiling from source (MinGW)
+You can also use mingw, all you need is git, make and mingw (I personally installed 
+them through chocolatey) and /path/to/mingw/bin to your PATH environment
+variable.
+
+Open Powershell and type:
+```bash
+git clone https://github.com/Francesco149/oppai.git
+cd oppai/win
+make
+```
+
+The executable will be in the win directory.
