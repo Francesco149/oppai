@@ -10,7 +10,11 @@
 TARGET = oppai
 
 CXX = g++
-CXXFLAGS = -std=c++14 -Wall -Werror -DOPPAI_VERBOSE
+CXXFLAGS = -std=c++14 -Wall -Werror
+# when enabling OUTPUT_AS_JSON make sure to disable OPPAI_VERBOSE and SHOW_BEATMAP!!!
+# otherwise non-json stuff might get outputted and that messes up json-parsing :P
+# CXXFLAGS += -DOUTPUT_AS_JSON
+CXXFLAGS += -DOPPAI_VERBOSE
 CXXFLAGS += -DOPPAI_FAST
 #CXXFLAGS += -D_DEBUG 
 #CXXFLAGS += -DSHOW_BEATMAP -DSLIDERTEST
