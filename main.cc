@@ -12,12 +12,6 @@
 #include "diff_calc.h"
 #include "pp_calc.h"
 
-#ifdef OUTPUT_AS_JSON
-
-#include "json.hpp"
-
-#endif
-
 namespace {
 	beatmap b;
 	void print_beatmap();
@@ -193,6 +187,7 @@ int main(int argc, char* argv[]) {
 #ifndef OUTPUT_AS_JSON
 	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
 #endif
+
 	f64 pp = no_percent ? 
 		pp_calc(aim, speed, b, mods, combo, misses, 0xFFFF, c100, c50, scoring)
 	  : pp_calc_acc(aim, speed, b, acc, mods, combo, misses, scoring);
@@ -202,36 +197,31 @@ int main(int argc, char* argv[]) {
 #endif
 
 #ifdef OUTPUT_AS_JSON
-	nlohmann::json j = {
-		{"beatmap", {
-			{"artist", b.artist},
-			{"title", b.title},
-			{"version", b.version},
-			{"creator", b.creator},
-			{"od", b.od},
-			{"ar", b.ar},
-			{"cs", b.cs},
-			{"max_combo", b.max_combo},
-			{"num_circles", b.num_circles},
-			{"num_sliders", b.num_sliders},
-			{"num_spinners", b.num_spinners},
-		}},
-		{"combo", combo},
-		{"misses", misses},
-		{"score_version", scoring},
-		{"stars", stars},
-		{"aim_stars", aim},
-		{"speed_stars", speed},
-		{"pp", pp}
-	};
-
-	// add mods_str, needs to be done here cuz reasons
-	if(mods_str) {
-		j["mods_str"] = mods_str;
-	} else {
-		j["mods_str"] = nullptr;
-	}
-	puts(j.dump(4).c_str());
+	printf(
+		"{"
+		"\"artist\": \"%s\","
+		"\"title\": \"%s\","
+		"\"version\": \"%s\","
+		"\"creator\": \"%s\","
+		"\"mods_str\": \"%s\","
+		"\"od\":%g,\"ar\":%g,\"cs\":%g,"
+		"\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
+		"\"num_circles\": %" fu16 ","
+		"\"num_sliders\": %" fu16 ","
+		"\"num_spinners\": %" fu16 ","
+		"\"misses\": %" fu16 ","
+		"\"score_version\": %" fu32 ","
+		"\"stars\": %g,\"speed_stars\": %g,\"aim_stars\": %g,"
+		"\"pp\":%g"
+		"}\n",
+		b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "",
+		b.od, b.ar, b.cs,
+		combo, b.max_combo,
+		b.num_circles, b.num_sliders, b.num_spinners,
+		misses, scoring,
+		stars, aim, speed,
+		pp
+	);
 #endif
 	return 0;
 }
