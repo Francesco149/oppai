@@ -34,6 +34,11 @@ namespace {
 		fputs("\n", stderr);
 		exit(1);
 	}
+
+#ifdef OUTPUT_AS_JSON
+	// note: this WILL invalidate 'str'
+	void printStrAsJson(char* str);
+#endif
 }
 
 int main(int argc, char* argv[]) {
@@ -197,12 +202,20 @@ int main(int argc, char* argv[]) {
 #endif
 
 #ifdef OUTPUT_AS_JSON
+	// first print the artist, title, version and creator like this
+	// since json-string so " needs to be escaped
+	printf("{\"artist\":");
+	printStrAsJson(b.artist);
+	printf(",\"title\":");
+	printStrAsJson(b.title);
+	printf(",\"version\":");
+	printStrAsJson(b.version);
+	printf(",\"creator\":");
+	printStrAsJson(b.creator);
+
+	// now print the rest
 	printf(
-		"{"
-		"\"artist\": \"%s\","
-		"\"title\": \"%s\","
-		"\"version\": \"%s\","
-		"\"creator\": \"%s\","
+		","
 		"\"mods_str\": \"%s\","
 		"\"od\":%g,\"ar\":%g,\"cs\":%g,"
 		"\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
@@ -214,7 +227,7 @@ int main(int argc, char* argv[]) {
 		"\"stars\": %g,\"speed_stars\": %g,\"aim_stars\": %g,"
 		"\"pp\":%g"
 		"}\n",
-		b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "",
+		mods_str ? mods_str : "",
 		b.od, b.ar, b.cs,
 		combo, b.max_combo,
 		b.num_circles, b.num_sliders, b.num_spinners,
@@ -227,6 +240,23 @@ int main(int argc, char* argv[]) {
 }
 
 namespace {
+#ifdef OUTPUT_AS_JSON
+	void printStrAsJson(char* str) {
+		putchar('"');
+		// start tokenizing on "
+		char* tok = strtok(str, "\"");
+		// first token, print as is
+		printf("%s", tok);
+		tok = strtok(nullptr, "\"");
+		while(tok != nullptr) {
+			// for all remaning tokens, print it with \" in front of it
+			printf("\\\"%s", tok);
+			tok = strtok(nullptr, "\"");
+		}
+		putchar('"');
+	}
+#endif
+
 	void print_beatmap() {
 #ifdef SHOW_BEATMAP
 		printf(
