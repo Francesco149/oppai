@@ -22,6 +22,14 @@ namespace mods {
 
 struct beatmap;
 
+struct pp_calc_result {
+	f64 acc_percent;
+	f64 pp;
+	f64 aim_pp;
+	f64 speed_pp;
+	f64 acc_pp;
+};
+
 // rounds acc_percent to the closest possible 100-count and calculates ppv2.
 //
 // aim: aim difficulty
@@ -32,7 +40,7 @@ struct beatmap;
 // combo: desired combo. 0xFFFF will assume full combo.
 // misses: amount of misses
 // score_version: 1 or 2, affects accuracy pp.
-f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, 
+pp_calc_result pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, 
 	u32 used_mods=mods::nomod, u16 combo = 0xFFFF, u16 misses = 0, 
 	u32 score_version = 1);
 
@@ -48,7 +56,7 @@ f64 pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent,
 //       the number of misses, 100s and 50s.
 // c100, c50: number of 100s and 50s.
 // score_version: 1 or 2, affects accuracy pp.
-f64 pp_calc(f64 aim, f64 speed, beatmap& b, 
+pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b, 
 	u32 used_mods=mods::nomod, 
 	u16 combo = 0xFFFF, u16 misses = 0, u16 c300 = 0xFFFF, 
 	u16 c100 = 0, u16 c50 = 0, u32 score_version = 1);

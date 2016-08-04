@@ -15,10 +15,3 @@
 #define dbgprintf(fmt, ...)
 #endif
 
-#if OPPAI_VERBOSE
-#define vbputs puts
-#define vbprintf printf
-#else
-#define vbputs(x)
-#define vbprintf(fmt, ...)
-#endif

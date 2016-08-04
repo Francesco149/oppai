@@ -162,7 +162,7 @@ void beatmap::apply_mods(u32 mods) {
 
 v2f hit_object::at(i64 ms) {
 	if (type != obj::slider) {
-		//vbputs("Warning: tried to call .at on a non-slider object");
+		//dbgputs("Warning: tried to call .at on a non-slider object");
 		return pos;
 	}
 
@@ -227,7 +227,7 @@ void beatmap::parse(const char* osu_file, beatmap& b) {
 	}
 
 	if (!b.format_version) {
-		vbputs("Warning: File format version not found");
+		dbgputs("Warning: File format version not found");
 	}
 
 	// ---
@@ -357,7 +357,7 @@ void beatmap::parse(const char* osu_file, beatmap& b) {
 	}
 
 	if (b.ar > 10) {
-		vbputs("Warning: AR not found, assuming old map and setting AR=OD");
+		dbgputs("Warning: AR not found, assuming old map and setting AR=OD");
 		b.ar = b.od;
 	}
 

@@ -43,7 +43,7 @@ namespace {
 
 int main(int argc, char* argv[]) {
 #ifndef OUTPUT_AS_JSON
-	puts("o p p a i | v0.4.0");
+	puts("o p p a i | v0.4.1");
 	puts("s     d n | ");
 	puts("u     v s | (looking for");
 	puts("!     a p | cool ascii");
@@ -170,37 +170,38 @@ int main(int argc, char* argv[]) {
 	print_beatmap();
 	chk();
 
-#ifndef OUTPUT_AS_JSON
-	printf("\n%s - %s [%s] (%s) %s\n", 
-			b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "");
-#endif
-
 	b.apply_mods(mods);
 	chk();
 
+	f64 aim, speed;
+	f64 stars = d_calc(b, &aim, &speed);
+	chk();
+
+	auto res = no_percent ?
+		pp_calc(aim, speed, b, mods, combo, misses, 0xFFFF, c100, c50, scoring)
+		: pp_calc_acc(aim, speed, b, acc, mods, combo, misses, scoring);
+
+	chk();
+
 #ifndef OUTPUT_AS_JSON
+	printf("\n%s - %s [%s] (%s) %s\n", 
+			b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "");
+
 	printf("od%g ar%g cs%g\n", b.od, b.ar, b.cs);
 	printf("%" fu16 "/%" fu16 " combo\n", combo, b.max_combo);
 	printf("%" fu16 " circles, %" fu16 " sliders %" fu16 " spinners\n", 
 			b.num_circles, b.num_sliders, b.num_spinners);
 	printf("%" fu16 "xmiss\n", misses);
+	printf("%g%%\n", res.acc_percent);
 	printf("scorev%" fu32"\n\n", scoring);
-#endif
 
-	f64 aim, speed;
-	f64 stars = d_calc(b, &aim, &speed);
-	chk();
-#ifndef OUTPUT_AS_JSON
-	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
-#endif
+	printf("%g stars\naim stars: %g, speed stars: %g\n\n", stars, aim, speed);
 
-	f64 pp = no_percent ? 
-		pp_calc(aim, speed, b, mods, combo, misses, 0xFFFF, c100, c50, scoring)
-	  : pp_calc_acc(aim, speed, b, acc, mods, combo, misses, scoring);
-	chk();
+	printf("aim: %g\n", res.aim_pp);
+	printf("speed: %g\n", res.speed_pp);
+	printf("accuracy: %g\n", res.acc_pp);
 
-#ifndef OUTPUT_AS_JSON
-	printf("\n%gpp\n", pp);
+	printf("\n%gpp\n", res.pp);
 #else
 	// TODO: better separate the json logic so there is no need for ifdefs 
 	// everywhere
@@ -239,7 +240,7 @@ int main(int argc, char* argv[]) {
 		b.num_circles, b.num_sliders, b.num_spinners,
 		misses, scoring,
 		stars, aim, speed,
-		pp
+		res.pp
 	);
 #endif
 	return 0;
