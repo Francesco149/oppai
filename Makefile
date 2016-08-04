@@ -12,15 +12,8 @@ TARGET = oppai
 CXX = g++
 CXXFLAGS = -std=c++14 -Wall -Werror
 
-json_output = 0
-ifeq ($(json_output), 1)
-	# when enabling OUTPUT_AS_JSON make sure to disable SHOW_BEATMAP and _DEBUG
-	# otherwise non-json stuff might get outputted and that messes up parsing :P
-	CXXFLAGS += -DOUTPUT_AS_JSON
-else
-	#CXXFLAGS += -D_DEBUG 
-	#CXXFLAGS += -DSHOW_BEATMAP -DSLIDERTEST
-endif
+#CXXFLAGS += -D_DEBUG 
+#CXXFLAGS += -DSHOW_BEATMAP -DSLIDERTEST
 
 CXXFLAGS += -DOPPAI_FAST
 #CXXFLAGS = $(CXXFLAGS) -DSLIDERFIX
