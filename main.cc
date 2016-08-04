@@ -34,10 +34,16 @@ namespace {
 		fputs("\n", stderr);
 		exit(1);
 	}
+
+#ifdef OUTPUT_AS_JSON
+	// prints "str" escaped for json
+	void print_escaped_json_string(const char* str);
+#endif
 }
 
 int main(int argc, char* argv[]) {
-	puts("o p p a i | v0.3.5");
+#ifndef OUTPUT_AS_JSON
+	puts("o p p a i | v0.4.0");
 	puts("s     d n | ");
 	puts("u     v s | (looking for");
 	puts("!     a p | cool ascii");
@@ -46,7 +52,9 @@ int main(int argc, char* argv[]) {
 	puts("      e t | ");
 	puts("      d o | ");
 	puts("        r |\n");
+#endif
 
+	// TODO: output errors as JSON when in json mode
 	if (argc < 2) {
 		printf("Usage: %s /path/to/difficulty.osu "
 				"{[acc]%% or [num_100s]x100 [num_50s]x50} +[mods] "
@@ -162,34 +170,102 @@ int main(int argc, char* argv[]) {
 	print_beatmap();
 	chk();
 
+#ifndef OUTPUT_AS_JSON
 	printf("\n%s - %s [%s] (%s) %s\n", 
 			b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "");
+#endif
 
 	b.apply_mods(mods);
 	chk();
 
+#ifndef OUTPUT_AS_JSON
 	printf("od%g ar%g cs%g\n", b.od, b.ar, b.cs);
 	printf("%" fu16 "/%" fu16 " combo\n", combo, b.max_combo);
 	printf("%" fu16 " circles, %" fu16 " sliders %" fu16 " spinners\n", 
 			b.num_circles, b.num_sliders, b.num_spinners);
 	printf("%" fu16 "xmiss\n", misses);
 	printf("scorev%" fu32"\n\n", scoring);
+#endif
 
 	f64 aim, speed;
 	f64 stars = d_calc(b, &aim, &speed);
 	chk();
+#ifndef OUTPUT_AS_JSON
 	printf("\n%g stars\naim stars: %g, speed stars: %g\n", stars, aim, speed);
+#endif
 
 	f64 pp = no_percent ? 
 		pp_calc(aim, speed, b, mods, combo, misses, 0xFFFF, c100, c50, scoring)
 	  : pp_calc_acc(aim, speed, b, acc, mods, combo, misses, scoring);
 	chk();
-	printf("\n%gpp\n", pp);
 
+#ifndef OUTPUT_AS_JSON
+	printf("\n%gpp\n", pp);
+#else
+	// TODO: better separate the json logic so there is no need for ifdefs 
+	// everywhere
+	//
+	// TODO: have json output as a command line option rather than a compile 
+	// flag after doing the above
+
+	// first print the artist, title, version and creator like this
+	// since json-string so " and \ needs to be escaped
+	printf("{\"artist\":");
+	print_escaped_json_string(b.artist);
+	printf(",\"title\":");
+	print_escaped_json_string(b.title);
+	printf(",\"version\":");
+	print_escaped_json_string(b.version);
+	printf(",\"creator\":");
+	print_escaped_json_string(b.creator);
+
+	// now print the rest
+	printf(
+		","
+		"\"mods_str\": \"%s\","
+		"\"od\":%g,\"ar\":%g,\"cs\":%g,"
+		"\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
+		"\"num_circles\": %" fu16 ","
+		"\"num_sliders\": %" fu16 ","
+		"\"num_spinners\": %" fu16 ","
+		"\"misses\": %" fu16 ","
+		"\"score_version\": %" fu32 ","
+		"\"stars\": %g,\"speed_stars\": %g,\"aim_stars\": %g,"
+		"\"pp\":%g"
+		"}\n",
+		mods_str ? mods_str : "",
+		b.od, b.ar, b.cs,
+		combo, b.max_combo,
+		b.num_circles, b.num_sliders, b.num_spinners,
+		misses, scoring,
+		stars, aim, speed,
+		pp
+	);
+#endif
 	return 0;
 }
 
 namespace {
+#ifdef OUTPUT_AS_JSON
+	void print_escaped_json_string(const char* str) {
+		putchar('"');
+
+		const char* chars_to_escape = "\\\"";
+		for (; *str; ++str) {
+			// escape all characters in chars_to_escape
+			for (const char* p = chars_to_escape; *p; ++p) {
+				if (*p == *str) {
+					putchar('\\');
+				}
+			}
+
+			putchar(*str);
+		}
+
+		putchar('"');
+	}
+#endif
+
 	void print_beatmap() {
 #ifdef SHOW_BEATMAP
 		printf(
