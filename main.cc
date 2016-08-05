@@ -1,5 +1,5 @@
-#include "types.h"
-#include "common.h"
+#include "types.hh"
+#include "common.hh"
 
 // at the moment I'm not using static anywhere since it's a monolithic build
 // anyways. it might be nice to have it though, for extra scope safety
@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.4.6";
+const char* version_string = "0.4.7";
 
 // -----------------------------------------------------------------------------
 
