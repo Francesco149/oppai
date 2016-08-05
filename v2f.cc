@@ -8,8 +8,8 @@ const char* v2f::str() {
 	return buf;
 }
 
-f32 v2f::len() const {
-	return sqrt(x * x + y * y);
+f64 v2f::len() const {
+	return sqrt((f64)x * (f64)x + (f64)y * (f64)y);
 }
 
 v2f& v2f::norm() {

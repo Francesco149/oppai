@@ -96,7 +96,7 @@ void p_show(hit_object& ho) {
 	for (i64 ms = 0; ms <= duration; ms++) {
 		v2f p = ho.at(ms);
 
-		if (ms % 50 == 0 || ms == duration) {
+		if (ms % 1 == 0 || ms == duration || ms == duration - 1) {
 			printf("%" fi64 "ms %s\n", ms, p.str());
 		}
 

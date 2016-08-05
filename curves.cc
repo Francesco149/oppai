@@ -10,6 +10,7 @@
 #include <stdio.h>
 #endif
 
+// TODO: rewrite everything in here
 // ported from osu-web
 
 v2f pt_on_line(const v2f& p1, const v2f& p2, f64 t) {
@@ -22,7 +23,7 @@ v2f pt_on_line(const v2f& p1, const v2f& p2, f64 t) {
 // ---
 
 namespace {
-	const f64 curve_step = 0.0005;
+	const f64 curve_step = 0.02;
 }
 
 void curve::init(const v2f* pts, size_t npts) {
@@ -63,11 +64,13 @@ namespace {
 		c->c = v2f{ (f32)Ux, (f32)Uy };
 	}
 
+	/*
 	bool is_counter_clockwise(const v2f& a, const v2f& b, const v2f& c) {
 		v2f diff1 = b - a;
 		v2f diff2 = c - a;
 		return diff1.y * diff2.x > diff1.x * diff2.y;
 	}
+	*/
 
 	// rotates point p around the center c
 	v2f rotate(const v2f& c, const v2f& p, f64 radians) {
@@ -90,10 +93,15 @@ void circular_arc::init(const v2f* pts, f64 length) {
 v2f circular_arc::at(f64 t) const {
 	t = std::min(1.0, std::max(0.0, t));
 
-	f64 radians = (t * len) / c.r;
-	if (is_counter_clockwise(points[0], points[1], points[2])) {
-		radians *= -1;
-	}
+	f64 radians_start = atan2(points[0].y - c.c.y, points[0].x - c.c.x);
+	f64 radians_mid = atan2(points[1].y - c.c.y, points[1].x - c.c.x);
+	f64 radians_end = atan2(points[2].y - c.c.y, points[2].x - c.c.x);
+
+	while (radians_mid < radians_start) radians_mid += 2.0 * M_PI;
+	while (radians_end < radians_start) radians_end += 2.0 * M_PI;
+	if (radians_mid > radians_end) radians_end -= 2.0 * M_PI;
+
+	f64 radians = t * (radians_end - radians_start);
 
 	return rotate(c.c, points[0], radians);
 }

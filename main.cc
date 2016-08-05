@@ -13,7 +13,7 @@
 #include "pp_calc.h"
 
 namespace {
-	const char* version_string = "0.4.2";
+	const char* version_string = "0.4.3";
 
 	beatmap b;
 	void print_beatmap();

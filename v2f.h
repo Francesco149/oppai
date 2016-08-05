@@ -14,7 +14,7 @@ public:
 		v2f{v, v} {}
 
 	const char* str();
-	f32 len() const;
+	f64 len() const;
 	v2f& norm/*ies*/();
 
 #define do_op(o) \

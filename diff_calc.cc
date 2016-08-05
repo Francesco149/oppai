@@ -105,7 +105,6 @@ namespace {
 			auto& sl = ho->slider;
 			i64 repetition_len = (ho->end_time - ho->time) / sl.repetitions;
 
-
 			v2f cursor = ho->pos;
 			f64 follow_circle_rad = radius * 3;
 
@@ -129,12 +128,6 @@ namespace {
 			}
 
 			lazy_len_1st *= scaling_factor;
-
-			// -----------------------------------------------------------------
-			//lazy_len_1st = 0.0;
-			// for some maps, removing slider lengths entirely fixes inaccuracy
-			// TODO: ask tom about this, were slider length weights removed?
-			// -----------------------------------------------------------------
 
 			if (sl.repetitions % 2 == 1) {
 				norm_end = cursor * scaling_factor;
@@ -168,13 +161,8 @@ namespace {
 
 			lazy_len_rest *= scaling_factor;
 
-			// -----------------------------------------------------------------
-			//lazy_len_rest = 0.0; // see above
-			// -----------------------------------------------------------------
-
-			if (sl.repetitions % 2 == 1) {
+			if (sl.repetitions % 2 == 0) {
 				norm_end = cursor * scaling_factor;
-				// end position = start position for odd amount of repetitions
 			}
 #endif
 		}
