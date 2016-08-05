@@ -14,8 +14,7 @@ public:
 		v2f{v, v} {}
 
 	const char* str();
-	f64 len() const;
-	v2f& norm/*ies*/();
+	f32 len() const;
 
 #define do_op(o) \
 	inline void operator o##= (const v2f& v) { x o##= v.x; y o##= v.y; } 	   \

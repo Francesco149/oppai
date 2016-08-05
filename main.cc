@@ -8,15 +8,17 @@
 
 #include "utils.h"
 #include "beatmap.h"
-#include "preview_window.h"
 #include "diff_calc.h"
 #include "pp_calc.h"
 
 namespace {
-	const char* version_string = "0.4.3";
+	const char* version_string = "0.4.4";
 
 	beatmap b;
+
+#ifdef SHOW_BEATMAP
 	void print_beatmap();
+#endif
 
 	const char* const mod_strs[] {
 		"nomod", "nf", "ez", "hd", "hr", "dt", "ht", "nc", "fl", "so"
@@ -301,11 +303,10 @@ main(int argc, char* argv[])
 
 	chk();
 
-	p_init(argc, argv);
-	chk();
-
+#ifdef SHOW_BEATMAP
 	print_beatmap();
 	chk();
+#endif
 
 	b.apply_mods(mods);
 	chk();
@@ -331,9 +332,9 @@ main(int argc, char* argv[])
 	return 0;
 }
 
+#ifdef SHOW_BEATMAP
 namespace {
 	void print_beatmap() {
-#ifdef SHOW_BEATMAP
 		printf(
 			"Format version: %" fi32 "\n"
 			"Stack Leniency: %g\n"
@@ -364,12 +365,11 @@ namespace {
 		}
 
 		printf("\n> %zd hit objects\n", b.num_objects);
-#endif
+
 		for (size_t i = 0; i < b.num_objects; i++) {
 
 			auto& ho = b.objects[i];
 			switch (ho.type) {
-#ifdef SHOW_BEATMAP
 				case obj::circle:
 					printf("%" fi64 ": Circle (%g, %g)\n", 
 						ho.time, ho.pos.x, ho.pos.y);
@@ -379,15 +379,13 @@ namespace {
 					printf("%" fi64 "-%" fi64 ": Spinner\n", 
 							ho.time, ho.end_time);
 					break;
-#else
+
 			case obj::circle:
 			case obj::spinner:
 				break;
-#endif
 
 				case obj::slider:
 				{
-#ifdef SHOW_BEATMAP
 					auto& sl = ho.slider;
 
 					printf(
@@ -402,9 +400,7 @@ namespace {
 					}
 
 					puts("");
-#endif
 
-					p_show(ho);
 					break;
 				}
 
@@ -415,3 +411,4 @@ namespace {
 		}
 	}
 }
+#endif

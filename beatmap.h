@@ -19,14 +19,10 @@ enum class obj : u8 {
 struct slider_data {
 	char type;
 
-	std::vector<v2f> points;
-	std::vector<v2f> pos_at_ms; // position at every millisecond for
-								// bezier and catmull sliders
-	
-	// NOTE: pos_at_ms is initialized by calling .at on hit_object at least once
+	std::vector<v2f> points; // TODO: get rid of vector
 
-	u16 repetitions = 0;
-	f64 length = 0;
+	u16 repetitions = 0; // starts at 1 for non-repeating sliders
+	f64 length = 0; // how much distance the curve travels in osu pixels
 };
 
 struct hit_object {
@@ -35,13 +31,6 @@ struct hit_object {
 	obj type = obj::invalid;
 	i64 end_time = 0; // for spinners and sliders
 	slider_data slider;
-
-	// get position at given millisecond offset (for sliders).
-	// the offset is relative to the object's time, which means that it ranges 
-	// from 0 to end_time - time.
-	// NOTE: the first call to this will be slow, as it will pre-calculate
-	//       the entire curve for subsequent calls.
-	v2f at(i64 ms);
 };
 
 struct timing_point {

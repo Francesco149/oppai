@@ -9,7 +9,6 @@
 #endif
 
 #include "utils.h"
-#include "slider_calc.h"
 #include "pp_calc.h" // TODO: move the mods namespace elsewhere?
 
 namespace {
@@ -158,15 +157,6 @@ void beatmap::apply_mods(u32 mods) {
 		o.time = (i64)((f64)o.time / speed);
 		o.end_time = (i64)((f64)o.end_time / speed);
 	}
-}
-
-v2f hit_object::at(i64 ms) {
-	if (type != obj::slider) {
-		//dbgputs("Warning: tried to call .at on a non-slider object");
-		return pos;
-	}
-
-	return slider_at(*this, ms);
 }
 
 void beatmap::parse(const char* osu_file, beatmap& b) {

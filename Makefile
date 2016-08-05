@@ -13,12 +13,10 @@ CXX = g++
 CXXFLAGS = -std=c++14 -Wall -Werror
 
 #CXXFLAGS += -D_DEBUG 
-#CXXFLAGS += -DSHOW_BEATMAP -DSLIDERTEST
-
-CXXFLAGS += -DOPPAI_FAST
+#CXXFLAGS += -DSHOW_BEATMAP
 
 LINKER = $(CXX) -o
-LFLAGS = -lm -lstdc++ #-lGL -lglut
+LFLAGS = -lm -lstdc++
 
 SRCDIR = .
 OBJDIR = obj

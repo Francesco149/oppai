@@ -11,12 +11,12 @@ TARGET = oppai.exe
 
 CXX = g++
 CXXFLAGS = -std=c++14 -Wall -Werror
-CXXFLAGS += -DOPPAI_FAST
+
 #CXXFLAGS += -D_DEBUG 
-#CXXFLAGS += -DSHOW_BEATMAP -DSLIDERTEST
+#CXXFLAGS += -DSHOW_BEATMAP
 
 LINKER = $(CXX) -o
-LFLAGS = -lm -lstdc++ #-lGL -lglut
+LFLAGS = -lm -lstdc++
 
 SRCDIR = ..
 OBJDIR = obj
