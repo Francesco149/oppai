@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.4.5";
+const char* version_string = "0.4.6";
 
 // -----------------------------------------------------------------------------
 
@@ -96,7 +96,6 @@ void print_beatmap();
 // output modules
 #define print_sig(name)			\
 	void name(					\
-		beatmap&	b, 			\
 		char*		mods_str,	\
 		u16			combo,		\
 		u16			misses,		\
@@ -380,7 +379,7 @@ int main(int argc, char* argv[]) {
 	}
 	chk();
 
-	m->print(b, mods_str, combo, misses, scoring, stars, aim, speed, res);
+	m->print(mods_str, combo, misses, scoring, stars, aim, speed, res);
 
 	// ---
 

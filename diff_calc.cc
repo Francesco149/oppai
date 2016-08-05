@@ -20,7 +20,7 @@ const f64 single_spacing = 125;
 const f64 weight_scaling[] = { 1400, 26.25 };
 
 // non-normalized diameter where the circlesize buff starts
-const f64 circlesize_buff_treshold = 30;
+const f32 circlesize_buff_treshold = 30;
 
 namespace diff {
 	const u8 speed = 0, 
@@ -38,18 +38,18 @@ struct d_obj {
 	v2f norm_start;
 	v2f norm_end;
 
-	void init(hit_object* base_object, f64 radius) {
+	void init(hit_object* base_object, f32 radius) {
 		this->ho = base_object;
 
 		// positions are normalized on circle radius so that we can calc as
 		// if everything was the same circlesize
-		f64 scaling_factor = 52.0 / radius;
+		f32 scaling_factor = 52.0f / radius;
 
 		// cs buff (credits to osuElements, I have confirmed that this is
 		// indeed accurate)
 		if (radius < circlesize_buff_treshold) {
 			scaling_factor *= 
-				1 + (circlesize_buff_treshold - radius) * 0.02;
+				1.f + (circlesize_buff_treshold - radius) * 0.02f;
 		}
 
 		norm_start = ho->pos * scaling_factor;

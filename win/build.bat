@@ -4,8 +4,9 @@ mkdir ..\build
 pushd ..\build
 cl 	-D_CRT_SECURE_NO_WARNINGS=1 ^
 	-DNOMINMAX=1 ^
-	-nologo -MTd -Gm- -GR- -EHa- -W4 -WX ^
+	-nologo -MT -Gm- -GR- -EHsc -W4 -WX ^
 	-wd4201 ^
 	-wd4100 ^
-	..\main.cc
+	..\main.cc ^
+	-Feoppai.exe
 popd
