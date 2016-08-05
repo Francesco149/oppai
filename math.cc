@@ -1,6 +1,3 @@
-#pragma once
-#include "types.h"
-
 class v2f {
 public:
 	f32 x = 0, y = 0;
@@ -13,8 +10,14 @@ public:
 	v2f(f32 v) :
 		v2f{v, v} {}
 
-	const char* str();
-	f32 len() const;
+	const char* str() {
+		sprintf(buf, "(%g %g)", x, y);
+		return buf;
+	}
+
+	f32 len() const {
+		return sqrt(x * x + y * y);
+	}
 
 #define do_op(o) \
 	inline void operator o##= (const v2f& v) { x o##= v.x; y o##= v.y; } 	   \
@@ -35,3 +38,4 @@ protected:
 	// without having to pass copies of the string around
 	char buf[42] = { 0 };
 };
+

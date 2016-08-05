@@ -1,47 +1,99 @@
+#include "types.h"
 #include "common.h"
 
+// at the moment I'm not using static anywhere since it's a monolithic build
+// anyways. it might be nice to have it though, for extra scope safety
+
+// common includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <algorithm>
+#include <cmath>
+
 #include <ctype.h> // tolower/toupper
 
-#include "utils.h"
-#include "beatmap.h"
-#include "diff_calc.h"
-#include "pp_calc.h"
+const char* version_string = "0.4.5";
 
-namespace {
-	const char* version_string = "0.4.4";
+// -----------------------------------------------------------------------------
 
-	beatmap b;
+// sets the last error to msg if it's not already set
+#define die(msg) dbgputs(msg); die_impl(msg)
 
-#ifdef SHOW_BEATMAP
-	void print_beatmap();
-#endif
+const char* last_err = 0;
 
-	const char* const mod_strs[] {
-		"nomod", "nf", "ez", "hd", "hr", "dt", "ht", "nc", "fl", "so"
-	};
-	const u32 mod_masks[] {
-		mods::nomod, mods::nf, mods::ez, mods::hd, mods::hr, mods::dt, mods::ht,
-		mods::nc, mods::fl, mods::so
-	};
-	const size_t num_mods = sizeof(mod_masks) / sizeof(mod_masks[0]);
-
-	void chk() {
-		if (!err()) {
-			return;
-		}
-
-		fputs(err(), stderr);
-		fputs("\n", stderr);
-		exit(1);
+void die_impl(const char* msg) {
+	if (last_err) {
+		return;
 	}
+
+	last_err = msg;
 }
 
-namespace
-{
+// returns the last error, or 0 if no error has occurred
+const char* err() {
+	return last_err;
+}
+
+void chk() {
+	if (!err()) {
+		return;
+	}
+
+	fputs(err(), stderr);
+	fputs("\n", stderr);
+	exit(1);
+}
+
+// -----------------------------------------------------------------------------
+
+// these don't necessarily need to match the pp processor's bitmask 1:1 but 
+// I'll keep them consistent just because
+namespace mods {
+	const u32 
+		nomod = 0, 
+		nf = 1 << 0,
+		ez = 1 << 1,
+		hd = 1 << 3,
+		hr = 1 << 4,
+		dt = 1 << 6,
+		ht = 1 << 8,
+		nc = 1 << 9,
+		fl = 1 << 10,
+		so = 1 << 12, 
+		speed_changing = dt | ht | nc, 
+		map_changing = hr | ez | speed_changing;
+}
+
+const char* const mod_strs[] {
+	"nomod", "nf", "ez", "hd", "hr", "dt", "ht", "nc", "fl", "so"
+};
+const u32 mod_masks[] {
+	mods::nomod, mods::nf, mods::ez, mods::hd, mods::hr, mods::dt, mods::ht,
+	mods::nc, mods::fl, mods::so
+};
+const size_t num_mods = sizeof(mod_masks) / sizeof(mod_masks[0]);
+
+// -----------------------------------------------------------------------------
+
+// this a monolithic build. stuff is separated into files purely for readability
+#include "math.cc"
+#include "beatmap.cc"
+#include "diff_calc.cc"
+#include "pp_calc.cc"
+
+// -----------------------------------------------------------------------------
+
+// globals for main
+beatmap b;
+
+#ifdef SHOW_BEATMAP
+void print_beatmap();
+#endif
+
+// -----------------------------------------------------------------------------
+
+// output modules
 #define print_sig(name)			\
 	void name(					\
 		beatmap&	b, 			\
@@ -54,128 +106,125 @@ namespace
 		f64			speed,		\
 		pp_calc_result& res)
 
-	print_sig(text_print)
-	{
-		printf("o p p a i | v%s\n", version_string);
-		puts("s     d n | ");
-		puts("u     v s | (looking for");
-		puts("!     a p | cool ascii");
-		puts("      n e | to put here)");
-		puts("      c c | ");
-		puts("      e t | ");
-		puts("      d o | ");
-		puts("        r |\n");
+// text output
+print_sig(text_print) {
+	printf("o p p a i | v%s\n", version_string);
+	puts("s     d n | ");
+	puts("u     v s | (looking for");
+	puts("!     a p | cool ascii");
+	puts("      n e | to put here)");
+	puts("      c c | ");
+	puts("      e t | ");
+	puts("      d o | ");
+	puts("        r |\n");
 
-		printf("\n%s - %s [%s] (%s) %s\n", 
-				b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "");
+	printf("\n%s - %s [%s] (%s) %s\n", 
+			b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "");
 
-		printf("od%g ar%g cs%g\n", b.od, b.ar, b.cs);
-		printf("%" fu16 "/%" fu16 " combo\n", combo, b.max_combo);
-		printf("%" fu16 " circles, %" fu16 " sliders %" fu16 " spinners\n", 
-				b.num_circles, b.num_sliders, b.num_spinners);
-		printf("%" fu16 "xmiss\n", misses);
-		printf("%g%%\n", res.acc_percent);
-		printf("scorev%" fu32"\n\n", scoring);
+	printf("od%g ar%g cs%g\n", b.od, b.ar, b.cs);
+	printf("%" fu16 "/%" fu16 " combo\n", combo, b.max_combo);
+	printf("%" fu16 " circles, %" fu16 " sliders %" fu16 " spinners\n", 
+			b.num_circles, b.num_sliders, b.num_spinners);
+	printf("%" fu16 "xmiss\n", misses);
+	printf("%g%%\n", res.acc_percent);
+	printf("scorev%" fu32"\n\n", scoring);
 
-		printf("%g stars\naim stars: %g, speed stars: %g\n\n", stars, aim, speed);
+	printf("%g stars\naim stars: %g, speed stars: %g\n\n", stars, aim, speed);
 
-		printf("aim: %g\n", res.aim_pp);
-		printf("speed: %g\n", res.speed_pp);
-		printf("accuracy: %g\n", res.acc_pp);
+	printf("aim: %g\n", res.aim_pp);
+	printf("speed: %g\n", res.speed_pp);
+	printf("accuracy: %g\n", res.acc_pp);
 
-		printf("\n%gpp\n", res.pp);
-	}
-
-	void print_escaped_json_string(const char* str) {
-		putchar('"');
-
-		const char* chars_to_escape = "\\\"";
-		for (; *str; ++str) {
-			// escape all characters in chars_to_escape
-			for (const char* p = chars_to_escape; *p; ++p) {
-				if (*p == *str) {
-					putchar('\\');
-				}
-			}
-
-			putchar(*str);
-		}
-
-		putchar('"');
-	}
-
-	print_sig(json_print)
-	{
-		printf("{\"oppai_version\":");
-		print_escaped_json_string(version_string);
-
-		// first print the artist, title, version and creator like this
-		// since json-string so " and \ needs to be escaped
-		printf(",\"artist\":");
-		print_escaped_json_string(b.artist);
-		printf(",\"title\":");
-		print_escaped_json_string(b.title);
-		printf(",\"version\":");
-		print_escaped_json_string(b.version);
-		printf(",\"creator\":");
-		print_escaped_json_string(b.creator);
-
-		// now print the rest
-		printf(
-			","
-			"\"mods_str\": \"%s\","
-			"\"od\":%g,\"ar\":%g,\"cs\":%g,"
-			"\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
-			"\"num_circles\": %" fu16 ","
-			"\"num_sliders\": %" fu16 ","
-			"\"num_spinners\": %" fu16 ","
-			"\"misses\": %" fu16 ","
-			"\"score_version\": %" fu32 ","
-			"\"stars\": %g,\"speed_stars\": %g,\"aim_stars\": %g,"
-			"\"pp\":%g"
-			"}\n",
-			mods_str ? mods_str : "",
-			b.od, b.ar, b.cs,
-			combo, b.max_combo,
-			b.num_circles, b.num_sliders, b.num_spinners,
-			misses, scoring,
-			stars, aim, speed,
-			res.pp
-		);
-	}
-
-	typedef print_sig(print_callback);
-#undef print_sig
-
-	struct output_module 
-	{
-		const char* name;
-		print_callback* print;
-	};
-
-	output_module modules[] = {
-		{ "text", text_print }, 
-		{ "json", json_print }, 
-		{ 0, 0 }
-	};
-
-	output_module*
-	get_output_module(const char* name)
-	{
-		for (output_module* m = modules; m->name; ++m)
-		{
-			if (!strcmp(m->name, name)) {
-				return m;
-			}
-		}
-
-		return 0;
-	}
+	printf("\n%gpp\n", res.pp);
 }
 
-int 
-main(int argc, char* argv[]) 
-{
+// json output
+void print_escaped_json_string(const char* str) {
+	putchar('"');
+
+	const char* chars_to_escape = "\\\"";
+	for (; *str; ++str) {
+		// escape all characters in chars_to_escape
+		for (const char* p = chars_to_escape; *p; ++p) {
+			if (*p == *str) {
+				putchar('\\');
+			}
+		}
+
+		putchar(*str);
+	}
+
+	putchar('"');
+}
+
+print_sig(json_print) {
+	printf("{\"oppai_version\":");
+	print_escaped_json_string(version_string);
+
+	// first print the artist, title, version and creator like this
+	// since json-string so " and \ needs to be escaped
+	printf(",\"artist\":");
+	print_escaped_json_string(b.artist);
+	printf(",\"title\":");
+	print_escaped_json_string(b.title);
+	printf(",\"version\":");
+	print_escaped_json_string(b.version);
+	printf(",\"creator\":");
+	print_escaped_json_string(b.creator);
+
+	// now print the rest
+	printf(
+		","
+		"\"mods_str\": \"%s\","
+		"\"od\":%g,\"ar\":%g,\"cs\":%g,"
+		"\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
+		"\"num_circles\": %" fu16 ","
+		"\"num_sliders\": %" fu16 ","
+		"\"num_spinners\": %" fu16 ","
+		"\"misses\": %" fu16 ","
+		"\"score_version\": %" fu32 ","
+		"\"stars\": %g,\"speed_stars\": %g,\"aim_stars\": %g,"
+		"\"pp\":%g"
+		"}\n",
+		mods_str ? mods_str : "",
+		b.od, b.ar, b.cs,
+		combo, b.max_combo,
+		b.num_circles, b.num_sliders, b.num_spinners,
+		misses, scoring,
+		stars, aim, speed,
+		res.pp
+	);
+}
+
+// ---
+
+typedef print_sig(print_callback);
+#undef print_sig
+
+struct output_module {
+	const char* name;
+	print_callback* print;
+};
+
+output_module modules[] = {
+	{ "text", text_print }, 
+	{ "json", json_print }, 
+	{ 0, 0 }
+};
+
+output_module* get_output_module(const char* name) {
+	for (output_module* m = modules; m->name; ++m) {
+		if (!strcmp(m->name, name)) {
+			return m;
+		}
+	}
+
+	return 0;
+}
+
+// -----------------------------------------------------------------------------
+
+int main(int argc, char* argv[]) {
 	// TODO: abstract error outputting into the output modules
 	if (argc < 2) {
 		printf("Usage: %s /path/to/difficulty.osu "
@@ -303,6 +352,8 @@ main(int argc, char* argv[])
 
 	chk();
 
+	// ---
+
 #ifdef SHOW_BEATMAP
 	print_beatmap();
 	chk();
@@ -321,6 +372,8 @@ main(int argc, char* argv[])
 
 	chk();
 
+	// ---
+
 	output_module* m = get_output_module(output_module_name);
 	if (!m) {
 		die("The specified output module does not exist");
@@ -329,86 +382,83 @@ main(int argc, char* argv[])
 
 	m->print(b, mods_str, combo, misses, scoring, stars, aim, speed, res);
 
+	// ---
+
 	return 0;
 }
 
 #ifdef SHOW_BEATMAP
-namespace {
-	void print_beatmap() {
-		printf(
-			"Format version: %" fi32 "\n"
-			"Stack Leniency: %g\n"
-			"Mode: %" fi32 "\n"
-			"Title: %s\n"
-			"Artist: %s\n"
-			"Version: %s\n"
-			"HP%g CS%g OD%g AR%g SV%g\n\n"
-			,
-			b.format_version, 
-			b.stack_leniency, 
-			b.mode, 
-			b.title, 
-			b.artist, 
-			b.version, 
-			b.hp, b.cs, b.od, b.ar, b.sv
-		);
+void print_beatmap() {
+	printf(
+		"Format version: %" fi32 "\n"
+		"Stack Leniency: %g\n"
+		"Mode: %" fi32 "\n"
+		"Title: %s\n"
+		"Artist: %s\n"
+		"Version: %s\n"
+		"HP%g CS%g OD%g AR%g SV%g\n\n"
+		,
+		b.format_version, 
+		b.stack_leniency, 
+		b.mode, 
+		b.title, 
+		b.artist, 
+		b.version, 
+		b.hp, b.cs, b.od, b.ar, b.sv
+	);
 
-		printf("> %zd timing points\n", b.num_timing_points);
-		for (size_t i = 0; i < b.num_timing_points; i++) {
-			auto& tp = b.timing_points[i];
-			printf("%" fi64 ": ", tp.time);
-			if (!tp.inherit) {
-				printf("%g bpm\n", 60000.0 / tp.ms_per_beat);
-			} else {
-				printf("%gx\n", -100.0 / tp.ms_per_beat);
-			}
+	printf("> %zd timing points\n", b.num_timing_points);
+	for (size_t i = 0; i < b.num_timing_points; i++) {
+		auto& tp = b.timing_points[i];
+		printf("%" fi64 ": ", tp.time);
+		if (!tp.inherit) {
+			printf("%g bpm\n", 60000.0 / tp.ms_per_beat);
+		} else {
+			printf("%gx\n", -100.0 / tp.ms_per_beat);
 		}
+	}
 
-		printf("\n> %zd hit objects\n", b.num_objects);
+	printf("\n> %zd hit objects\n", b.num_objects);
 
-		for (size_t i = 0; i < b.num_objects; i++) {
+	for (size_t i = 0; i < b.num_objects; i++) {
 
-			auto& ho = b.objects[i];
-			switch (ho.type) {
-				case obj::circle:
-					printf("%" fi64 ": Circle (%g, %g)\n", 
-						ho.time, ho.pos.x, ho.pos.y);
-					break;
-
-				case obj::spinner:
-					printf("%" fi64 "-%" fi64 ": Spinner\n", 
-							ho.time, ho.end_time);
-					break;
-
+		auto& ho = b.objects[i];
+		switch (ho.type) {
 			case obj::circle:
-			case obj::spinner:
+				printf("%" fi64 ": Circle (%g, %g)\n", 
+					ho.time, ho.pos.x, ho.pos.y);
 				break;
 
-				case obj::slider:
-				{
-					auto& sl = ho.slider;
+			case obj::spinner:
+				printf("%" fi64 "-%" fi64 ": Spinner\n", 
+						ho.time, ho.end_time);
+				break;
 
-					printf(
-						"%" fi64 "-%" fi64 ": Slider "
-						"[Type %c, Length %g, %" fu16 " Repetitions] ", 
-						ho.time, ho.end_time, sl.type, 
-						sl.length, sl.repetitions);
+			case obj::slider:
+			{
+				auto& sl = ho.slider;
 
-					for (size_t j = 0; j < sl.points.size(); j++) {
-						auto& pt = sl.points[j];
-						printf("(%g, %g) ", pt.x, pt.y);
-					}
+				printf(
+					"%" fi64 "-%" fi64 ": Slider "
+					"[Type %c, Length %g, %" fu16 " Repetitions] ", 
+					ho.time, ho.end_time, sl.type, 
+					sl.length, sl.repetitions);
 
-					puts("");
-
-					break;
+				for (size_t j = 0; j < sl.points.size(); j++) {
+					auto& pt = sl.points[j];
+					printf("(%g, %g) ", pt.x, pt.y);
 				}
 
-				default:
-					die("Invalid object type");
-					return;
+				puts("");
+
+				break;
 			}
+
+			default:
+				die("Invalid object type");
+				return;
 		}
 	}
 }
 #endif
+

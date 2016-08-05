@@ -1,74 +1,47 @@
-#include "pp_calc.h"
-
-#include "beatmap.h"
-#include "utils.h"
-
-#include <cmath>
-#include <stdio.h>
-#if NEEDS_TO_INSTALL_GENTOO
-#include <algorithm>
-#endif
-
-// various utility funcs to reduce code redundancy
-namespace {
-	// turns the beatmaps' strain attributes into a larger value, suitable 
-	// for pp calc. not 100% sure what is going on here, but it probably makes
-	// strain values scale a bit exponentially.
-	f64 base_strain(f64 strain) {
-		return std::pow(5.0 * std::max(1.0, strain / 0.0675) - 4.0, 3.0) / 
-			100000.0;
-	}
-
-	f64 acc_calc(u16 c300, u16 c100, u16 c50, u16 misses) {
-		u16 total_hits = c300 + c100 + c50 + misses;
-		f64 acc = 0.f;
-		if (total_hits > 0) {
-			acc = (
-				c50 * 50.0 + c100 * 100.0 + c300 * 300.0) / 
-				(total_hits * 300.0);
-		}
-		return acc;
-	}
+// turns the beatmaps' strain attributes into a larger value, suitable 
+// for pp calc. not 100% sure what is going on here, but it probably makes
+// strain values scale a bit exponentially.
+f64 base_strain(f64 strain) {
+	return std::pow(5.0 * std::max(1.0, strain / 0.0675) - 4.0, 3.0) / 
+		100000.0;
 }
 
-pp_calc_result pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, 
-	u32 used_mods, u16 combo, u16 misses, u32 score_version) {
-
-	// cap misses to num objects
-	misses = std::min((u16)b.num_objects, misses);
-
-	// cap acc to max acc with the given amount of misses
-	u16 max300 = (u16)(b.num_objects - misses);
-
-	acc_percent = std::max(0.0, 
-			std::min(acc_calc(max300, 0, 0, misses) * 100.0, acc_percent));
-
-	// round acc to the closest amount of 100s or 50s
-	u16 c50 = 0;
-	u16 c100 = std::round(-3.0 * ((acc_percent * 0.01 - 1.0) * 
-		b.num_objects + misses) * 0.5);
-
-	if (c100 > b.num_objects - misses) {
-		// acc lower than all 100s, use 50s
-		c100 = 0;
-		c50 = std::round(-6.0 * ((acc_percent * 0.01 - 1.0) * 
-			b.num_objects + misses) * 0.2);
-
-		c50 = std::min(max300, c50);
+f64 acc_calc(u16 c300, u16 c100, u16 c50, u16 misses) {
+	u16 total_hits = c300 + c100 + c50 + misses;
+	f64 acc = 0.f;
+	if (total_hits > 0) {
+		acc = (
+			c50 * 50.0 + c100 * 100.0 + c300 * 300.0) / 
+			(total_hits * 300.0);
 	}
-	else {
-		c100 = std::min(max300, c100);
-	}
-
-	u16 c300 = b.num_objects - c100 - c50 - misses;
-
-	return pp_calc(aim, speed, b, used_mods, combo, misses, c300, c100, c50, 
-		score_version);
+	return acc;
 }
 
-pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods, 
-	u16 combo, u16 misses, u16 c300, u16 c100, u16 c50, u32 score_version) {
+struct pp_calc_result {
+	f64 acc_percent;
+	f64 pp;
+	f64 aim_pp;
+	f64 speed_pp;
+	f64 acc_pp;
+};
 
+// calculates ppv2.
+//
+// aim: aim difficulty
+// speed: speed difficulty
+// b: the beatmap with map-modifying mods already applied
+// used_mods: the mods bitmask (see namespace mods)
+// combo: desired combo. 0xFFFF will assume full combo.
+// misses: amount of misses
+// c300: amount of 300s. 0xFFFF will automatically calculate this value based on
+//       the number of misses, 100s and 50s.
+// c100, c50: number of 100s and 50s.
+// score_version: 1 or 2, affects accuracy pp.
+pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b, 
+	u32 used_mods=mods::nomod, 
+	u16 combo = 0xFFFF, u16 misses = 0, u16 c300 = 0xFFFF, 
+	u16 c100 = 0, u16 c50 = 0, u32 score_version = 1)
+{
 	pp_calc_result res{0.0};
 
 	f64 od = b.od;
@@ -239,3 +212,50 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b, u32 used_mods,
 
 	return res;
 }
+
+// rounds acc_percent to the closest possible 100-count and calculates ppv2.
+//
+// aim: aim difficulty
+// speed: speed difficulty
+// b: the beatmap with map-modifying mods already applied
+// acc_percent: the desired accuracy in percent (0-100)
+// used_mods: the mods bitmask (see namespace mods)
+// combo: desired combo. 0xFFFF will assume full combo.
+// misses: amount of misses
+// score_version: 1 or 2, affects accuracy pp.
+pp_calc_result pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, 
+	u32 used_mods=mods::nomod, u16 combo = 0xFFFF, u16 misses = 0, 
+	u32 score_version = 1)
+{
+	// cap misses to num objects
+	misses = std::min((u16)b.num_objects, misses);
+
+	// cap acc to max acc with the given amount of misses
+	u16 max300 = (u16)(b.num_objects - misses);
+
+	acc_percent = std::max(0.0, 
+			std::min(acc_calc(max300, 0, 0, misses) * 100.0, acc_percent));
+
+	// round acc to the closest amount of 100s or 50s
+	u16 c50 = 0;
+	u16 c100 = std::round(-3.0 * ((acc_percent * 0.01 - 1.0) * 
+		b.num_objects + misses) * 0.5);
+
+	if (c100 > b.num_objects - misses) {
+		// acc lower than all 100s, use 50s
+		c100 = 0;
+		c50 = std::round(-6.0 * ((acc_percent * 0.01 - 1.0) * 
+			b.num_objects + misses) * 0.2);
+
+		c50 = std::min(max300, c50);
+	}
+	else {
+		c100 = std::min(max300, c100);
+	}
+
+	u16 c300 = b.num_objects - c100 - c50 - misses;
+
+	return pp_calc(aim, speed, b, used_mods, combo, misses, c300, c100, c50, 
+		score_version);
+}
+

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <cinttypes>
 
 typedef float	f32;
@@ -23,3 +24,4 @@ typedef uint_least8_t	u8;
 #define fu32 "u"
 #define fu16 "hu"
 #define fu8  "hhu"
+

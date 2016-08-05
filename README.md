@@ -22,17 +22,18 @@ windows)
 ```bash
 git clone https://github.com/Francesco149/oppai.git
 cd oppai
-make
+./build.sh
 ```
 
-To cross compile, you can edit the makefile and add, for example, ```-m32``` 
+To cross compile, you can edit the build.sh and add, for example, ```-m32``` 
 after g++ in CXX.
 
 # Compiling from source (Windows)
 You need to have git bash installed. The easiest way to get it is to install 
 GitHub desktop.
 
-You will also need visual studio 2015.
+You will also need visual studio. Any version should do. You don't even need the
+IDE, you can even get the stand-alone compiler without all the bloat.
 
 Open git bash and type:
 
@@ -40,21 +41,10 @@ Open git bash and type:
 git clone https://github.com/Francesco149/oppai.git
 ```
 
-Now navigate to the oppai folder and go to win/oppai. You will fin a visual 
-studio 2015 solution file that you can open and compile for x86 and x64.
-
-I recommend compiling in Release mode unless you want all that debug info.
-
-# Compiling from source (MinGW)
-You can also use mingw, all you need is git, make and mingw (I personally installed 
-them through chocolatey) and /path/to/mingw/bin to your PATH environment
-variable.
-
-Open Powershell and type:
+Now open a visual studio command prompt:
 ```bash
-git clone https://github.com/Francesco149/oppai.git
-cd oppai/win
-make
+cd \path\to\oppai\win
+build.bat
 ```
 
-The executable will be in the win directory.
+The executable will be found in the build directory.
