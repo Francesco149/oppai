@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.4.7";
+const char* version_string = "0.4.8";
 
 // -----------------------------------------------------------------------------
 
@@ -94,15 +94,16 @@ void print_beatmap();
 // -----------------------------------------------------------------------------
 
 // output modules
-#define print_sig(name)			\
-	void name(					\
-		char*		mods_str,	\
-		u16			combo,		\
-		u16			misses,		\
-		u32			scoring,	\
-		f64			stars,		\
-		f64			aim,		\
-		f64			speed,		\
+#define print_sig(name)					\
+	void name(							\
+		char*		mods_str,			\
+		u16			combo,				\
+		u16			misses,				\
+		u32			scoring,			\
+		f64			stars,				\
+		f64			aim,				\
+		f64			speed,				\
+		f64			rhythm_complexity,	\
 		pp_calc_result& res)
 
 // text output
@@ -133,6 +134,12 @@ print_sig(text_print) {
 	printf("aim: %g\n", res.aim_pp);
 	printf("speed: %g\n", res.speed_pp);
 	printf("accuracy: %g\n", res.acc_pp);
+	printf("rhythm awkwardness (beta): %g\n", rhythm_complexity);
+
+	// TODO clean-up complexity stuff, rename complexity to awkwardness etc
+	f64 complexity_bonus = 
+		std::max(1.0, std::min(1.15, std::pow(rhythm_complexity, 0.3)));
+	printf("awkwardness acc pp bonus (beta): %g\n", complexity_bonus);
 
 	printf("\n%gpp\n", res.pp);
 }
@@ -361,8 +368,8 @@ int main(int argc, char* argv[]) {
 	b.apply_mods(mods);
 	chk();
 
-	f64 aim, speed;
-	f64 stars = d_calc(b, &aim, &speed);
+	f64 aim, speed, rhythm_complexity;
+	f64 stars = d_calc(b, &aim, &speed, &rhythm_complexity);
 	chk();
 
 	auto res = no_percent ?
@@ -379,7 +386,8 @@ int main(int argc, char* argv[]) {
 	}
 	chk();
 
-	m->print(mods_str, combo, misses, scoring, stars, aim, speed, res);
+	m->print(mods_str, combo, misses, scoring, 
+			 stars, aim, speed, rhythm_complexity, res);
 
 	// ---
 

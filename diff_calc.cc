@@ -193,7 +193,7 @@ f64 calculate_difficulty(u8 type) {
 // aim, speed: pointers to the variables where 
 //             aim and speed stars will be stored.
 // returns overall stars
-f64 d_calc(beatmap& b, f64* aim, f64* speed) {
+f64 d_calc(beatmap& b, f64* aim, f64* speed, f64* rhythm_complexity) {
 	dbgputs("\ndiff calc");
 
 	if (b.mode != 0) {
@@ -215,6 +215,12 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed) {
 		}
 	}
 
+	i64 avg_interval = 0;
+	i64 min_interval = 0x7FFFFFFFFFFFFFFF;
+	auto nintervals = b.num_objects - 1;
+	f64 prev_interval = 0;
+	f64 awkwardness = 0;
+
 	auto* prev = &objects[0];
 	for (size_t i = 1; i < b.num_objects; i++) {
 		auto& o = objects[i];
@@ -228,8 +234,76 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed) {
 				"norm pos %s-%s, pos %s\n", 
 				o.ho->time, (int)o.ho->type, o.strains[0], o.strains[1], 
 				o.norm_start.str(), o.norm_end.str(), o.ho->pos.str());
+
+		i64 interval = o.ho->time - prev->ho->time;
+
+		avg_interval += interval;
+		if (interval < min_interval) {
+			min_interval = interval;
+		}
+
 		prev = &o;
 	}
+
+	avg_interval /= nintervals;
+	avg_interval /= min_interval;
+
+	f64 avg_awkwardness = 0;
+	std::vector<f64> awkwardness_values;
+	// TODO clean-up complexity stuff, rename complexity to awkwardness etc
+
+	*rhythm_complexity = 0;
+	prev = &objects[0];
+	for (size_t i = 1; i < b.num_objects; i++) {
+		auto& o = objects[i];
+		f64 interval = o.ho->time - prev->ho->time;
+
+		// NOTE: this is not used and will probably be removed
+		interval /= min_interval;
+		// ---
+
+		// TODO: actually compute break time length for the map's AR
+		if (i > 1 && interval < 1200.0 / min_interval) {
+			f64 ratio = interval > prev_interval ?
+				interval / prev_interval :
+				prev_interval / interval;
+
+			f64 closest_pot = pow(2, std::round(log(ratio)/log(2)));
+
+			f64 offset = std::abs(closest_pot - ratio);
+			offset /= closest_pot;
+
+			awkwardness_values.push_back(offset);
+			avg_awkwardness += offset;
+		}
+
+		prev_interval = interval;
+
+		// NOTE: this is not used and will probably be removed
+		interval = std::abs(avg_interval - interval);
+		*rhythm_complexity += interval;
+		// ------
+
+		prev = &o;
+	}
+
+	// NOTE: this is not used and will probably be removed
+	*rhythm_complexity /= nintervals;
+	// ------
+	
+	avg_awkwardness /= awkwardness_values.size();
+
+	for (u64 i = 0; i < awkwardness_values.size(); ++i) {
+		f64 offset = avg_awkwardness - awkwardness_values[i];
+		awkwardness += offset * offset;
+	}
+
+	awkwardness /= awkwardness_values.size();
+
+	// TODO: remove the rhythm complexity logic as I'm only using awkwardness
+	// 		 now
+	*rhythm_complexity = awkwardness;
+	*rhythm_complexity *= 100;
 
 	*aim = calculate_difficulty(diff::aim);
 	*speed = calculate_difficulty(diff::speed);
