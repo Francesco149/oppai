@@ -256,7 +256,7 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed, f64* rhythm_complexity) {
 	prev = &objects[0];
 	for (size_t i = 1; i < b.num_objects; i++) {
 		auto& o = objects[i];
-		f64 interval = o.ho->time - prev->ho->time;
+		f64 interval = (f64)o.ho->time - (f64)prev->ho->time;
 
 		// NOTE: this is not used and will probably be removed
 		interval /= min_interval;
