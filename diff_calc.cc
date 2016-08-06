@@ -293,7 +293,7 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed, f64* rhythm_complexity) {
 	
 	avg_awkwardness /= awkwardness_values.size();
 
-	for (u64 i = 0; i < awkwardness_values.size(); ++i) {
+	for (u32 i = 0; i < awkwardness_values.size(); ++i) {
 		f64 offset = avg_awkwardness - awkwardness_values[i];
 		awkwardness += offset * offset;
 	}
