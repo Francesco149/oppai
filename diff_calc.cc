@@ -237,7 +237,7 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed, f64* rhythm_awkwardness) {
 		prev = &o;
 	}
 
-	std::vector<f64> group;
+	std::vector<i64> group;
 
 	u64 noffsets = 0;
 	*rhythm_awkwardness = 0;
