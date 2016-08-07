@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.4.10";
+const char* version_string = "0.4.11";
 
 // -----------------------------------------------------------------------------
 
@@ -103,7 +103,7 @@ void print_beatmap();
 		f64			stars,				\
 		f64			aim,				\
 		f64			speed,				\
-		f64			rhythm_complexity,	\
+		f64			rhythm_awkwardness,	\
 		pp_calc_result& res)
 
 // text output
@@ -134,12 +134,11 @@ print_sig(text_print) {
 	printf("aim: %g\n", res.aim_pp);
 	printf("speed: %g\n", res.speed_pp);
 	printf("accuracy: %g\n", res.acc_pp);
-	printf("rhythm awkwardness (beta): %g\n", rhythm_complexity);
+	printf("rhythm awkwardness (beta): %g\n", rhythm_awkwardness);
 
-	// TODO clean-up complexity stuff, rename complexity to awkwardness etc
-	f64 complexity_bonus = 
-		std::max(1.0, std::min(1.15, std::pow(rhythm_complexity, 0.3)));
-	printf("awkwardness acc pp bonus (beta): %g\n", complexity_bonus);
+	f64 awkwardness_bonus = 
+		std::max(1.0, std::min(1.15, std::pow(rhythm_awkwardness, 0.3)));
+	printf("awkwardness acc pp bonus (beta): %g\n", awkwardness_bonus);
 
 	printf("\n%gpp\n", res.pp);
 }
