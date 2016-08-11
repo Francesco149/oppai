@@ -48,8 +48,8 @@ struct d_obj {
 		// cs buff (credits to osuElements, I have confirmed that this is
 		// indeed accurate)
 		if (radius < circlesize_buff_treshold) {
-			scaling_factor *= 
-				1.f + (circlesize_buff_treshold - radius) * 0.02f;
+			scaling_factor *= 1.f + 
+				std::min((circlesize_buff_treshold - radius), 5.f) / 50.f;
 		}
 
 		norm_start = ho->pos * scaling_factor;
