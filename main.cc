@@ -236,6 +236,7 @@ int main(int argc, char* argv[]) {
 				"{[acc]%% or [num_100s]x100 [num_50s]x50} +[mods] "
 				"[combo]x [misses]m scorev[scoring_version] "
 				"-o[output_module]\n\n", *argv);
+		puts("use \"-\" instead of a path to an .osu file to read from stdin");
 		puts("acc: the accuracy in percent (example: 99.99%)");
 		puts("num_100s, num_50s: used to specify accuracy in 100 and 50 count");
 		puts("mods: any combination of nomod, nf, ez, hd, hr, dt, ht"

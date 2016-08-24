@@ -1,4 +1,5 @@
 #include <vector>
+#include <string.h>
 
 // shit code ahead! I am way too lazy to write nice code for parsers, sorry
 // disclaimer: this beatmap parser is meant purely for difficulty calculation 
@@ -88,7 +89,8 @@ struct beatmap {
 
 	// parse .osu file into a beatmap object
 	static void parse(const char* osu_file, beatmap& b) {
-		auto f = fopen(osu_file, "rb");
+		// if osu_file is "-" read from stdin instead of file
+		auto f = (strcmp(osu_file, "-") == 0) ? stdin : fopen(osu_file, "rb");
 		if (!f) {
 			die("Failed to open beatmap");
 			return;
