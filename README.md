@@ -6,6 +6,28 @@ to do is supply it with the map's .osu file.
 Demonstration usage video on windows and linux: 
 [here](https://my.mixtape.moe/wasune.webm).
 
+UPDATE:
+You can now pipe beatmaps to oppai from stdin, which means that you can download
+a map on the fly and call oppai on it in one simple command.
+
+Some linux examples of piping:
+```bash
+curl https://osu.ppy.sh/osu/37658 | oppai -
+curl https://osu.ppy.sh/osu/37658 | oppai - +HDHR
+curl https://osu.ppy.sh/osu/37658 | oppai - +HDHR 99% 600x 1m
+```
+
+Windows examples of piping (using powershell):
+```powershell
+(New-Object System.Net.WebClient).DownloadString("https://osu.ppy.sh/osu/37658") | oppai -
+(New-Object System.Net.WebClient).DownloadString("https://osu.ppy.sh/osu/37658") | oppai - +HDHR
+(New-Object System.Net.WebClient).DownloadString("https://osu.ppy.sh/osu/37658") | oppai - +HDHR 99% 600x 1m
+```
+
+NOTE: to obtain the beatmap url, just open the desired map's page in your 
+browser, click on the desired difficulty and copy the url, then replace /b/ with
+/osu/.
+
 * Download the latest binaries for your OS from 
 [here](https://github.com/Francesco149/oppai/releases).
 * Extract the archive and place the executable anywhere you like (a good place
