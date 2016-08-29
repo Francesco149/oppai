@@ -204,26 +204,6 @@ struct beatmap {
 			}
 		}
 
-		if (!strlen(b.title)) {
-			die("Missing title in metadata");
-			return;
-		}
-
-		if (!strlen(b.artist)) {
-			die("Missing artist in metadata");
-			return;
-		}
-
-		if (!strlen(b.creator)) {
-			die("Missing creator in metadata");
-			return;
-		}
-
-		if (!strlen(b.version)) {
-			die("Missing version in metadata");
-			return;
-		}
-
 		// ---
 		
 		if (!find_fwd("[Difficulty]")) {
