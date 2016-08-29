@@ -24,16 +24,16 @@ a map on the fly and call oppai on it in one simple command.
 
 Some linux examples of piping:
 ```bash
-curl https://osu.ppy.sh/osu/37658 | oppai -
-curl https://osu.ppy.sh/osu/37658 | oppai - +HDHR
-curl https://osu.ppy.sh/osu/37658 | oppai - +HDHR 99% 600x 1m
+curl https://osu.ppy.sh/osu/37658 | ./oppai -
+curl https://osu.ppy.sh/osu/37658 | ./oppai - +HDHR
+curl https://osu.ppy.sh/osu/37658 | ./oppai - +HDHR 99% 600x 1m
 ```
 
 Windows examples of piping (using powershell):
 ```powershell
-(New-Object System.Net.WebClient).DownloadString("https://osu.ppy.sh/osu/37658") | oppai -
-(New-Object System.Net.WebClient).DownloadString("https://osu.ppy.sh/osu/37658") | oppai - +HDHR
-(New-Object System.Net.WebClient).DownloadString("https://osu.ppy.sh/osu/37658") | oppai - +HDHR 99% 600x 1m
+(New-Object System.Net.WebClient).DownloadString("https://osu.ppy.sh/osu/37658") | ./oppai -
+(New-Object System.Net.WebClient).DownloadString("https://osu.ppy.sh/osu/37658") | ./oppai - +HDHR
+(New-Object System.Net.WebClient).DownloadString("https://osu.ppy.sh/osu/37658") | ./oppai - +HDHR 99% 600x 1m
 ```
 
 NOTE: to obtain the beatmap url, just open the desired map's page in your 
