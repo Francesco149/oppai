@@ -6,6 +6,18 @@ to do is supply it with the map's .osu file.
 Demonstration usage video on windows and linux: 
 [here](https://my.mixtape.moe/wasune.webm).
 
+* Download the latest binaries for your OS from 
+[here](https://github.com/Francesco149/oppai/releases).
+* Extract the archive and place the executable anywhere you like (a good place
+would be your osu! folder). Advanced users are free to add oppai to their PATH
+to use it anywhere.
+* Open cmd (or your favorite terminal emulator if you're on linux) and 
+`cd /path/to/your/oppai/folder` (forward slashes might be backwards on 
+windows)
+* Type `./oppai` for a list of possible parameters.
+* Remember that you can tab-complete folder names and file names by pressing 
+  tab after typing the first few letters.
+
 UPDATE:
 You can now pipe beatmaps to oppai from stdin, which means that you can download
 a map on the fly and call oppai on it in one simple command.
@@ -28,17 +40,7 @@ NOTE: to obtain the beatmap url, just open the desired map's page in your
 browser, click on the desired difficulty and copy the url, then replace /b/ with
 /osu/.
 
-* Download the latest binaries for your OS from 
-[here](https://github.com/Francesco149/oppai/releases).
-* Extract the archive and place the executable anywhere you like (a good place
-would be your osu! folder). Advanced users are free to add oppai to their PATH
-to use it anywhere.
-* Open cmd (or your favorite terminal emulator if you're on linux) and 
-`cd /path/to/your/oppai/folder` (forward slashes might be backwards on 
-windows)
-* Type `./oppai` for a list of possible parameters.
-* Remember that you can tab-complete folder names and file names by pressing 
-  tab after typing the first few letters.
+
 
 # Compiling from source (Linux)
 ```bash
