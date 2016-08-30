@@ -3,6 +3,20 @@ standard beatmaps. It works on any map, even unsubmitted ones and all you have
 to do is supply it with the map's .osu file.
 
 # Getting started
+If you don't feel like using the command line, you can hop on the 
+[shigetora chat](https://www.twitch.tv/shigetora) and type
+`!oppai url_to_beatmap` followed by the parameters. But remember, you won't get
+the full output which contains much more useful info than just pp! So I 
+recommend spending 1 minute downloading the tool and learning to use it from 
+the command line.
+
+Examples:
+```
+!oppai https://osu.ppy.sh/osu/37658
+!oppai https://osu.ppy.sh/osu/37658 +HDHR
+!oppai https://osu.ppy.sh/osu/37658 +HDHR 500x 1m
+```
+
 Demonstration usage video on windows and linux: 
 [here](https://my.mixtape.moe/wasune.webm).
 
@@ -39,8 +53,6 @@ Windows examples of piping (using powershell):
 NOTE: to obtain the beatmap url, just open the desired map's page in your 
 browser, click on the desired difficulty and copy the url, then replace /b/ with
 /osu/.
-
-
 
 # Compiling from source (Linux)
 ```bash
