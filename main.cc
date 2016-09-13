@@ -196,7 +196,7 @@ print_sig(json_print) {
 		combo, b.max_combo,
 		b.num_circles, b.num_sliders, b.num_spinners,
 		misses, scoring,
-		stars, aim, speed,
+		stars, speed, aim,
 		res.pp
 	);
 }
