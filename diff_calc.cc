@@ -284,14 +284,8 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed, f64* rhythm_awkwardness) {
 	*aim = sqrt(*aim) * star_scaling_factor;
 	*speed = sqrt(*speed) * star_scaling_factor;
 
-	// round to 2 decimal places
-	*aim = std::round(*aim * 100.0) / 100.0;
-	*speed = std::round(*speed * 100.0) / 100.0;
-
 	f64 stars = *aim + *speed + 
 		std::abs(*speed - *aim) * extreme_scaling_factor;
-
-	stars = std::round(stars * 100.0) / 100.0;
 
 	return stars;
 }

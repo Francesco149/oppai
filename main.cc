@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.6.2";
+const char* version_string = "0.6.3";
 
 // -----------------------------------------------------------------------------
 
@@ -108,6 +108,11 @@ void print_beatmap();
 
 // text output
 print_sig(text_print) {
+	// round to 2 decimal places
+	aim = std::round(aim * 100.0) / 100.0;
+	speed = std::round(speed * 100.0) / 100.0;
+	stars = std::round(stars * 100.0) / 100.0;
+
 	printf("o p p a i | v%s\n", version_string);
 	puts("s     d n | ");
 	puts("u     v s | (looking for");
