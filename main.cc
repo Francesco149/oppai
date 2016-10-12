@@ -257,7 +257,7 @@ print_sig(binary_print) {
 }
 
 #ifndef __GNUC__
-#pragma push(pack, 1)
+#pragma pack(push, 1)
 #endif
 
 // binary struct output
@@ -283,7 +283,7 @@ struct binary_output_data {
 __attribute__ ((aligned (1), packed));
 #else
 ;
-#pragma pop(pack)
+#pragma pack(pop)
 #endif
 
 print_sig(binary_struct_print) {
