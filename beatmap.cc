@@ -1,5 +1,5 @@
 #include <vector>
-#include <string.h>
+#include <string>
 
 // shit code ahead! I am way too lazy to write nice code for parsers, sorry
 // disclaimer: this beatmap parser is meant purely for difficulty calculation 
