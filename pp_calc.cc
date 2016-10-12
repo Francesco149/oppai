@@ -201,14 +201,12 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
 		final_multiplier *= 0.95;
 	}
 
-	f64 pp = std::pow(
+	res.pp = std::pow(
 			std::pow(aim_value, 1.1) +
 			std::pow(speed_value, 1.1) +
 			std::pow(acc_value, 1.1), 
 			1.0 / 1.1
 		) * final_multiplier;
-
-	res.pp = std::round(pp * 100.0) / 100.0;
 
 	return res;
 }

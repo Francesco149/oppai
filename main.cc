@@ -112,6 +112,7 @@ print_sig(text_print) {
 	aim = std::round(aim * 100.0) / 100.0;
 	speed = std::round(speed * 100.0) / 100.0;
 	stars = std::round(stars * 100.0) / 100.0;
+	res.pp = std::round(res.pp * 100.0) / 100.0;
 
 	printf("o p p a i | v%s\n", version_string);
 	puts("s     d n | ");
