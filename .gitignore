@@ -4,3 +4,4 @@ obj
 *.tar.gz
 *.swp
 *~
+build/
