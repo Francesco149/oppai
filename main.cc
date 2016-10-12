@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.6.3";
+const char* version_string = "0.7.0";
 
 // -----------------------------------------------------------------------------
 
@@ -206,6 +206,117 @@ print_sig(json_print) {
 	);
 }
 
+// binary output
+void encode_str(FILE* fd, const char* str) {
+	if (strlen(str) > 0xFFFF) {
+		die("encode_str can only handle strings up to FFFF characters");
+		return;
+	}
+	u16 len = (u16)strlen(str);
+	fwrite(&len, 2, 1, fd);
+	fwrite(str, 1, len, fd);
+}
+
+print_sig(binary_print) {
+	freopen(0, "wb", stdout);
+
+	u32 binary_output_version = 1;
+
+	// TODO: shorten this with macros
+	putc('\0', stdout);
+	putc('\0', stdout); // is_struct
+	fwrite(&binary_output_version, 4, 1, stdout);
+	encode_str(stdout, version_string); chk();
+	encode_str(stdout, b.artist); chk();
+	encode_str(stdout, b.title); chk();
+	encode_str(stdout, b.version); chk();
+	encode_str(stdout, b.creator); chk();
+	encode_str(stdout, mods_str ? mods_str : ""); chk();
+	fwrite(&b.od, sizeof(f32), 1, stdout);
+	fwrite(&b.ar, sizeof(f32), 1, stdout);
+	fwrite(&b.cs, sizeof(f32), 1, stdout);
+	fwrite(&combo, 2, 1, stdout);
+	fwrite(&b.max_combo, 2, 1, stdout);
+	fwrite(&b.num_circles, 2, 1, stdout);
+	fwrite(&b.num_sliders, 2, 1, stdout);
+	fwrite(&b.num_spinners, 2, 1, stdout);
+	fwrite(&misses, 2, 1, stdout);
+	fwrite(&scoring, 4, 1, stdout);
+
+	f32 tmp = (f32)stars;
+	fwrite(&tmp, sizeof(f32), 1, stdout);
+
+	tmp = (f32)speed;
+	fwrite(&tmp, sizeof(f32), 1, stdout);
+
+	tmp = (f32)aim;
+	fwrite(&tmp, sizeof(f32), 1, stdout);
+
+	tmp = (f32)res.pp;
+	fwrite(&tmp, sizeof(f32), 1, stdout);
+}
+
+#ifndef __GNUC__
+#pragma push(pack, 1)
+#endif
+
+// binary struct output
+struct binary_output_data {
+	u8 must_be_zero;
+	u8 is_struct;
+	u32 output_version;
+	char oppai_version[256];
+	char artist[256];
+	char title[256];
+	char version[256];
+	char creator[256];
+	char mods_str[256];
+	f32 od, ar, cs;
+	u16 combo, max_combo;
+	u16 num_circles, num_sliders, num_spinners;
+	u16 misses;
+	u32 scoring;
+	f32 stars, speed, aim;
+	f32 pp;
+}
+#ifdef __GNUC__
+__attribute__ ((aligned (1), packed));
+#else
+;
+#pragma pop(pack)
+#endif
+
+print_sig(binary_struct_print) {
+	freopen(0, "wb", stdout);
+
+	binary_output_data d = {0};
+
+	d.is_struct = 1;
+	d.output_version = 1;
+	strcpy(d.oppai_version, version_string);
+	strcpy(d.artist, b.artist);
+	strcpy(d.title, b.title);
+	strcpy(d.version, b.version);
+	strcpy(d.creator, b.creator);
+	strcpy(d.mods_str, mods_str ? mods_str : "");
+	d.od = b.od;
+	d.ar = b.ar;
+	d.cs = b.cs;
+	d.combo = combo;
+	d.max_combo = b.max_combo;
+	d.num_circles = b.num_circles;
+	d.num_sliders = b.num_sliders;
+	d.num_spinners = b.num_spinners;
+	d.misses = misses;
+	d.scoring = scoring;
+	d.stars = (f32)stars;
+	d.speed = (f32)speed;
+	d.aim = (f32)aim;
+	d.pp = (f32)res.pp;
+
+	fwrite(&d, sizeof(binary_output_data), 1, stdout);
+}
+
 // ---
 
 typedef print_sig(print_callback);
@@ -219,6 +330,8 @@ struct output_module {
 output_module modules[] = {
 	{ "text", text_print }, 
 	{ "json", json_print }, 
+	{ "binary", binary_print }, 
+	{ "binary_struct", binary_struct_print }, 
 	{ 0, 0 }
 };
 

@@ -8,13 +8,13 @@
 const size_t bufsize = 2000000; // 2 mb
 u8 buf[bufsize];
 
-const f64	od0_ms = 79.5,
+const f32	od0_ms = 79.5,
 			od10_ms = 19.5,
 			ar0_ms = 1800,
 			ar5_ms = 1200,
 			ar10_ms = 450;
 
-const f64	od_ms_step = 6,
+const f32	od_ms_step = 6,
 			ar_ms_step1 = 120, // ar0-5
 			ar_ms_step2 = 150; // ar5-10
 
@@ -56,7 +56,7 @@ struct beatmap {
 	u32 format_version = 0;
 
 	// general
-	f64 stack_leniency = 0;
+	f32 stack_leniency = 0;
 	u8 mode = 0;
 
 	// metadata
@@ -66,12 +66,12 @@ struct beatmap {
 	char version[256] = {0};
 
 	// difficulty
-	f64 hp = 1337;
-	f64 cs = 1337;
-	f64 od = 1337;
-	f64 ar = 1337;
-	f64 sv = 1337;
-	f64 tick_rate = 1;
+	f32 hp = 1337;
+	f32 cs = 1337;
+	f32 od = 1337;
+	f32 ar = 1337;
+	f32 sv = 1337;
+	f32 tick_rate = 1;
 
 	u16 num_circles = 0;
 	u16 num_sliders = 0;
@@ -165,7 +165,7 @@ struct beatmap {
 		// StackLeniency and Mode are not present in older formats
 		for (; not_section(); fwd()) {
 
-			if (sscanf(tok, "StackLeniency: %lf", &b.stack_leniency) == 1) {
+			if (sscanf(tok, "StackLeniency: %f", &b.stack_leniency) == 1) {
 				continue;
 			}
 
@@ -215,27 +215,27 @@ struct beatmap {
 		
 		for (; not_section(); fwd()) {
 
-			if (sscanf(tok, "HPDrainRate: %lf", &b.hp) == 1) {
+			if (sscanf(tok, "HPDrainRate: %f", &b.hp) == 1) {
 				continue;
 			}
 
-			if (sscanf(tok, "CircleSize: %lf", &b.cs) == 1) {
+			if (sscanf(tok, "CircleSize: %f", &b.cs) == 1) {
 				continue;
 			}
 
-			if (sscanf(tok, "OverallDifficulty: %lf", &b.od) == 1) {
+			if (sscanf(tok, "OverallDifficulty: %f", &b.od) == 1) {
 				continue;
 			}
 
-			if (sscanf(tok, "ApproachRate: %lf", &b.ar) == 1) {
+			if (sscanf(tok, "ApproachRate: %f", &b.ar) == 1) {
 				continue;
 			}
 
-			if (sscanf(tok, "SliderMultiplier: %lf", &b.sv) == 1) {
+			if (sscanf(tok, "SliderMultiplier: %f", &b.sv) == 1) {
 				continue;
 			}
 
-			if (sscanf(tok, "SliderTickRate: %lf", &b.tick_rate) == 1) {
+			if (sscanf(tok, "SliderTickRate: %f", &b.tick_rate) == 1) {
 				continue;
 			}
 		}
@@ -303,9 +303,10 @@ struct beatmap {
 
 			u8 not_inherited = 0;
 			f64 time_tmp; // I'm rounding times to milliseconds. 
-						  // not sure if making them floats will matter for diffcalc
+						  // not sure if making them floats will matter for diff
 
-			if (sscanf(tok, "%lf,%lf,%" fi32 ",%" fi32 ",%" fi32 ",%" fi32 ",%" fu8, 
+			if (sscanf(tok, 
+					   "%lf,%lf,%" fi32 ",%" fi32 ",%" fi32 ",%" fi32 ",%" fu8, 
 					   &time_tmp, &tp.ms_per_beat, 
 					   &useless, &useless, &useless, &useless, 
 					   &not_inherited) == 7) {
@@ -563,57 +564,57 @@ struct beatmap {
 		}
 
 		// playback speed
-		f64 speed = 1;
+		f32 speed = 1;
 		
 		if ((mods & mods::dt) != 0 || (mods & mods::nc) != 0) {
-			speed *= 1.5;
+			speed *= 1.5f;
 		}
 
 		if (mods & mods::ht) {
-			speed *= 0.75;
+			speed *= 0.75f;
 		}
 
 		// od
-		f64 od_multiplier = 1;
+		f32 od_multiplier = 1;
 
 		if (mods & mods::hr) {
-			od_multiplier *= 1.4;
+			od_multiplier *= 1.4f;
 		}
 
 		if (mods & mods::ez) {
-			od_multiplier *= 0.5;
+			od_multiplier *= 0.5f;
 		}
 
 		od *= od_multiplier;
-		f64 odms = od0_ms - std::ceil(od_ms_step * od);
+		f32 odms = od0_ms - std::ceil(od_ms_step * od);
 
 		// ar
-		f64 ar_multiplier = 1;
+		f32 ar_multiplier = 1;
 
 		if (mods & mods::hr) {
-			ar_multiplier = 1.4;
+			ar_multiplier = 1.4f;
 		}
 
 		if (mods & mods::ez) {
-			ar_multiplier = 0.5;
+			ar_multiplier = 0.5f;
 		}
 
 		ar *= ar_multiplier;
 
 		// convert AR into its milliseconds value
-		f64 arms = ar <= 5 
+		f32 arms = ar <= 5 
 			? (ar0_ms - ar_ms_step1 *  ar     ) 
 			: (ar5_ms - ar_ms_step2 * (ar - 5));
 
 		// cs
-		f64 cs_multiplier = 1;
+		f32 cs_multiplier = 1;
 
 		if (mods & mods::hr) {
-			cs_multiplier = 1.3;
+			cs_multiplier = 1.3f;
 		}
 
 		if (mods & mods::ez) {
-			cs_multiplier = 0.5;
+			cs_multiplier = 0.5f;
 		}
 
 		// stats must be capped to 0-10 before HT/DT which bring them to a range
@@ -628,14 +629,14 @@ struct beatmap {
 		// convert OD and AR back into their stat form
 		//od = (-(odms - od0_ms)) / od_ms_step;
 		od = (od0_ms - odms) / od_ms_step;
-		ar = ar <= 5.0
+		ar = ar <= 5.0f
 			//? (      (-(arms - ar0_ms)) / ar_ms_step1)
 			//: (5.0 + (-(arms - ar5_ms)) / ar_ms_step2);
-			? (      (ar0_ms - arms) / ar_ms_step1)
-			: (5.0 + (ar5_ms - arms) / ar_ms_step2);
+			? (       (ar0_ms - arms) / ar_ms_step1)
+			: (5.0f + (ar5_ms - arms) / ar_ms_step2);
 
 		cs *= cs_multiplier;
-		cs = std::max(0.0, std::min(10.0, cs));
+		cs = std::max(0.0f, std::min(10.0f, cs));
 
 		if ((mods & mods::speed_changing) == 0) {
 			// not speed-modifying
