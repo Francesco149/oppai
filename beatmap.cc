@@ -422,15 +422,7 @@ struct beatmap {
 
 			// slider points are separated by |
 			if (!strstr(tok, "|")) {
-				
-				// expected slider but no points found
-				if (ho.type == obj::slider) {
-					die("Slider is missing points");
-					return;
-				}
-
 				dbgputs("no slider points, we're done here");
-
 				continue;
 			}
 
