@@ -1,0 +1,64 @@
+.TH OPPAI 1 2016-09-13 "oppai 0.6.2" "osu!"
+.\" %%%LICENSE_START(GPLv3_DOC_FULL)
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, see
+.\" <http://www.gnu.org/licenses/>.
+.\" %%%LICENSE_END
+.SH NAME
+oppai \- osu! pp advanced inspector
+.SH SYNOPSIS
+.P
+oppai \fIFILE\fP [\fIOPTION\fP]...
+.SH DESCRIPTION
+A difficulty and pp calculator for osu! standard beatmaps. It works all maps, even unranked or unsubmitted ones. All you need to do is supply the map's \fI*.osu\fP file.
+.P
+When FILE is \-, read standard input.
+.SH OPTIONS
+.TP
+.IB accuracy %
+Set the play accuracy. The default is \fI100%\fP.
+.TP
+.IB "number of 100s" x100
+.TP
+.IB "number of 50s" x50
+Sets the number of imperfect hits. The default is to assume every note is a \fI300\fP.
+.TP
+.BI + mods
+Sets which mods were used. When multiple mods are used, simply concatenate their names, such as "HDHR". The default is to use no mods.
+.TP
+.BI combo x
+Sets the combo. By default full combo is used.
+.TP
+.BI scorev "version number"
+Use the given scoring algorithm instead of the most current one.
+.TP
+.BI \-o "output module"
+How map information is printed to the screen, such as outputting JSON. By default it is printed as \fItext\fP.
+.SH RETURN CODES
+0 is returned if the program exited normally, nonzero is returned otherwise.
+.SH EXAMPLES
+.TP
+oppai "gtmn. (witch's slave) - furioso melodia (Alumetorz) [Wrath].osu"
+Give scoring and difficulty information about a downloaded map.
+.TP
+oppai my_map.osu +HR 98% 4x100
+Calculate the pp that would earned from a play of the given map with hard rock (HR), 98% accuracy, and 4 100s.
+.TP
+curl https://osu.ppy.sh/osu/37658 | oppai -
+Download beatmap information from the osu! website and give information on it.
+.SH SEE ALSO
+\fBosu\fP(1), \fBcurl\fP(1)
