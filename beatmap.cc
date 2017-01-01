@@ -503,7 +503,7 @@ struct beatmap {
 			// the -.01 is there to prevent ceil from ceiling whole values
 			// like 1.0 to 2.0 randomly
 			u16 ticks = (u16)std::ceil(
-					(num_beats - 0.01) / sl.repetitions * b.tick_rate);
+					(num_beats - 0.1) / sl.repetitions * b.tick_rate);
 			ticks--;
 
 			ticks *= sl.repetitions; // multiply slider ticks by repetitions
