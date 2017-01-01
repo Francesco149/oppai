@@ -1,7 +1,7 @@
 #!/bin/sh
 
 g++ 				\
-	-std=c++14		\
+	-std=c++0x		\
 	-Wall -Werror	\
 	main.cc			\
 	-lm -lstdc++	\
