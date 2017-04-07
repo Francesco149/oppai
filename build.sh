@@ -1,6 +1,6 @@
 #!/bin/sh
 
-g++ 				\
+${CXX} 				\
 	-std=c++0x		\
 	-Wall -Werror	\
 	main.cc			\
