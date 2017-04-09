@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.7.2";
+const char* version_string = "0.7.3";
 
 // -----------------------------------------------------------------------------
 
@@ -384,6 +384,7 @@ int main(int argc, char* argv[]) {
     char* output_module_name = (char*)"text";
     char* mods_str = nullptr;
     f64 acc = 0;
+    f32 ar, od, cs;
     u32 mods = mods::nomod;
     u16 combo = b.max_combo;
     u16 misses = 0;
@@ -467,6 +468,22 @@ int main(int argc, char* argv[]) {
         u32 tmp_scoring;
         if (sscanf(a, "scorev%" fu32, &tmp_scoring) == 1) {
             scoring = tmp_scoring;
+            continue;
+        }
+
+        // AR/OD/CS override
+        if (sscanf(a, "ar%f", &ar) == 1) {
+            b.ar = ar;
+            continue;
+        }
+
+        if (sscanf(a, "od%f", &od) == 1) {
+            b.od = od;
+            continue;
+        }
+
+        if (sscanf(a, "cs%f", &cs) == 1) {
+            b.cs = cs;
             continue;
         }
 
