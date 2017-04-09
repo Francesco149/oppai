@@ -4,7 +4,7 @@ public:
 
     v2f() {}
     v2f(f32 x, f32 y) :
-        x{x}, 
+        x{x},
         y{y} {}
 
     v2f(f32 v) :
@@ -33,7 +33,7 @@ public:
 #undef do_op
 
 protected:
-    // this is used for formatting with str() 
+    // this is used for formatting with str()
     // without having to pass copies of the string around
     // obviously not thread safe
     char buf[42] = { 0 };

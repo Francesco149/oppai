@@ -2,7 +2,7 @@
 #include <string>
 
 // shit code ahead! I am way too lazy to write nice code for parsers, sorry
-// disclaimer: this beatmap parser is meant purely for difficulty calculation 
+// disclaimer: this beatmap parser is meant purely for difficulty calculation
 //             and I don't support any malicious use of it
 
 const size_t bufsize = 2000000; // 2 mb
@@ -112,13 +112,13 @@ struct beatmap {
 
         char* tok = strtok((char*)buf, "\n");
 
-        auto fwd = [&tok]() { 
+        auto fwd = [&tok]() {
             // skips 1 line
-            tok = strtok(nullptr, "\n"); 
+            tok = strtok(nullptr, "\n");
         };
 
         auto find_fwd = [&tok, fwd](const char* str) -> bool {
-            // skips forward until tok is the line right after 
+            // skips forward until tok is the line right after
             // the one that contains str
             dbgprintf("skipping until %s", str);
             while (tok) {
@@ -134,11 +134,11 @@ struct beatmap {
         auto not_section = [&tok]() -> bool {
             return tok && *tok != '[';
         };
-        
+
         // ---
 
         while (not_section()) {
-            if (sscanf(tok, "osu file format v%" fi32 "", 
+            if (sscanf(tok, "osu file format v%" fi32 "",
                        &b.format_version) == 1) {
                 break;
             }
@@ -150,14 +150,14 @@ struct beatmap {
         }
 
         // ---
-        
+
         if (!find_fwd("[General]")) {
             die("Could not find General info");
             return;
         }
 
         // ---
-        
+
         // NOTE: I could just store all properties and map them by section and name
         // but I'd rather parse only the ones I need since I'd still need to parse
         // them one by one and check for format errors.
@@ -182,7 +182,7 @@ struct beatmap {
         }
 
         // ---
-        
+
         for (; not_section(); fwd()) {
 
             // %[^\r\n] means accept all characters except \r\n
@@ -205,14 +205,14 @@ struct beatmap {
         }
 
         // ---
-        
+
         if (!find_fwd("[Difficulty]")) {
             die("Could not find Difficulty");
             return;
         }
 
         // ---
-        
+
         for (; not_section(); fwd()) {
 
             if (sscanf(tok, "HPDrainRate: %f", &b.hp) == 1) {
@@ -266,7 +266,7 @@ struct beatmap {
         }
 
         // ---
-        
+
         if (!find_fwd("[TimingPoints]")) {
             die("Could not find TimingPoints");
             return;
@@ -302,13 +302,13 @@ struct beatmap {
             auto& tp = b.timing_points[b.num_timing_points];
 
             u8 not_inherited = 0;
-            f64 time_tmp; // I'm rounding times to milliseconds. 
+            f64 time_tmp; // I'm rounding times to milliseconds.
                           // not sure if making them floats will matter for diff
 
-            if (sscanf(tok, 
-                       "%lf,%lf,%" fi32 ",%" fi32 ",%" fi32 ",%" fi32 ",%" fu8, 
-                       &time_tmp, &tp.ms_per_beat, 
-                       &useless, &useless, &useless, &useless, 
+            if (sscanf(tok,
+                       "%lf,%lf,%" fi32 ",%" fi32 ",%" fi32 ",%" fi32 ",%" fu8,
+                       &time_tmp, &tp.ms_per_beat,
+                       &useless, &useless, &useless, &useless,
                        &not_inherited) == 7) {
 
                 tp.time = (i64)time_tmp;
@@ -328,7 +328,7 @@ struct beatmap {
         }
 
         // ---
-        
+
         if (!find_fwd("[HitObjects]")) {
             die("Could not find HitObjects");
             return;
@@ -353,12 +353,12 @@ struct beatmap {
             i32 type_num;
 
             // slider
-            if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 ",%c", 
-                       &ho.pos.x, &ho.pos.y, &ho.time, &useless, &useless, 
-                       &ho.slider.type) == 6 && 
+            if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 ",%c",
+                       &ho.pos.x, &ho.pos.y, &ho.time, &useless, &useless,
+                       &ho.slider.type) == 6 &&
                         ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
-                
-                // the slider type check is for old maps that have trailing 
+
+                // the slider type check is for old maps that have trailing
                 // commas on circles and sliders
 
                 // x,y,time,type,hitSound,sliderType|curveX:curveY|...,repeat,
@@ -368,7 +368,7 @@ struct beatmap {
 
             // circle, or spinner
             else if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 ",%" fi64,
-                       &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless, 
+                       &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless,
                        &ho.end_time) == 6) {
 
                 if (type_num & 8) {
@@ -382,7 +382,7 @@ struct beatmap {
             }
 
             // old circle
-            else if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 "", 
+            else if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 "",
                 &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless) == 5) {
 
                 ho.type = obj::circle;
@@ -453,15 +453,15 @@ struct beatmap {
 
                 // lastcurveX:lastcurveY,repeat,pixelLength,
                 //      edgeHitsound,edgeAddition,addition
-                if (sscanf(slider_tok, 
-                          "%f:%f,%" fu16 ",%lf", 
+                if (sscanf(slider_tok,
+                          "%f:%f,%" fu16 ",%lf",
                           &pt.x, &pt.y, &sl.repetitions, &sl.length) == 4) {
 
                     dbgputs("last slider point");
                     // end of point list
                     break;
                 }
-                
+
                 // curveX:curveY
                 else if (sscanf(slider_tok, "%f:%f", &pt.x, &pt.y) != 2) {
                     die("Invalid slider found");
@@ -509,7 +509,7 @@ struct beatmap {
             ticks *= sl.repetitions; // multiply slider ticks by repetitions
             ticks += sl.repetitions + 1; // add heads and tails
 
-            dbgprintf("%g beats x %" fu16 " = %" fu16 " combo\n", 
+            dbgprintf("%g beats x %" fu16 " = %" fu16 " combo\n",
                 num_beats, sl.repetitions, ticks);
 
             b.max_combo += ticks - 1; // -1 because we already did ++ earlier
@@ -539,7 +539,7 @@ struct beatmap {
 
         for (i64 i = (i64)num_timing_points - 1; i >= 0; i--) {
             auto& cur = timing_points[i];
-            
+
             if (cur.time <= t->time && !cur.inherit) {
                 return &cur;
             }
@@ -557,7 +557,7 @@ struct beatmap {
 
         // playback speed
         f32 speed = 1;
-        
+
         if ((mods & mods::dt) != 0 || (mods & mods::nc) != 0) {
             speed *= 1.5f;
         }
@@ -594,8 +594,8 @@ struct beatmap {
         ar *= ar_multiplier;
 
         // convert AR into its milliseconds value
-        f32 arms = ar <= 5 
-            ? (ar0_ms - ar_ms_step1 *  ar     ) 
+        f32 arms = ar <= 5
+            ? (ar0_ms - ar_ms_step1 *  ar     )
             : (ar5_ms - ar_ms_step2 * (ar - 5));
 
         // cs

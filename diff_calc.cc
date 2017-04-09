@@ -4,14 +4,14 @@
 // TODO: rewrite this to be less object oriented
 
 // how much strains decay per interval (if the previous interval's peak
-// strains after applying decay are still higher than the current one's, 
+// strains after applying decay are still higher than the current one's,
 // they will be used as the peak strains).
-const f64 decay_base[] = { 0.3, 0.15 }; 
+const f64 decay_base[] = { 0.3, 0.15 };
 
 // almost the normalized circle diameter (104px)
 const f64 almost_diameter = 90;
 
-// arbitrary tresholds to determine when a stream is spaced enough that is 
+// arbitrary tresholds to determine when a stream is spaced enough that is
 // becomes hard to alternate.
 const f64 stream_spacing = 110;
 const f64 single_spacing = 125;
@@ -23,7 +23,7 @@ const f64 weight_scaling[] = { 1400, 26.25 };
 const f32 circlesize_buff_treshold = 30;
 
 namespace diff {
-    const u8 speed = 0, 
+    const u8 speed = 0,
              aim = 1;
 }
 
@@ -48,7 +48,7 @@ struct d_obj {
         // cs buff (credits to osuElements, I have confirmed that this is
         // indeed accurate)
         if (radius < circlesize_buff_treshold) {
-            scaling_factor *= 1.f + 
+            scaling_factor *= 1.f +
                 std::min((circlesize_buff_treshold - radius), 5.f) / 50.f;
         }
 
@@ -108,7 +108,7 @@ struct d_obj {
                         / (stream_spacing - almost_diameter);
                 }
                 else if (distance > almost_diameter / 2.0) {
-                    return 0.95 + 0.25 * 
+                    return 0.95 + 0.25 *
                         (distance - almost_diameter / 2.0) /
                         (almost_diameter / 2.0);
                 }
@@ -159,14 +159,14 @@ f64 calculate_difficulty(u8 type) {
             if (!prev) {
                 max_strain = 0.0;
             } else {
-                f64 decay = pow(decay_base[type], 
+                f64 decay = pow(decay_base[type],
                     (interval_end - prev->ho->time) / 1000.0);
                 max_strain = prev->strains[type] * decay;
             }
 
             interval_end += strain_step;
         }
-    
+
         // calculate max strain for this interval
         max_strain = std::max(max_strain, o.strains[type]);
         prev = &o;
@@ -176,7 +176,7 @@ f64 calculate_difficulty(u8 type) {
     f64 weight = 1.0;
 
     // sort strains from greatest to lowest
-    std::sort(highest_strains.begin(), highest_strains.end(), 
+    std::sort(highest_strains.begin(), highest_strains.end(),
         std::greater<f64>());
     // TODO: get rid of std::greater
 
@@ -190,7 +190,7 @@ f64 calculate_difficulty(u8 type) {
 }
 
 // calculates overall, aim and speed stars for a map.
-// aim, speed: pointers to the variables where 
+// aim, speed: pointers to the variables where
 //             aim and speed stars will be stored.
 // returns overall stars
 f64 d_calc(beatmap& b, f64* aim, f64* speed, f64* rhythm_awkwardness) {
@@ -228,8 +228,8 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed, f64* rhythm_awkwardness) {
         }
 
         dbgprintf("%" fi64 ": type %" fi32 ", strains %g %g, "
-                "norm pos %s-%s, pos %s\n", 
-                o.ho->time, (int)o.ho->type, o.strains[0], o.strains[1], 
+                "norm pos %s-%s, pos %s\n",
+                o.ho->time, (int)o.ho->type, o.strains[0], o.strains[1],
                 o.norm_start.str(), o.norm_end.str(), o.ho->pos.str());
 
         intervals.push_back(o.ho->time - prev->ho->time);
@@ -284,7 +284,7 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed, f64* rhythm_awkwardness) {
     *aim = sqrt(*aim) * star_scaling_factor;
     *speed = sqrt(*speed) * star_scaling_factor;
 
-    f64 stars = *aim + *speed + 
+    f64 stars = *aim + *speed +
         std::abs(*speed - *aim) * extreme_scaling_factor;
 
     return stars;

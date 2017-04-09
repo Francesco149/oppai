@@ -1,8 +1,8 @@
-// turns the beatmaps' strain attributes into a larger value, suitable 
+// turns the beatmaps' strain attributes into a larger value, suitable
 // for pp calc. not 100% sure what is going on here, but it probably makes
 // strain values scale a bit exponentially.
 f64 base_strain(f64 strain) {
-    return std::pow(5.0 * std::max(1.0, strain / 0.0675) - 4.0, 3.0) / 
+    return std::pow(5.0 * std::max(1.0, strain / 0.0675) - 4.0, 3.0) /
         100000.0;
 }
 
@@ -11,7 +11,7 @@ f64 acc_calc(u16 c300, u16 c100, u16 c50, u16 misses) {
     f64 acc = 0.f;
     if (total_hits > 0) {
         acc = (
-            c50 * 50.0 + c100 * 100.0 + c300 * 300.0) / 
+            c50 * 50.0 + c100 * 100.0 + c300 * 300.0) /
             (total_hits * 300.0);
     }
     return acc;
@@ -37,9 +37,9 @@ struct pp_calc_result {
 //       the number of misses, 100s and 50s.
 // c100, c50: number of 100s and 50s.
 // score_version: 1 or 2, affects accuracy pp.
-pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b, 
-    u32 used_mods=mods::nomod, 
-    u16 combo = 0xFFFF, u16 misses = 0, u16 c300 = 0xFFFF, 
+pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
+    u32 used_mods=mods::nomod,
+    u16 combo = 0xFFFF, u16 misses = 0, u16 c300 = 0xFFFF,
     u16 c100 = 0, u16 c50 = 0, u32 score_version = 1)
 {
     pp_calc_result res{0.0};
@@ -82,7 +82,7 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
 
     // length bonus (reused in speed pp)
     f64 total_hits_over_2k = (f64)total_hits / 2000.0;
-    f64 length_bonus = 0.95 + 
+    f64 length_bonus = 0.95 +
         0.4 * std::min(1.0, total_hits_over_2k) +
         (total_hits > 2000 ? std::log10(total_hits_over_2k) * 0.5 : 0.0);
 
@@ -90,7 +90,7 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
     f64 miss_penality = std::pow(0.97, misses);
 
     // combo break penality (reused in speed pp)
-    f64 combo_break = 
+    f64 combo_break =
         std::pow((f64)combo, 0.8) / std::pow((f64)b.max_combo, 0.8);
 
     aim_value *= length_bonus;
@@ -140,7 +140,7 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
 
     // speed pp ----------------------------------------------------------------
     f64 speed_value = base_strain(speed);
-    
+
     speed_value *= length_bonus;
     speed_value *= miss_penality;
     speed_value *= combo_break;
@@ -170,8 +170,8 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
     }
 
     // arbitrary values tom crafted out of trial and error
-    f64 acc_value = 
-        std::pow(1.52163, od) * std::pow(real_acc, 24.0) * 2.83; 
+    f64 acc_value =
+        std::pow(1.52163, od) * std::pow(real_acc, 24.0) * 2.83;
 
     // length bonus (not the same as speed/aim length bonus)
     acc_value *= std::min(1.15, std::pow(circles / 1000.0, 0.3));
@@ -204,7 +204,7 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
     res.pp = std::pow(
             std::pow(aim_value, 1.1) +
             std::pow(speed_value, 1.1) +
-            std::pow(acc_value, 1.1), 
+            std::pow(acc_value, 1.1),
             1.0 / 1.1
         ) * final_multiplier;
 
@@ -221,8 +221,8 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
 // combo: desired combo. 0xFFFF will assume full combo.
 // misses: amount of misses
 // score_version: 1 or 2, affects accuracy pp.
-pp_calc_result pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent, 
-    u32 used_mods=mods::nomod, u16 combo = 0xFFFF, u16 misses = 0, 
+pp_calc_result pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent,
+    u32 used_mods=mods::nomod, u16 combo = 0xFFFF, u16 misses = 0,
     u32 score_version = 1)
 {
     // cap misses to num objects
@@ -231,18 +231,18 @@ pp_calc_result pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent,
     // cap acc to max acc with the given amount of misses
     u16 max300 = (u16)(b.num_objects - misses);
 
-    acc_percent = std::max(0.0, 
+    acc_percent = std::max(0.0,
             std::min(acc_calc(max300, 0, 0, misses) * 100.0, acc_percent));
 
     // round acc to the closest amount of 100s or 50s
     u16 c50 = 0;
-    u16 c100 = (u16)std::round(-3.0 * ((acc_percent * 0.01 - 1.0) * 
+    u16 c100 = (u16)std::round(-3.0 * ((acc_percent * 0.01 - 1.0) *
         b.num_objects + misses) * 0.5);
 
     if (c100 > b.num_objects - misses) {
         // acc lower than all 100s, use 50s
         c100 = 0;
-        c50 = (u16)std::round(-6.0 * ((acc_percent * 0.01 - 1.0) * 
+        c50 = (u16)std::round(-6.0 * ((acc_percent * 0.01 - 1.0) *
             b.num_objects + misses) * 0.2);
 
         c50 = std::min(max300, c50);
@@ -253,7 +253,7 @@ pp_calc_result pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent,
 
     u16 c300 = (u16)b.num_objects - c100 - c50 - misses;
 
-    return pp_calc(aim, speed, b, used_mods, combo, misses, c300, c100, c50, 
+    return pp_calc(aim, speed, b, used_mods, combo, misses, c300, c100, c50,
         score_version);
 }
 

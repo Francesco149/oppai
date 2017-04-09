@@ -47,11 +47,11 @@ void chk() {
 
 // -----------------------------------------------------------------------------
 
-// these don't necessarily need to match the pp processor's bitmask 1:1 but 
+// these don't necessarily need to match the pp processor's bitmask 1:1 but
 // I'll keep them consistent just because
 namespace mods {
-    const u32 
-        nomod = 0, 
+    const u32
+        nomod = 0,
         nf = 1 << 0,
         ez = 1 << 1,
         hd = 1 << 3,
@@ -60,8 +60,8 @@ namespace mods {
         ht = 1 << 8,
         nc = 1 << 9,
         fl = 1 << 10,
-        so = 1 << 12, 
-        speed_changing = dt | ht | nc, 
+        so = 1 << 12,
+        speed_changing = dt | ht | nc,
         map_changing = hr | ez | speed_changing;
 }
 
@@ -124,12 +124,12 @@ print_sig(text_print) {
     puts("      d o | ");
     puts("        r |\n");
 
-    printf("\n%s - %s [%s] (%s) %s\n", 
+    printf("\n%s - %s [%s] (%s) %s\n",
             b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "");
 
     printf("od%g ar%g cs%g\n", b.od, b.ar, b.cs);
     printf("%" fu16 "/%" fu16 " combo\n", combo, b.max_combo);
-    printf("%" fu16 " circles, %" fu16 " sliders %" fu16 " spinners\n", 
+    printf("%" fu16 " circles, %" fu16 " sliders %" fu16 " spinners\n",
             b.num_circles, b.num_sliders, b.num_spinners);
     printf("%" fu16 "xmiss\n", misses);
     printf("%g%%\n", res.acc_percent);
@@ -142,7 +142,7 @@ print_sig(text_print) {
     printf("accuracy: %g\n", res.acc_pp);
     printf("rhythm awkwardness (beta): %g\n", rhythm_awkwardness);
 
-    f64 awkwardness_bonus = 
+    f64 awkwardness_bonus =
         std::max(1.0, std::min(1.15, std::pow(rhythm_awkwardness, 0.3)));
     printf("awkwardness acc pp bonus (beta): %g\n", awkwardness_bonus);
 
@@ -329,10 +329,10 @@ struct output_module {
 };
 
 output_module modules[] = {
-    { "text", text_print }, 
-    { "json", json_print }, 
-    { "binary", binary_print }, 
-    { "binary_struct", binary_struct_print }, 
+    { "text", text_print },
+    { "json", json_print },
+    { "binary", binary_print },
+    { "binary_struct", binary_struct_print },
     { 0, 0 }
 };
 
@@ -414,14 +414,14 @@ int main(int argc, char* argv[]) {
 
         // 100s, 50s
         u16 tmp_c100 = 0, tmp_c50 = 0;
-        if (sscanf(a, "%" fu16 "%s", &tmp_c100, suff) == 2 && 
+        if (sscanf(a, "%" fu16 "%s", &tmp_c100, suff) == 2 &&
             !strcmp(suff, "x100")) {
 
             c100 = tmp_c100;
             continue;
         }
 
-        if (sscanf(a, "%" fu16 "%s", &tmp_c50, suff) == 2 && 
+        if (sscanf(a, "%" fu16 "%s", &tmp_c50, suff) == 2 &&
             !strcmp(suff, "x50")) {
 
             c50 = tmp_c50;
@@ -440,14 +440,14 @@ int main(int argc, char* argv[]) {
         if (tmp_mods_str == a && *tmp_mods_str == '+') {
             // at least one mod found in the parameter and the prefix matches
             mods_str = tmp_mods_str;
-            std::transform(mods_str, mods_str + strlen(mods_str), mods_str, 
+            std::transform(mods_str, mods_str + strlen(mods_str), mods_str,
                     toupper);
             continue;
         }
 
         // combo
         u16 tmp_combo;
-        if (sscanf(a, "%" fu16 "%s", &tmp_combo, suff) == 2 && 
+        if (sscanf(a, "%" fu16 "%s", &tmp_combo, suff) == 2 &&
             !strcmp(suff, "x")) {
 
             combo = tmp_combo;
@@ -456,7 +456,7 @@ int main(int argc, char* argv[]) {
 
         // misses
         u16 tmp_misses;
-        if (sscanf(a, "%" fu16 "%s", &tmp_misses, suff) == 2 && 
+        if (sscanf(a, "%" fu16 "%s", &tmp_misses, suff) == 2 &&
                 (!strcmp(suff, "xm") || !strcmp(suff, "xmiss") ||
                  !strcmp(suff, "m"))) {
             misses = tmp_misses;
@@ -505,7 +505,7 @@ int main(int argc, char* argv[]) {
     }
     chk();
 
-    m->print(mods_str, combo, misses, scoring, 
+    m->print(mods_str, combo, misses, scoring,
              stars, aim, speed, rhythm_complexity, res);
 
     // ---
@@ -524,12 +524,12 @@ void print_beatmap() {
         "Version: %s\n"
         "HP%g CS%g OD%g AR%g SV%g\n\n"
         ,
-        b.format_version, 
-        b.stack_leniency, 
-        b.mode, 
-        b.title, 
-        b.artist, 
-        b.version, 
+        b.format_version,
+        b.stack_leniency,
+        b.mode,
+        b.title,
+        b.artist,
+        b.version,
         b.hp, b.cs, b.od, b.ar, b.sv
     );
 
@@ -551,12 +551,12 @@ void print_beatmap() {
         auto& ho = b.objects[i];
         switch (ho.type) {
             case obj::circle:
-                printf("%" fi64 ": Circle (%g, %g)\n", 
+                printf("%" fi64 ": Circle (%g, %g)\n",
                     ho.time, ho.pos.x, ho.pos.y);
                 break;
 
             case obj::spinner:
-                printf("%" fi64 "-%" fi64 ": Spinner\n", 
+                printf("%" fi64 "-%" fi64 ": Spinner\n",
                         ho.time, ho.end_time);
                 break;
 
@@ -566,8 +566,8 @@ void print_beatmap() {
 
                 printf(
                     "%" fi64 "-%" fi64 ": Slider "
-                    "[Type %c, Length %g, %" fu16 " Repetitions] ", 
-                    ho.time, ho.end_time, sl.type, 
+                    "[Type %c, Length %g, %" fu16 " Repetitions] ",
+                    ho.time, ho.end_time, sl.type,
                     sl.length, sl.repetitions);
 
                 for (size_t j = 0; j < sl.points.size(); j++) {
