@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.7.4";
+const char* version_string = "0.7.5";
 
 // -----------------------------------------------------------------------------
 
@@ -127,7 +127,7 @@ print_sig(text_print) {
     printf("\n%s - %s [%s] (%s) %s\n",
             b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "");
 
-    printf("od%g ar%g cs%g\n", b.od, b.ar, b.cs);
+    printf("od%g ar%g cs%g hp%g\n", b.od, b.ar, b.cs, b.hp);
     printf("%" fu16 "/%" fu16 " combo\n", combo, b.max_combo);
     printf("%" fu16 " circles, %" fu16 " sliders %" fu16 " spinners\n",
             b.num_circles, b.num_sliders, b.num_spinners);
@@ -187,7 +187,7 @@ print_sig(json_print) {
     printf(
         ","
         "\"mods_str\": \"%s\","
-        "\"od\":%g,\"ar\":%g,\"cs\":%g,"
+        "\"od\":%g,\"ar\":%g,\"cs\":%g,\"hp\":%g,"
         "\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
         "\"num_circles\": %" fu16 ","
         "\"num_sliders\": %" fu16 ","
@@ -198,7 +198,7 @@ print_sig(json_print) {
         "\"pp\":%g"
         "}\n",
         mods_str ? mods_str : "",
-        b.od, b.ar, b.cs,
+        b.od, b.ar, b.cs, b.hp,
         combo, b.max_combo,
         b.num_circles, b.num_sliders, b.num_spinners,
         misses, scoring,
@@ -218,10 +218,13 @@ void encode_str(FILE* fd, const char* str) {
     fwrite(str, 1, len, fd);
 }
 
+// binary format history:
+// version 2: added hp
+
 print_sig(binary_print) {
     freopen(0, "wb", stdout);
 
-    u32 binary_output_version = 1;
+    u32 binary_output_version = 2;
 
     // TODO: shorten this with macros
     putc('\0', stdout);
@@ -236,6 +239,7 @@ print_sig(binary_print) {
     fwrite(&b.od, sizeof(f32), 1, stdout);
     fwrite(&b.ar, sizeof(f32), 1, stdout);
     fwrite(&b.cs, sizeof(f32), 1, stdout);
+    fwrite(&b.hp, sizeof(f32), 1, stdout);
     fwrite(&combo, 2, 1, stdout);
     fwrite(&b.max_combo, 2, 1, stdout);
     fwrite(&b.num_circles, 2, 1, stdout);
@@ -272,7 +276,7 @@ struct binary_output_data {
     char version[256];
     char creator[256];
     char mods_str[256];
-    f32 od, ar, cs;
+    f32 od, ar, cs, hp;
     u16 combo, max_combo;
     u16 num_circles, num_sliders, num_spinners;
     u16 misses;
@@ -303,6 +307,7 @@ print_sig(binary_struct_print) {
     d.od = b.od;
     d.ar = b.ar;
     d.cs = b.cs;
+    d.hp = b.hp;
     d.combo = combo;
     d.max_combo = b.max_combo;
     d.num_circles = b.num_circles;

@@ -573,31 +573,24 @@ struct beatmap {
         }
 
         // od
-        f32 od_multiplier = 1;
+        f32 od_ar_hp_multiplier = 1;
 
         if (mods & mods::hr) {
-            od_multiplier *= 1.4f;
+            od_ar_hp_multiplier *= 1.4f;
         }
 
         if (mods & mods::ez) {
-            od_multiplier *= 0.5f;
+            od_ar_hp_multiplier *= 0.5f;
         }
 
-        od *= od_multiplier;
+        od *= od_ar_hp_multiplier;
         f32 odms = od0_ms - std::ceil(od_ms_step * od);
 
         // ar
-        f32 ar_multiplier = 1;
+        ar *= od_ar_hp_multiplier;
 
-        if (mods & mods::hr) {
-            ar_multiplier = 1.4f;
-        }
-
-        if (mods & mods::ez) {
-            ar_multiplier = 0.5f;
-        }
-
-        ar *= ar_multiplier;
+        // hp
+        hp *= od_ar_hp_multiplier;
 
         // convert AR into its milliseconds value
         f32 arms = ar <= 5
