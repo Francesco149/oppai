@@ -30,7 +30,10 @@ enum class obj : u8 {
 struct slider_data {
     char type;
 
-    std::vector<v2f> points; // TODO: get rid of vector
+    // this implementation of diff calc does not
+    // actually use sliders because they are way more expensive
+    // to compute and it's already accurate enough
+    //std::vector<v2f> points;
 
     u16 repetitions = 0; // starts at 1 for non-repeating sliders
     f64 length = 0; // how much distance the curve travels in osu pixels
@@ -443,13 +446,16 @@ struct beatmap {
             char* slider_tok = strtok_r(line, "|", &saveptr);
             slider_tok = strtok_r(nullptr, "|", &saveptr); // skip first token
 
+            // I don't use sliders anymore
+
             // TODO: prevent useless copying here and in other vector usages
-            sl.points.push_back(ho.pos);
+            //sl.points.push_back(ho.pos);
             dbgputs("first slider point");
 
             for (; slider_tok; slider_tok = strtok_r(nullptr, "|", &saveptr)) {
-                sl.points.push_back(v2f{});
-                auto& pt = sl.points[sl.points.size() - 1];
+                //sl.points.push_back(v2f{});
+                //auto& pt = sl.points[sl.points.size() - 1];
+                v2f pt;
 
                 // lastcurveX:lastcurveY,repeat,pixelLength,
                 //      edgeHitsound,edgeAddition,addition
@@ -468,7 +474,7 @@ struct beatmap {
                     return;
                 }
 
-                dbgprintf("slider point %zd\n", sl.points.size());
+                //dbgprintf("slider point %zd\n", sl.points.size());
             }
 
             // find which timing section the slider belongs to

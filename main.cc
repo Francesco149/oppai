@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.7.3";
+const char* version_string = "0.7.4";
 
 // -----------------------------------------------------------------------------
 
