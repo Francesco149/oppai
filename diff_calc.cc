@@ -1,7 +1,7 @@
 #include <functional> // std::greater
 #include <vector>
 
-#define macro_round(x) std::floor(x + 0.5)
+#define macro_round(x) std::floor((x) + 0.5)
 
 // based on tom94's osu!tp aimod
 // TODO: rewrite this to be less object oriented
