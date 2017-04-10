@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.8.2";
+const char* version_string = "0.8.3";
 
 // -----------------------------------------------------------------------------
 
@@ -382,7 +382,7 @@ int main(int argc, char* argv[]) {
                 "[combo]x [misses]m scorev[scoring_version] "
                 "AR[ar_override] OD[od_override] CS[cs_override] "
                 "-st[singletap_max_bpm] "
-                "-o[output_module]\n\n", *argv);
+                "-o[output_module] [-no-awkwardness]\n\n", *argv);
         puts("use \"-\" instead of a path to an .osu file to read from stdin");
         puts("acc: the accuracy in percent (example: 99.99%)");
         puts("num_100s, num_50s: used to specify accuracy in 100 and 50 count");
@@ -406,7 +406,12 @@ int main(int argc, char* argv[]) {
             printf("%s ", m->name);
         }
 
-        puts("\n\narguments in [square brackets] are optional");
+        puts("");
+
+        puts("-no-awkwardness: disables rhythm awkwardness calculation "
+               "for speed (about 10% performance gain)");
+
+        puts("\narguments in [square brackets] are optional");
         puts("(the order of the optional arguments does not matter)");
 
         return 1;
@@ -426,6 +431,7 @@ int main(int argc, char* argv[]) {
     u16 c100 = 0, c50 = 0;
     i64 single_max_bpm = 240;
     bool no_percent = true;
+    bool no_awkwardness = false;
 
     dbgputs("\nparsing arguments");
     for (int i = 2; i < argc; i++) {
@@ -443,13 +449,16 @@ int main(int argc, char* argv[]) {
             }
 
             // singletap threshold
-            if (a[1] == 's' && a[2] == 't')
-            {
-                i64 tmp;
-                if (sscanf(a + 3, "%" fi64, &tmp) == 1) {
-                    single_max_bpm = tmp;
-                    continue;
-                }
+            i64 tmp;
+            if (sscanf(a + 1, "st%" fi64, &tmp) == 1) {
+                single_max_bpm = tmp;
+                continue;
+            }
+
+            // no rhythm awkwardness
+            if (!strcmp(a + 1, "no-awkwardness")) {
+                no_awkwardness = true;
+                continue;
             }
         }
 
@@ -559,7 +568,7 @@ int main(int argc, char* argv[]) {
             b,
             &aim,
             &speed,
-            &rhythm_complexity,
+            no_awkwardness ? 0 : &rhythm_complexity,
             &nsingles,
             &nsingles_timing,
             &nsingles_threshold,

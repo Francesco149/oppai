@@ -276,6 +276,11 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
     std::vector<i64> group;
 
     u64 noffsets = 0;
+
+    if (!rhythm_awkwardness) {
+        goto skip_awkwardness;
+    }
+
     *rhythm_awkwardness = 0;
     for (size_t i = 0; i < intervals.size(); ++i) {
         // TODO: actually compute break time length for the map's AR
@@ -315,6 +320,7 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
     *rhythm_awkwardness /= noffsets;
     *rhythm_awkwardness *= 82;
 
+skip_awkwardness:
     *aim = calculate_difficulty(diff::aim);
     *speed = calculate_difficulty(diff::speed);
     *aim = sqrt(*aim) * star_scaling_factor;

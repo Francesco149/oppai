@@ -55,12 +55,15 @@ Use the given base OD instead of the map's.
 .BI cs "cs override"
 Use the given base CS instead of the map's.
 .TP
-.BI -st "max singletap bpm threshold"
+.BI \-st "max singletap bpm threshold"
 This is used to count how many notes are within 1/2 singletaps of this bpm.
 Defaults to 240bpm.
 .TP
 .BI \-o "output module"
 How map information is printed to the screen, such as outputting JSON. By default it is printed as \fItext\fP.
+.TP
+.BI \-no-awkwardness
+Disables rhythm awkwardness calculation for speed (gains ~10% performance).
 .SH RETURN CODES
 0 is returned if the program exited normally, nonzero is returned otherwise.
 .SH EXAMPLES
