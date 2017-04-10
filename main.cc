@@ -380,6 +380,8 @@ int main(int argc, char* argv[]) {
         printf("Usage: %s /path/to/difficulty.osu "
                 "{[acc]%% or [num_100s]x100 [num_50s]x50} +[mods] "
                 "[combo]x [misses]m scorev[scoring_version] "
+                "AR[ar_override] OD[od_override] CS[cs_override] "
+                "-st[singletap_max_bpm] "
                 "-o[output_module]\n\n", *argv);
         puts("use \"-\" instead of a path to an .osu file to read from stdin");
         puts("acc: the accuracy in percent (example: 99.99%)");
@@ -389,6 +391,12 @@ int main(int argc, char* argv[]) {
         puts("combo: the highest combo (example: 1337x)");
         puts("misses: amount of misses (example: 1m)");
         puts("scoring_version: can only be 1 or 2 (example: scorev2)");
+        puts("ar_override, od_override, cs_override: overrides base ar/od/cs "
+             "for the map. useful to quickly calculate how it would affect pp "
+             "without editing the actual map. (example: AR10 OD10 CS6.5)");
+        puts("singletap_max_bpm: singletap bpm threshold, defaults to 240. "
+             "this is used to count how many notes are within 1/2 singletaps "
+             "of this bpm.");
 
         printf("output_module: the module that will be used to output the "
              "results (defaults to text). currently available modules: ");

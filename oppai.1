@@ -46,6 +46,19 @@ Sets the combo. By default full combo is used.
 .BI scorev "version number"
 Use the given scoring algorithm instead of the most current one.
 .TP
+.BI ar "ar override"
+Use the given base AR instead of the map's.
+.TP
+.BI od "od override"
+Use the given base OD instead of the map's.
+.TP
+.BI cs "cs override"
+Use the given base CS instead of the map's.
+.TP
+.BI -st "max singletap bpm threshold"
+This is used to count how many notes are within 1/2 singletaps of this bpm.
+Defaults to 240bpm.
+.TP
 .BI \-o "output module"
 How map information is printed to the screen, such as outputting JSON. By default it is printed as \fItext\fP.
 .SH RETURN CODES
