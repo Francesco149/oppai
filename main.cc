@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.7.5";
+const char* version_string = "0.8.0";
 
 // -----------------------------------------------------------------------------
 
@@ -104,6 +104,9 @@ void print_beatmap();
         f64         aim,                \
         f64         speed,              \
         f64         rhythm_awkwardness, \
+        u16         nsingles,           \
+        u16         nsingles_timing,    \
+        u16         nsingles_threshold, \
         pp_calc_result& res)
 
 // text output
@@ -140,11 +143,23 @@ print_sig(text_print) {
     printf("aim: %g\n", res.aim_pp);
     printf("speed: %g\n", res.speed_pp);
     printf("accuracy: %g\n", res.acc_pp);
-    printf("rhythm awkwardness (beta): %g\n", rhythm_awkwardness);
+
+    printf("\nrhythm awkwardness (beta): %g\n", rhythm_awkwardness);
 
     f64 awkwardness_bonus =
         std::max(1.0, std::min(1.15, std::pow(rhythm_awkwardness, 0.3)));
     printf("awkwardness acc pp bonus (beta): %g\n", awkwardness_bonus);
+
+    printf("%" fu16 " spacing singletaps (%g%%)\n",
+           nsingles, (f32)nsingles / (b.num_circles + b.num_sliders) * 100.0f);
+
+    printf("%" fu16 " timing singletaps (%g%%)\n",
+           nsingles_timing,
+           (f32)nsingles_timing / (b.num_circles + b.num_sliders) * 100.0f);
+
+    printf("%" fu16 " notes within singletap threshold (%g%%)\n",
+           nsingles_threshold,
+           (f32)nsingles_threshold / (b.num_circles + b.num_sliders) * 100.0f);
 
     printf("\n%gpp\n", res.pp);
 }
@@ -195,6 +210,10 @@ print_sig(json_print) {
         "\"misses\": %" fu16 ","
         "\"score_version\": %" fu32 ","
         "\"stars\": %g,\"speed_stars\": %g,\"aim_stars\": %g,"
+        "\"rhythm_awkwardness\": %g,"
+        "\"nsingles\": %" fu16 ","
+        "\"nsingles_timing\": %" fu16 ","
+        "\"nsingles_threshold\": %" fu16 ","
         "\"pp\":%g"
         "}\n",
         mods_str ? mods_str : "",
@@ -203,6 +222,8 @@ print_sig(json_print) {
         b.num_circles, b.num_sliders, b.num_spinners,
         misses, scoring,
         stars, speed, aim,
+        rhythm_awkwardness,
+        nsingles, nsingles_timing, nsingles_threshold,
         res.pp
     );
 }
@@ -395,6 +416,7 @@ int main(int argc, char* argv[]) {
     u16 misses = 0;
     u32 scoring = 1;
     u16 c100 = 0, c50 = 0;
+    i64 single_max_bpm = 240;
     bool no_percent = true;
 
     dbgputs("\nparsing arguments");
@@ -404,10 +426,23 @@ int main(int argc, char* argv[]) {
 
         std::transform(a, a + strlen(a), a, tolower);
 
-        // output module
-        if (a[0] == '-' && a[1] == 'o') {
-            output_module_name = a + 2;
-            continue;
+        if (a[0] == '-')
+        {
+            // output module
+            if (a[1] == 'o') {
+                output_module_name = a + 2;
+                continue;
+            }
+
+            // singletap threshold
+            if (a[1] == 's' && a[2] == 't')
+            {
+                i64 tmp;
+                if (sscanf(a + 3, "%" fi64, &tmp) == 1) {
+                    single_max_bpm = tmp;
+                    continue;
+                }
+            }
         }
 
         // acc
@@ -509,8 +544,19 @@ int main(int argc, char* argv[]) {
     b.apply_mods(mods);
     chk();
 
+    u16 nsingles, nsingles_timing, nsingles_threshold;
     f64 aim, speed, rhythm_complexity;
-    f64 stars = d_calc(b, &aim, &speed, &rhythm_complexity);
+    f64 stars =
+        d_calc(
+            b,
+            &aim,
+            &speed,
+            &rhythm_complexity,
+            &nsingles,
+            &nsingles_timing,
+            &nsingles_threshold,
+            (i64)((60000.0f / single_max_bpm) / 2)
+        );
     chk();
 
     auto res = no_percent ?
@@ -528,7 +574,8 @@ int main(int argc, char* argv[]) {
     chk();
 
     m->print(mods_str, combo, misses, scoring,
-             stars, aim, speed, rhythm_complexity, res);
+             stars, aim, speed, rhythm_complexity,
+             nsingles, nsingles_timing, nsingles_threshold, res);
 
     // ---
 

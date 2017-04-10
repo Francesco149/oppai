@@ -38,6 +38,9 @@ struct d_obj {
     v2f norm_start;
     v2f norm_end;
 
+    // initialized after claulcating strains
+    bool is_single;
+
     void init(hit_object* base_object, f32 radius) {
         this->ho = base_object;
 
@@ -96,6 +99,7 @@ struct d_obj {
         switch (diff_type) {
             case diff::speed:
                 if (distance > single_spacing) {
+                    is_single = true;
                     return 2.5;
                 }
                 else if (distance > stream_spacing) {
@@ -193,7 +197,13 @@ f64 calculate_difficulty(u8 type) {
 // aim, speed: pointers to the variables where
 //             aim and speed stars will be stored.
 // returns overall stars
-f64 d_calc(beatmap& b, f64* aim, f64* speed, f64* rhythm_awkwardness) {
+f64 d_calc(beatmap& b, f64* aim, f64* speed,
+           f64* rhythm_awkwardness,
+           u16* nsingles,
+           u16* nsingles_timing,
+           u16* nsingles_threshold,
+           i64 singletap_threshold)
+{
     dbgputs("\ndiff calc");
 
     if (b.mode != 0) {
@@ -232,7 +242,22 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed, f64* rhythm_awkwardness) {
                 o.ho->time, (int)o.ho->type, o.strains[0], o.strains[1],
                 o.norm_start.str(), o.norm_end.str(), o.ho->pos.str());
 
-        intervals.push_back(o.ho->time - prev->ho->time);
+        i64 interval = o.ho->time - prev->ho->time;
+        intervals.push_back(interval);
+
+        if (nsingles && o.is_single) {
+            ++*nsingles;
+        }
+
+        i64 one_half_threshold = (i64)(b.timing(o.ho->time)->ms_per_beat / 2);
+
+        if (nsingles_timing && interval >= one_half_threshold) {
+            ++*nsingles_timing;
+        }
+
+        if (nsingles_threshold && interval >= singletap_threshold) {
+            ++*nsingles_threshold;
+        }
 
         prev = &o;
     }
