@@ -592,10 +592,12 @@ void print_beatmap() {
                     ho.time, ho.end_time, sl.type,
                     sl.length, sl.repetitions);
 
+#if 0
                 for (size_t j = 0; j < sl.points.size(); j++) {
                     auto& pt = sl.points[j];
                     printf("(%g, %g) ", pt.x, pt.y);
                 }
+#endif
 
                 puts("");
 
