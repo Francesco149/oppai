@@ -124,9 +124,9 @@ struct beatmap {
         num_objects(0)
     {
         memset(title, 0, sizeof(title));
-        memset(title, 0, sizeof(artist));
-        memset(title, 0, sizeof(creator));
-        memset(title, 0, sizeof(version));
+        memset(artist, 0, sizeof(artist));
+        memset(creator, 0, sizeof(creator));
+        memset(version, 0, sizeof(version));
     }
 
     // parse .osu file into a beatmap object
