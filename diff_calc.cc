@@ -1,4 +1,7 @@
 #include <functional> // std::greater
+#include <vector>
+
+#define macro_round(x) std::floor(x + 0.5)
 
 // based on tom94's osu!tp aimod
 // TODO: rewrite this to be less object oriented
@@ -31,8 +34,7 @@ namespace diff {
 struct d_obj {
     hit_object* ho;
 
-    // strains start at 1
-    f64 strains[2] = { 1, 1 };
+    f64 strains[2];
 
     // start/end positions normalized on radius
     v2f norm_start;
@@ -40,6 +42,12 @@ struct d_obj {
 
     // initialized after claulcating strains
     bool is_single;
+
+    d_obj() {
+        // strains start at 1
+        strains[0] = 1;
+        strains[1] = 1;
+    }
 
     void init(hit_object* base_object, f32 radius) {
         this->ho = base_object;
@@ -185,8 +193,11 @@ f64 calculate_difficulty(u8 type) {
     // TODO: get rid of std::greater
 
     // weigh the top strains
-    for (const f64& strain : highest_strains) {
-        difficulty += weight * strain;
+    for (std::vector<f64>::iterator it = highest_strains.begin();
+         it != highest_strains.end();
+         ++it)
+    {
+        difficulty += weight * *it;
         weight *= decay_weight;
     }
 
@@ -286,7 +297,7 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
                         (f64)group[j] / (f64)group[k] :
                         (f64)group[k] / (f64)group[j];
 
-                    f64 closest_pot = pow(2, std::round(log(ratio)/log(2)));
+                    f64 closest_pot = pow(2, macro_round(log(ratio)/log(2.0)));
 
                     f64 offset = std::abs(closest_pot - ratio);
                     offset /= closest_pot;

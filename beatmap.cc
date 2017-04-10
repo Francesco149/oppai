@@ -19,12 +19,15 @@ const f32   od_ms_step = 6,
 
 // -----------------------------------------------------------------------------
 
-enum class obj : u8 {
-    invalid = 0,
-    circle,
-    spinner,
-    slider,
-};
+namespace obj
+{
+    enum t {
+        invalid = 0,
+        circle,
+        spinner,
+        slider,
+    };
+}
 
 struct slider_data {
     char type;
@@ -34,60 +37,97 @@ struct slider_data {
     // to compute and it's already accurate enough
     //std::vector<v2f> points;
 
-    u16 repetitions = 0; // starts at 1 for non-repeating sliders
-    f64 length = 0; // how much distance the curve travels in osu pixels
+    u16 repetitions; // starts at 1 for non-repeating sliders
+    f64 length; // how much distance the curve travels in osu pixels
+
+    slider_data() :
+        repetitions(0),
+        length(0)
+    {};
 };
 
 struct hit_object {
-    v2f pos{0};
-    i64 time = 0;
-    obj type = obj::invalid;
-    i64 end_time = 0; // for spinners and sliders
+    v2f pos;
+    i64 time;
+    obj::t type;
+    i64 end_time; // for spinners and sliders
     slider_data slider;
+
+    hit_object() :
+        pos(0),
+        time(0),
+        type(obj::invalid),
+        end_time(0)
+    {}
 };
 
 struct timing_point {
-    i64 time = 0;
-    f64 ms_per_beat = 0;
-    bool inherit = false;
+    i64 time;
+    f64 ms_per_beat;
+    bool inherit;
+
+    timing_point() :
+        time(0),
+        ms_per_beat(0),
+        inherit(false)
+    {}
 };
 
 // note: values not required for diff calc will be omitted from this parser
 // at least for now
 struct beatmap {
-    u32 format_version = 0;
+    u32 format_version;
 
     // general
-    f32 stack_leniency = 0;
-    u8 mode = 0;
+    f32 stack_leniency;
+    u8 mode;
 
     // metadata
-    char title[256] = {0};
-    char artist[256] = {0};
-    char creator[256] = {0};
-    char version[256] = {0};
+    char title[256];
+    char artist[256];
+    char creator[256];
+    char version[256];
 
     // difficulty
-    f32 hp = 1337;
-    f32 cs = 1337;
-    f32 od = 1337;
-    f32 ar = 1337;
-    f32 sv = 1337;
-    f32 tick_rate = 1;
+    f32 hp;
+    f32 cs;
+    f32 od;
+    f32 ar;
+    f32 sv;
+    f32 tick_rate;
 
-    u16 num_circles = 0;
-    u16 num_sliders = 0;
-    u16 num_spinners = 0;
+    u16 num_circles;
+    u16 num_sliders;
+    u16 num_spinners;
 
-    u16 max_combo = 0;
+    u16 max_combo;
 
     static const size_t max_timing_points = 0xFFFF;
-    size_t num_timing_points = 0;
+    size_t num_timing_points;
     timing_point timing_points[max_timing_points];
 
     static const size_t max_objects = max_timing_points;
-    size_t num_objects = 0;
+    size_t num_objects;
     hit_object objects[max_objects];
+
+    beatmap() :
+        format_version(0),
+        stack_leniency(0),
+        mode(0),
+        hp(1337), cs(1337), od(1337), ar(1337),
+        sv(1337), tick_rate(1),
+        num_circles(0),
+        num_sliders(0),
+        num_spinners(0),
+        max_combo(0),
+        num_timing_points(0),
+        num_objects(0)
+    {
+        memset(title, 0, sizeof(title));
+        memset(title, 0, sizeof(artist));
+        memset(title, 0, sizeof(creator));
+        memset(title, 0, sizeof(version));
+    }
 
     // parse .osu file into a beatmap object
     static void parse(const char* osu_file, beatmap& b) {
@@ -438,7 +478,7 @@ struct beatmap {
 
             // gotta make a copy of the line to tokenize sliders without affecting
             // the current line-by-line tokenization
-            std::string sline{tok};
+            std::string sline(tok);
             char* line = &sline[0];
 
             char* saveptr = nullptr;

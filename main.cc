@@ -65,10 +65,10 @@ namespace mods {
         map_changing = hr | ez | speed_changing;
 }
 
-const char* const mod_strs[] {
+const char* const mod_strs[] = {
     "nomod", "nf", "ez", "hd", "hr", "dt", "ht", "nc", "fl", "so"
 };
-const u32 mod_masks[] {
+const u32 mod_masks[] = {
     mods::nomod, mods::nf, mods::ez, mods::hd, mods::hr, mods::dt, mods::ht,
     mods::nc, mods::fl, mods::so
 };
@@ -112,10 +112,10 @@ void print_beatmap();
 // text output
 print_sig(text_print) {
     // round to 2 decimal places
-    aim = std::round(aim * 100.0) / 100.0;
-    speed = std::round(speed * 100.0) / 100.0;
-    stars = std::round(stars * 100.0) / 100.0;
-    res.pp = std::round(res.pp * 100.0) / 100.0;
+    aim = macro_round(aim * 100.0) / 100.0;
+    speed = macro_round(speed * 100.0) / 100.0;
+    stars = macro_round(stars * 100.0) / 100.0;
+    res.pp = macro_round(res.pp * 100.0) / 100.0;
 
     printf("o p p a i | v%s\n", version_string);
     puts("s     d n | ");

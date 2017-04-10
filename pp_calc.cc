@@ -42,7 +42,9 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
     u16 combo = 0xFFFF, u16 misses = 0, u16 c300 = 0xFFFF,
     u16 c100 = 0, u16 c50 = 0, u32 score_version = 1)
 {
-    pp_calc_result res{0.0};
+    pp_calc_result res;
+
+    memset(&res, 0, sizeof(res));
 
     f64 od = b.od;
     f64 ar = b.ar;
@@ -236,13 +238,13 @@ pp_calc_result pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent,
 
     // round acc to the closest amount of 100s or 50s
     u16 c50 = 0;
-    u16 c100 = (u16)std::round(-3.0 * ((acc_percent * 0.01 - 1.0) *
+    u16 c100 = (u16)macro_round(-3.0 * ((acc_percent * 0.01 - 1.0) *
         b.num_objects + misses) * 0.5);
 
     if (c100 > b.num_objects - misses) {
         // acc lower than all 100s, use 50s
         c100 = 0;
-        c50 = (u16)std::round(-6.0 * ((acc_percent * 0.01 - 1.0) *
+        c50 = (u16)macro_round(-6.0 * ((acc_percent * 0.01 - 1.0) *
             b.num_objects + misses) * 0.2);
 
         c50 = std::min(max300, c50);
