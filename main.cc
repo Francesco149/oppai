@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.8.0";
+const char* version_string = "0.8.1";
 
 // -----------------------------------------------------------------------------
 
@@ -552,7 +552,7 @@ int main(int argc, char* argv[]) {
     b.apply_mods(mods);
     chk();
 
-    u16 nsingles, nsingles_timing, nsingles_threshold;
+    u16 nsingles = 0, nsingles_timing = 0, nsingles_threshold = 0;
     f64 aim, speed, rhythm_complexity;
     f64 stars =
         d_calc(
