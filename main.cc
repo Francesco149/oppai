@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.8.4";
+const char* version_string = "0.8.5";
 
 // -----------------------------------------------------------------------------
 
@@ -117,6 +117,9 @@ print_sig(text_print) {
     speed = macro_round(speed * 100.0) / 100.0;
     stars = macro_round(stars * 100.0) / 100.0;
     res.pp = macro_round(res.pp * 100.0) / 100.0;
+    res.pp = macro_round(res.aim_pp * 100.0) / 100.0;
+    res.pp = macro_round(res.speed_pp * 100.0) / 100.0;
+    res.pp = macro_round(res.acc_pp * 100.0) / 100.0;
 
     printf("o p p a i | v%s\n", version_string);
     puts("s     d n | ");
@@ -203,19 +206,19 @@ print_sig(json_print) {
     printf(
         ","
         "\"mods_str\": \"%s\","
-        "\"od\":%g,\"ar\":%g,\"cs\":%g,\"hp\":%g,"
+        "\"od\":%.17g,\"ar\":%17g,\"cs\":%.17g,\"hp\":%.17g,"
         "\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
         "\"num_circles\": %" fu16 ","
         "\"num_sliders\": %" fu16 ","
         "\"num_spinners\": %" fu16 ","
         "\"misses\": %" fu16 ","
         "\"score_version\": %" fu32 ","
-        "\"stars\": %g,\"speed_stars\": %g,\"aim_stars\": %g,"
-        "\"rhythm_awkwardness\": %g,"
+        "\"stars\": %.17g,\"speed_stars\": %.17g,\"aim_stars\": %.17g,"
+        "\"rhythm_awkwardness\": %17g,"
         "\"nsingles\": %" fu16 ","
         "\"nsingles_timing\": %" fu16 ","
         "\"nsingles_threshold\": %" fu16 ","
-        "\"pp\":%g"
+        "\"pp\":%.17g"
         "}\n",
         mods_str ? mods_str : "",
         b.od, b.ar, b.cs, b.hp,
