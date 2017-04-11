@@ -218,7 +218,7 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
     dbgputs("\ndiff calc");
 
     if (b.mode != 0) {
-        die("This gamemode is not supported");
+        //die("This gamemode is not supported");
         return 0;
     }
 

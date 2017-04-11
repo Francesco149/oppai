@@ -1,4 +1,50 @@
 #include <string>
+#include <openssl/md5.h>
+
+#ifdef _MSC_VER
+#include <Windows.h>
+#include <direct.h>
+#define mkdir _mkdir
+
+i64 get_exe_path(char* buf, i64 bufsize) {
+    return GetModuleFileNameA(0, buf, (DWORD)bufsize);
+}
+#else
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#define mkdir(x) mkdir(x, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
+
+i64 get_exe_path(char* buf, i64 bufsize)
+{
+    i64 res;
+
+    res = readlink("/proc/self/exe", buf, bufsize);
+    if (res >= 0) {
+        return res;
+    }
+
+    res = readlink("/proc/curproc/file", buf, bufsize);
+    if (res >= 0) {
+        return res;
+    }
+
+    res = readlink("/proc/self/path/a.out", buf, bufsize);
+    if (res >= 0) {
+        return res;
+    }
+
+    perror("readlink");
+    strcpy(buf, ".");
+    return 1;
+}
+
+bool file_exists(char* filename)
+{
+    struct stat s;
+    return stat(filename, &s) == 0;
+}
+#endif
 
 // shit code ahead! I am way too lazy to write nice code for parsers, sorry
 // disclaimer: this beatmap parser is meant purely for difficulty calculation
@@ -73,6 +119,26 @@ struct timing_point {
     {}
 };
 
+// TODO: move this
+bool decode_str(FILE* fd, char* str)
+{
+    u16 len;
+
+    if (fread(&len, 2, 1, fd) != 1) {
+        perror("fread");
+        return false;
+    }
+
+    if (fread(str, 1, len, fd) != len) {
+        perror("fread");
+        return false;
+    }
+
+    str[len - 1] = 0;
+
+    return true;
+}
+
 // note: values not required for diff calc will be omitted from this parser
 // at least for now
 struct beatmap {
@@ -110,6 +176,102 @@ struct beatmap {
     size_t num_objects;
     hit_object objects[max_objects];
 
+    bool write(FILE* fd)
+    {
+#define w(x) \
+        if (fwrite(&x, sizeof(x), 1, fd) != 1) { \
+            perror("fwrite"); \
+            return false; \
+        }
+
+        w(format_version)
+        w(stack_leniency)
+        w(mode)
+
+        if (!encode_str(fd, title) ||
+            !encode_str(fd, artist) ||
+            !encode_str(fd, creator) ||
+            !encode_str(fd, version))
+        {
+            return false;
+        }
+
+        w(hp)
+        w(cs)
+        w(od)
+        w(ar)
+        w(sv)
+        w(tick_rate)
+
+        w(num_circles)
+        w(num_sliders)
+        w(num_spinners)
+
+        w(max_combo)
+
+        w(num_timing_points)
+        w(num_objects)
+
+        for (u16 i = 0; i < num_timing_points; ++i) {
+            w(timing_points[i])
+        }
+
+        for (u16 i = 0; i < num_objects; ++i) {
+            w(objects[i])
+        }
+#undef w
+
+        return true;
+    }
+
+    bool read(FILE* fd)
+    {
+#define w(x) \
+        if (fread(&x, sizeof(x), 1, fd) != 1) { \
+            perror("fread"); \
+            return false; \
+        }
+
+        w(format_version)
+        w(stack_leniency)
+        w(mode)
+
+        if (!decode_str(fd, title) ||
+            !decode_str(fd, artist) ||
+            !decode_str(fd, creator) ||
+            !decode_str(fd, version))
+        {
+            return false;
+        }
+
+        w(hp)
+        w(cs)
+        w(od)
+        w(ar)
+        w(sv)
+        w(tick_rate)
+
+        w(num_circles)
+        w(num_sliders)
+        w(num_spinners)
+
+        w(max_combo)
+
+        w(num_timing_points)
+        w(num_objects)
+
+        for (u16 i = 0; i < num_timing_points; ++i) {
+            w(timing_points[i])
+        }
+
+        for (u16 i = 0; i < num_objects; ++i) {
+            w(objects[i])
+        }
+#undef w
+
+        return true;
+    }
+
     beatmap() :
         format_version(0),
         stack_leniency(0),
@@ -129,8 +291,45 @@ struct beatmap {
         memset(version, 0, sizeof(version));
     }
 
+    static
+    i64 get_cache_file(char* cache_path, i64 bufsize, bool mk = true)
+    {
+        u8 digest_bytes[MD5_DIGEST_LENGTH];
+        char* p = cache_path;
+        char const* folder_name = "oppai_cache";
+
+        MD5((u8*)buf, strlen((char const*)buf), digest_bytes);
+
+        p += get_exe_path(
+            p,
+            bufsize - MD5_DIGEST_LENGTH * 2 - 3 - strlen(folder_name)
+        );
+
+        /* get base dir of exe */
+        for (; *p != '\\' && *p != '/'; --p);
+
+        p += sprintf(p, "/oppai_cache/");
+
+        if (mk) {
+            mkdir(cache_path);
+        }
+
+        for (u8 i = 0; i < MD5_DIGEST_LENGTH; ++i) {
+            p += sprintf(p, "%02x", digest_bytes[i]);
+        }
+
+        *p = 0;
+
+        dbgprintf("cache path: %s\n", cache_path);
+
+        return p - cache_path;
+    }
+
     // parse .osu file into a beatmap object
-    static void parse(const char* osu_file, beatmap& b)
+    static void parse(
+        const char* osu_file,
+        beatmap& b,
+        bool disable_cache = false)
     {
 #if OPPAI_PROFILING
         const int prid = 1;
@@ -156,6 +355,22 @@ struct beatmap {
 
         // just to be safe
         buf[cb] = 0;
+
+        // ---
+
+        char cachefile[4096];
+        FILE* cachefd = 0;
+        bool cache_exists = false;
+
+        if (!disable_cache) {
+            get_cache_file(cachefile, sizeof(cachefile));
+
+            cache_exists = file_exists(cachefile);
+
+            if (cache_exists) {
+                cachefd = fopen(cachefile, "rb");
+            }
+        }
 
         // ---
 
@@ -188,11 +403,13 @@ struct beatmap {
 
         // ---
 
+        u32 tmp_format_version = 0;
+
         profile(prid, "format version");
 
         while (not_section()) {
             if (sscanf(tok, "osu file format v%" fi32 "",
-                       &b.format_version) == 1) {
+                       cachefd ? &tmp_format_version :&b.format_version) == 1) {
                 break;
             }
             fwd();
@@ -217,6 +434,9 @@ struct beatmap {
         // but I'd rather parse only the ones I need since I'd still need to parse
         // them one by one and check for format errors.
 
+        f32 tmp_stack_leniency = 0;
+        u8 tmp_mode = 0;
+
         // StackLeniency and Mode are not present in older formats
         for (; not_section(); fwd()) {
 
@@ -240,25 +460,81 @@ struct beatmap {
 
         // ---
 
+        char tmp_title[sizeof(b.title)];
+        char tmp_artist[sizeof(b.artist)];
+        char tmp_creator[sizeof(b.creator)];
+        char tmp_version[sizeof(b.version)];
+
+        if (cachefd)
+        {
+            memset(tmp_title, 0, sizeof(tmp_title));
+            memset(tmp_artist, 0, sizeof(tmp_title));
+            memset(tmp_creator, 0, sizeof(tmp_title));
+            memset(tmp_version, 0, sizeof(tmp_title));
+        }
+
         for (; not_section(); fwd()) {
 
             // %[^\r\n] means accept all characters except \r\n
             // which means that it'll grab the string until it finds \r or \n
-            if (sscanf(tok, "Title: %[^\r\n]", b.title) == 1) {
+            if (sscanf(tok, "Title: %[^\r\n]",
+                       cachefd ? tmp_title : b.title) == 1) {
                 continue;
             }
 
-            if (sscanf(tok, "Artist: %[^\r\n]", b.artist) == 1) {
+            if (sscanf(tok, "Artist: %[^\r\n]",
+                       cachefd ? tmp_artist : b.artist) == 1) {
                 continue;
             }
 
-            if (sscanf(tok, "Creator: %[^\r\n]", b.creator) == 1) {
+            if (sscanf(tok, "Creator: %[^\r\n]",
+                       cachefd ? tmp_creator : b.creator) == 1) {
                 continue;
             }
 
-            if (sscanf(tok, "Version: %[^\r\n]", b.version) == 1) {
+            if (sscanf(tok, "Version: %[^\r\n]",
+                       cachefd ? tmp_version : b.version) == 1) {
                 continue;
             }
+        }
+
+        // ---
+
+        if (cachefd)
+        {
+            int n = b.read(cachefd) ? 1 : -1;
+
+            if (n != 1) {
+                perror("fread");
+            }
+
+            fclose(cachefd);
+
+            if (n == 1 &&
+                !strcmp(b.title, tmp_title) &&
+                !strcmp(b.artist, tmp_artist) &&
+                !strcmp(b.creator, tmp_creator) &&
+                !strcmp(b.version, tmp_version))
+            {
+                return;
+            }
+
+            dbgprintf(
+                "hash collision for %s: "
+                "%s - %s (%s) [%s] != %s - %s (%s) [%s]\n",
+                osu_file,
+                b.artist, b.title, b.creator, b.version,
+                tmp_artist, tmp_title, tmp_creator, tmp_version
+            );
+
+            b.format_version = tmp_format_version;
+            b.mode = tmp_mode;
+            b.stack_leniency = tmp_stack_leniency;
+
+            strcpy(b.title, tmp_title);
+            strcpy(b.artist, tmp_artist);
+            strcpy(b.creator, tmp_creator);
+            strcpy(b.version, tmp_version);
         }
 
         // ---
@@ -591,6 +867,18 @@ struct beatmap {
         }
 
         profile(prid, "");
+
+        if (!disable_cache && cache_exists)
+        {
+            cachefd = fopen(cachefile, "wb");
+            if (!cachefd) {
+                perror("fopen");
+            } else {
+                b.write(cachefd);
+                fclose(cachefd);
+                dbgputs("beatmap written to cache");
+            }
+        }
 
         dbgputs("\nparsing done");
     }

@@ -76,6 +76,9 @@ const size_t num_mods = sizeof(mod_masks) / sizeof(mod_masks[0]);
 
 // -----------------------------------------------------------------------------
 
+// TODO: move this
+bool encode_str(FILE* fd, const char* str);
+
 // this a monolithic build. stuff is separated into files purely for readability
 #include "profiler.cc"
 #include "math.cc"
@@ -233,14 +236,26 @@ print_sig(json_print) {
 }
 
 // binary output
-void encode_str(FILE* fd, const char* str) {
+bool encode_str(FILE* fd, const char* str)
+{
     if (strlen(str) > 0xFFFF) {
         die("encode_str can only handle strings up to FFFF characters");
-        return;
+        return false;
     }
+
     u16 len = (u16)strlen(str);
-    fwrite(&len, 2, 1, fd);
-    fwrite(str, 1, len, fd);
+
+    if (fwrite(&len, 2, 1, fd) != 1) {
+        perror("fwrite");
+        return false;
+    }
+
+    if (fwrite(str, 1, len, fd) != len) {
+        perror("fwrite");
+        return false;
+    }
+
+    return true;
 }
 
 // binary format history:
@@ -431,10 +446,23 @@ int main(int argc, char* argv[]) {
     const int prid = 0;
 #endif
 
+    bool no_cache = false;
+
+    // TODO: find a way to do this without using 2 loops
+    for (int i = 2; i < argc; i++)
+    {
+        // no cache
+        if (!strcmp(argv[i], "-no-cache")) {
+            no_cache = true;
+            argv[i] = 0;
+            break;
+        }
+    }
+
     profile_init();
 
     profile(prid, "beatmap parse");
-    beatmap::parse(argv[1], b);
+    beatmap::parse(argv[1], b, no_cache);
     chk();
 
     profile(prid, "arguments parse");
@@ -448,6 +476,8 @@ int main(int argc, char* argv[]) {
     u32 scoring = 1;
     u16 c100 = 0, c50 = 0;
     i64 single_max_bpm = 240;
+
+    // TODO: bitmask
     bool no_percent = true;
     bool no_awkwardness = false;
 
@@ -455,6 +485,10 @@ int main(int argc, char* argv[]) {
     for (int i = 2; i < argc; i++) {
         char suff[64] = {0};
         auto a = argv[i];
+
+        if (!a) {
+            continue;
+        }
 
         std::transform(a, a + strlen(a), a, tolower);
 

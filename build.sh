@@ -6,6 +6,7 @@ ${CXX:-g++}         \
     -Wall -Werror   \
     main.cc         \
     -lm -lstdc++    \
+    -lcrypto        \
     -o oppai        \
                     \
 && strip -R .comment ./oppai
