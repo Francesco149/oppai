@@ -12,7 +12,6 @@ i64 get_exe_path(char* buf, i64 bufsize) {
 #else
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #define mkdir(x) mkdir(x, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
 
 i64 get_exe_path(char* buf, i64 bufsize)
@@ -37,12 +36,6 @@ i64 get_exe_path(char* buf, i64 bufsize)
     perror("readlink");
     strcpy(buf, ".");
     return 1;
-}
-
-bool file_exists(char* filename)
-{
-    struct stat s;
-    return stat(filename, &s) == 0;
 }
 #endif
 
@@ -134,7 +127,7 @@ bool decode_str(FILE* fd, char* str)
         return false;
     }
 
-    str[len - 1] = 0;
+    str[len] = 0;
 
     return true;
 }
@@ -360,16 +353,10 @@ struct beatmap {
 
         char cachefile[4096];
         FILE* cachefd = 0;
-        bool cache_exists = false;
 
         if (!disable_cache) {
             get_cache_file(cachefile, sizeof(cachefile));
-
-            cache_exists = file_exists(cachefile);
-
-            if (cache_exists) {
-                cachefd = fopen(cachefile, "rb");
-            }
+            cachefd = fopen(cachefile, "rb");
         }
 
         // ---
