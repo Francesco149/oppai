@@ -5,6 +5,7 @@ ${CXX:-g++}         \
     -pedantic       \
     -O2             \
     $@              \
+    -Wno-variadic-macros \
     -Wall -Werror   \
     main.cc         \
     -lm -lstdc++    \

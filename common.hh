@@ -14,6 +14,7 @@
 #define dbgprintf print_caller_info(); printf
 #else
 #define dbgputs(x)
-internal inline void dbgprintf(char const* fmt, ...) {}
+//internal inline void dbgprintf(char const* fmt, ...) {}
+#define dbgprintf(fmt, ...)
 #endif
 
