@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.8.5";
+const char* version_string = "0.8.6";
 
 // -----------------------------------------------------------------------------
 
@@ -206,7 +206,7 @@ print_sig(json_print) {
     printf(
         ","
         "\"mods_str\": \"%s\","
-        "\"od\":%.17g,\"ar\":%.17g,\"cs\":%.17g,\"hp\":%.17g,"
+        "\"od\":%.2g,\"ar\":%.2g,\"cs\":%.2g,\"hp\":%.2g,"
         "\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
         "\"num_circles\": %" fu16 ","
         "\"num_sliders\": %" fu16 ","
