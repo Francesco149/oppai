@@ -133,6 +133,22 @@ bool decode_str(FILE* fd, char* str)
     return true;
 }
 
+//TODO: move this
+bool find_fwd(char*& tok, const char* str)
+{
+    // skips forward until tok is the line right after
+    // the one that contains str
+    dbgprintf("skipping until %s", str);
+    while (tok) {
+        if (strstr(tok, str)) {
+            tok = strtok(nullptr, "\n");
+            return true;
+        }
+        tok = strtok(nullptr, "\n");
+    }
+    return false;
+};
+
 // note: values not required for diff calc will be omitted from this parser
 // at least for now
 struct beatmap {
@@ -366,28 +382,8 @@ struct beatmap {
 
         char* tok = strtok((char*)buf, "\n");
 
-        auto fwd = [&tok]() {
-            // skips 1 line
-            tok = strtok(nullptr, "\n");
-        };
-
-        auto find_fwd = [&tok, fwd](const char* str) -> bool {
-            // skips forward until tok is the line right after
-            // the one that contains str
-            dbgprintf("skipping until %s", str);
-            while (tok) {
-                if (strstr(tok, str)) {
-                    fwd();
-                    return true;
-                }
-                fwd();
-            }
-            return false;
-        };
-
-        auto not_section = [&tok]() -> bool {
-            return tok && *tok != '[';
-        };
+#define fwd() tok = strtok(nullptr, "\n")
+#define not_section() (tok && *tok != '[')
 
         // ---
 
@@ -411,7 +407,7 @@ struct beatmap {
 
         profile(prid, "general");
 
-        if (!find_fwd("[General]")) {
+        if (!find_fwd(tok, "[General]")) {
             die("Could not find General info");
             return;
         }
@@ -441,7 +437,7 @@ struct beatmap {
 
         profile(prid, "metadata");
 
-        if (!find_fwd("[Metadata]")) {
+        if (!find_fwd(tok, "[Metadata]")) {
             die("Could not find Metadata");
             return;
         }
@@ -529,7 +525,7 @@ struct beatmap {
 
         profile(prid, "difficulty");
 
-        if (!find_fwd("[Difficulty]")) {
+        if (!find_fwd(tok, "[Difficulty]")) {
             die("Could not find Difficulty");
             return;
         }
@@ -592,7 +588,7 @@ struct beatmap {
 
         profile(prid, "timing points");
 
-        if (!find_fwd("[TimingPoints]")) {
+        if (!find_fwd(tok, "[TimingPoints]")) {
             die("Could not find TimingPoints");
             return;
         }
@@ -656,7 +652,7 @@ struct beatmap {
 
         profile(prid, "hit objects");
 
-        if (!find_fwd("[HitObjects]")) {
+        if (!find_fwd(tok, "[HitObjects]")) {
             die("Could not find HitObjects");
             return;
         }
