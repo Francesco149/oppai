@@ -868,7 +868,7 @@ struct beatmap {
 
         profile(prid, "");
 
-        if (!disable_cache && cache_exists)
+        if (!disable_cache)
         {
             cachefd = fopen(cachefile, "wb");
             if (!cachefd) {
