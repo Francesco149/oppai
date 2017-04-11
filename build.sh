@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ${CXX:-g++}         \
-    -std=c++0x      \
+    -std=c++98      \
     -O2             \
     -Wall -Werror   \
     main.cc         \

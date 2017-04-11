@@ -162,7 +162,7 @@ f64 calculate_difficulty(u8 type) {
 
     d_obj* prev = 0;
     for (size_t i = 0; i < num_objects; i++) {
-        auto& o = objects[i];
+        d_obj& o = objects[i];
 
         // make previous peak strain decay until the current object
         while (o.ho->time > interval_end) {
@@ -239,9 +239,9 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
     // TODO: don't use vector
     std::vector<i64> intervals;
 
-    auto* prev = &objects[0];
+    d_obj* prev = &objects[0];
     for (size_t i = 1; i < b.num_objects; i++) {
-        auto& o = objects[i];
+        d_obj& o = objects[i];
 
         o.calculate_strains(*prev);
         if (err()) {

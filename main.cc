@@ -484,7 +484,7 @@ int main(int argc, char* argv[]) {
     dbgputs("\nparsing arguments");
     for (int i = 2; i < argc; i++) {
         char suff[64] = {0};
-        auto a = argv[i];
+        char* a = argv[i];
 
         if (!a) {
             continue;
@@ -629,7 +629,7 @@ int main(int argc, char* argv[]) {
         );
     chk();
 
-    auto res = no_percent ?
+    pp_calc_result res = no_percent ?
         pp_calc(aim, speed, b, mods, combo, misses, 0xFFFF, c100, c50, scoring)
         : pp_calc_acc(aim, speed, b, acc, mods, combo, misses, scoring);
 

@@ -1,14 +1,6 @@
 #pragma once
 
-#if !defined(_MSC_VER) || _MSC_VER >= 1800
-#define OPPAI_MODERN_COMPILER 1
-#endif
-
-#if OPPAI_MODERN_COMPILER
-#include <cinttypes>
-#else
-#include <cstdint>
-#endif
+#include <stdint.h>
 
 typedef float   f32;
 typedef double  f64;
@@ -23,20 +15,12 @@ typedef uint_least32_t  u32;
 typedef uint_least16_t  u16;
 typedef uint_least8_t   u8;
 
-#if OPPAI_MODERN_COMPILER
-#define fi64 PRIdLEAST64
-#else
-#define fi64 "lld"
-#endif
+#define fi64 "ld"
 #define fi32 "d"
 #define fi16 "hd"
 #define fi8  "hhd"
 
-#if OPPAI_MODERN_COMPILER
-#define fu64 PRIuLEAST64
-#else
-#define fu64 "llu"
-#endif
+#define fu64 "lu"
 #define fu32 "u"
 #define fu16 "hu"
 #define fu8  "hhu"

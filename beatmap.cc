@@ -123,7 +123,7 @@ bool decode_str(FILE* fd, char* str)
         return false;
     }
 
-    if (fread(str, 1, len, fd) != len) {
+    if (fread(str, 1, len, fd) != (size_t)len) {
         perror("fread");
         return false;
     }
@@ -233,11 +233,11 @@ struct beatmap {
         w(num_timing_points)
         w(num_objects)
 
-        for (u16 i = 0; i < num_timing_points; ++i) {
+        for (u16 i = 0; i < (u16)num_timing_points; ++i) {
             w(timing_points[i])
         }
 
-        for (u16 i = 0; i < num_objects; ++i) {
+        for (u16 i = 0; i < (u16)num_objects; ++i) {
             w(objects[i])
         }
 #undef w
@@ -281,11 +281,11 @@ struct beatmap {
         w(num_timing_points)
         w(num_objects)
 
-        for (u16 i = 0; i < num_timing_points; ++i) {
+        for (u16 i = 0; i < (u16)num_timing_points; ++i) {
             w(timing_points[i])
         }
 
-        for (u16 i = 0; i < num_objects; ++i) {
+        for (u16 i = 0; i < (u16)num_objects; ++i) {
             w(objects[i])
         }
 #undef w
@@ -359,13 +359,13 @@ struct beatmap {
         profile(prid, "I/O");
 
         // if osu_file is "-" read from stdin instead of file
-        auto f = (strcmp(osu_file, "-") == 0) ? stdin : fopen(osu_file, "rb");
+        FILE* f = (strcmp(osu_file, "-") == 0) ? stdin : fopen(osu_file, "rb");
         if (!f) {
             die("Failed to open beatmap");
             return;
         }
 
-        auto cb = fread(buf, 1, bufsize, f);
+        size_t cb = fread(buf, 1, bufsize, f);
         if (cb == bufsize) {
             die("Beatmap is too big for the internal buffer");
             return;
@@ -620,7 +620,7 @@ struct beatmap {
                 return;
             }
 
-            auto& tp = b.timing_points[b.num_timing_points];
+            timing_point& tp = b.timing_points[b.num_timing_points];
 
             u8 not_inherited = 0;
             f64 time_tmp; // I'm rounding times to milliseconds.
@@ -678,7 +678,7 @@ struct beatmap {
             }
 
             profile(prid, "object type");
-            auto& ho = b.objects[b.num_objects];
+            hit_object& ho = b.objects[b.num_objects];
 
             i32 type_num;
 
@@ -763,7 +763,7 @@ struct beatmap {
             }
 
             profile(prid, "slider points");
-            auto& sl = ho.slider;
+            slider_data& sl = ho.slider;
 
             // gotta make a copy of the line to tokenize sliders without
             // affecting the current line-by-line tokenization
@@ -782,7 +782,7 @@ struct beatmap {
 
             for (; slider_tok; slider_tok = strtok_r(0, "|", &saveptr)) {
                 //sl.points.push_back(v2f{});
-                //auto& pt = sl.points[sl.points.size() - 1];
+                //v2f& pt = sl.points[sl.points.size() - 1];
                 //v2f pt;
 
                 // lastcurveX:lastcurveY,repeat,pixelLength,
@@ -807,8 +807,8 @@ struct beatmap {
 
             profile(prid, "timing calculations");
             // find which timing section the slider belongs to
-            auto tp = b.timing(ho.time);
-            auto parent = b.parent_timing(tp);
+            timing_point* tp = b.timing(ho.time);
+            timing_point* parent = b.parent_timing(tp);
             if (err()) {
                 return;
             }
@@ -870,7 +870,7 @@ struct beatmap {
     // get timing point at the given time
     timing_point* timing(i64 time) {
         for (i64 i = (i64)num_timing_points - 1; i >= 0; i--) {
-            auto& cur = timing_points[i];
+            timing_point& cur = timing_points[i];
 
             if (cur.time <= time) {
                 return &cur;
@@ -891,7 +891,7 @@ struct beatmap {
 
         for (i64 i = (i64)num_timing_points - 1; i >= 0; i--)
         {
-            auto& cur = timing_points[i];
+            timing_point& cur = timing_points[i];
 
             if (cur.time <= t->time && !cur.inherit)
             {
@@ -990,7 +990,7 @@ struct beatmap {
         // apply speed-changing mods
 
         for (size_t i = 0; i < num_timing_points; i++) {
-            auto &tp = timing_points[i];
+            timing_point&tp = timing_points[i];
             tp.time = (i64)((f64)tp.time / speed);
             if (!tp.inherit) {
                 tp.ms_per_beat /= speed;
@@ -998,7 +998,7 @@ struct beatmap {
         }
 
         for (size_t i = 0; i < num_objects; i++) {
-            auto& o = objects[i];
+            hit_object& o = objects[i];
             o.time = (i64)((f64)o.time / speed);
             o.end_time = (i64)((f64)o.end_time / speed);
         }
