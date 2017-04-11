@@ -529,7 +529,7 @@ struct beatmap {
                 //      edgeHitsound,edgeAddition,addition
                 if (sscanf(slider_tok,
                           "%*f:%*f,%" fu16 ",%lf",
-                          /*&pt.x, &pt.y,*/ &sl.repetitions, &sl.length) == 4) {
+                          /*&pt.x, &pt.y,*/ &sl.repetitions, &sl.length) == 2) {
 
                     dbgputs("last slider point");
                     // end of point list
