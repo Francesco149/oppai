@@ -12,6 +12,7 @@ i64 get_exe_path(char* buf, i64 bufsize) {
 #else
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #define mkdir(x) mkdir(x, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
 
 i64 get_exe_path(char* buf, i64 bufsize)
