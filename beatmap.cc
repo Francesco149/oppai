@@ -130,7 +130,14 @@ struct beatmap {
     }
 
     // parse .osu file into a beatmap object
-    static void parse(const char* osu_file, beatmap& b) {
+    static void parse(const char* osu_file, beatmap& b)
+    {
+#if OPPAI_PROFILING
+        const int prid = 1;
+#endif
+
+        profile(prid, "I/O");
+
         // if osu_file is "-" read from stdin instead of file
         auto f = (strcmp(osu_file, "-") == 0) ? stdin : fopen(osu_file, "rb");
         if (!f) {
@@ -151,6 +158,8 @@ struct beatmap {
         buf[cb] = 0;
 
         // ---
+
+        profile(prid, "prepare lambdas");
 
         char* tok = strtok((char*)buf, "\n");
 
@@ -179,6 +188,8 @@ struct beatmap {
 
         // ---
 
+        profile(prid, "format version");
+
         while (not_section()) {
             if (sscanf(tok, "osu file format v%" fi32 "",
                        &b.format_version) == 1) {
@@ -192,6 +203,8 @@ struct beatmap {
         }
 
         // ---
+
+        profile(prid, "general");
 
         if (!find_fwd("[General]")) {
             die("Could not find General info");
@@ -217,6 +230,8 @@ struct beatmap {
         }
 
         // ---
+
+        profile(prid, "metadata");
 
         if (!find_fwd("[Metadata]")) {
             die("Could not find Metadata");
@@ -247,6 +262,8 @@ struct beatmap {
         }
 
         // ---
+
+        profile(prid, "difficulty");
 
         if (!find_fwd("[Difficulty]")) {
             die("Could not find Difficulty");
@@ -308,6 +325,8 @@ struct beatmap {
         }
 
         // ---
+
+        profile(prid, "timing points");
 
         if (!find_fwd("[TimingPoints]")) {
             die("Could not find TimingPoints");
@@ -371,6 +390,8 @@ struct beatmap {
 
         // ---
 
+        profile(prid, "hit objects");
+
         if (!find_fwd("[HitObjects]")) {
             die("Could not find HitObjects");
             return;
@@ -378,7 +399,13 @@ struct beatmap {
 
         // ---
 
-        for (; tok; fwd()) {
+        for (; tok; fwd())
+        {
+#if OPPAI_PROFILING
+            const int prid = 2;
+#endif
+
+            profile(prid, "loop start");
 
             if (whitespace(tok)) {
                 dbgputs("skipping whitespace line");
@@ -390,6 +417,7 @@ struct beatmap {
                 return;
             }
 
+            profile(prid, "object type");
             auto& ho = b.objects[b.num_objects];
 
             i32 type_num;
@@ -474,10 +502,11 @@ struct beatmap {
                 return;
             }
 
+            profile(prid, "slider points");
             auto& sl = ho.slider;
 
-            // gotta make a copy of the line to tokenize sliders without affecting
-            // the current line-by-line tokenization
+            // gotta make a copy of the line to tokenize sliders without
+            // affecting the current line-by-line tokenization
             std::string sline(tok);
             char* line = &sline[0];
 
@@ -494,13 +523,13 @@ struct beatmap {
             for (; slider_tok; slider_tok = strtok_r(nullptr, "|", &saveptr)) {
                 //sl.points.push_back(v2f{});
                 //auto& pt = sl.points[sl.points.size() - 1];
-                v2f pt;
+                //v2f pt;
 
                 // lastcurveX:lastcurveY,repeat,pixelLength,
                 //      edgeHitsound,edgeAddition,addition
                 if (sscanf(slider_tok,
-                          "%f:%f,%" fu16 ",%lf",
-                          &pt.x, &pt.y, &sl.repetitions, &sl.length) == 4) {
+                          "%*f:%*f,%" fu16 ",%lf",
+                          /*&pt.x, &pt.y,*/ &sl.repetitions, &sl.length) == 4) {
 
                     dbgputs("last slider point");
                     // end of point list
@@ -508,14 +537,15 @@ struct beatmap {
                 }
 
                 // curveX:curveY
-                else if (sscanf(slider_tok, "%f:%f", &pt.x, &pt.y) != 2) {
-                    die("Invalid slider found");
-                    return;
-                }
+                //else if (sscanf(slider_tok, "%f:%f", &pt.x, &pt.y) != 2) {
+                //    die("Invalid slider found");
+                //    return;
+                //}
 
                 //dbgprintf("slider point %zd\n", sl.points.size());
             }
 
+            profile(prid, "timing calculations");
             // find which timing section the slider belongs to
             auto tp = b.timing(ho.time);
             auto parent = b.parent_timing(tp);
@@ -560,6 +590,8 @@ struct beatmap {
             b.max_combo += ticks - 1; // -1 because we already did ++ earlier
         }
 
+        profile(prid, "");
+
         dbgputs("\nparsing done");
     }
 
@@ -577,21 +609,31 @@ struct beatmap {
     }
 
     // find parent of a inherited timing point
-    timing_point* parent_timing(timing_point* t) {
+    timing_point* parent_timing(timing_point* t)
+    {
+        timing_point* res = nullptr;
+
         if (!t->inherit) {
             return t;
         }
 
-        for (i64 i = (i64)num_timing_points - 1; i >= 0; i--) {
+        for (i64 i = (i64)num_timing_points - 1; i >= 0; i--)
+        {
             auto& cur = timing_points[i];
 
-            if (cur.time <= t->time && !cur.inherit) {
-                return &cur;
+            if (cur.time <= t->time && !cur.inherit)
+            {
+                if (!res || res->time > res->time) {
+                    res = &cur;
+                }
             }
         }
 
-        die("Orphan timing section");
-        return nullptr;
+        if (!res) {
+            die("Orphan timing section");
+        }
+
+        return res;
     }
 
     // apply map-modifying mods (such as EZ, HR, DT, HT)

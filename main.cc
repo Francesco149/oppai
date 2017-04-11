@@ -13,7 +13,7 @@
 
 #include <ctype.h> // tolower/toupper
 
-const char* version_string = "0.8.3";
+const char* version_string = "0.8.4";
 
 // -----------------------------------------------------------------------------
 
@@ -77,6 +77,7 @@ const size_t num_mods = sizeof(mod_masks) / sizeof(mod_masks[0]);
 // -----------------------------------------------------------------------------
 
 // this a monolithic build. stuff is separated into files purely for readability
+#include "profiler.cc"
 #include "math.cc"
 #include "beatmap.cc"
 #include "diff_calc.cc"
@@ -243,7 +244,10 @@ void encode_str(FILE* fd, const char* str) {
 // version 2: added hp
 
 print_sig(binary_print) {
-    freopen(0, "wb", stdout);
+    if (!freopen(0, "wb", stdout)) {
+        perror(0);
+        exit(1);
+    }
 
     u32 binary_output_version = 2;
 
@@ -313,7 +317,10 @@ __attribute__ ((aligned (1), packed));
 #endif
 
 print_sig(binary_struct_print) {
-    freopen(0, "wb", stdout);
+    if (!freopen(0, "wb", stdout)) {
+        perror(0);
+        exit(1);
+    }
 
     binary_output_data d = {0};
 
@@ -417,9 +424,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+#if OPPAI_PROFILING
+    const int prid = 0;
+#endif
+
+    profile_init();
+
+    profile(prid, "beatmap parse");
     beatmap::parse(argv[1], b);
     chk();
 
+    profile(prid, "arguments parse");
     char* output_module_name = (char*)"text";
     char* mods_str = nullptr;
     f64 acc = 0;
@@ -558,6 +573,7 @@ int main(int argc, char* argv[]) {
     chk();
 #endif
 
+    profile(prid, "diff calc");
     b.apply_mods(mods);
     chk();
 
@@ -584,6 +600,7 @@ int main(int argc, char* argv[]) {
 
     // ---
 
+    profile(prid, "output");
     output_module* m = get_output_module(output_module_name);
     if (!m) {
         die("The specified output module does not exist");
@@ -595,6 +612,10 @@ int main(int argc, char* argv[]) {
              nsingles, nsingles_timing, nsingles_threshold, res);
 
     // ---
+
+    profile(prid, "");
+
+    profile_end();
 
     return 0;
 }
