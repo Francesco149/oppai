@@ -18,10 +18,8 @@ typedef uint_least8_t   u8;
 #define fi64 "ld"
 #define fi32 "d"
 #define fi16 "hd"
-#define fi8  "hhd"
 
 #define fu64 "lu"
 #define fu32 "u"
 #define fu16 "hu"
-#define fu8  "hhu"
 

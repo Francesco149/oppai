@@ -65,7 +65,7 @@ namespace obj
         invalid = 0,
         circle,
         spinner,
-        slider,
+        slider
     };
 }
 
@@ -403,7 +403,7 @@ struct beatmap {
         profile(prid, "format version");
 
         while (not_section()) {
-            if (sscanf(tok, "osu file format v%" fi32 "",
+            if (sscanf(tok, "osu file format v%" fu32 "",
                        cachefd ? &tmp_format_version :&b.format_version) == 1) {
                 break;
             }
@@ -430,16 +430,21 @@ struct beatmap {
         // them one by one and check for format errors.
 
         f32 tmp_stack_leniency = 0;
-        u8 tmp_mode = 0;
+        u16 tmp_mode = 0;
 
         // StackLeniency and Mode are not present in older formats
         for (; not_section(); fwd()) {
 
-            if (sscanf(tok, "StackLeniency: %f", &b.stack_leniency) == 1) {
+            if (sscanf(tok, "StackLeniency: %f",
+                       cachefd ? &tmp_stack_leniency : &b.stack_leniency) == 1) {
                 continue;
             }
 
-            if (sscanf(tok, "Mode: %" fu8 "", &b.mode) == 1) {
+            if (sscanf(tok, "Mode: %" fu16 "", &tmp_mode) == 1)
+            {
+                if (!cachefd) {
+                    b.mode = (u8)tmp_mode;
+                }
                 continue;
             }
         }
@@ -622,12 +627,12 @@ struct beatmap {
 
             timing_point& tp = b.timing_points[b.num_timing_points];
 
-            u8 not_inherited = 0;
+            u16 not_inherited = 0;
             f64 time_tmp; // I'm rounding times to milliseconds.
                           // not sure if making them floats will matter for diff
 
             if (sscanf(tok,
-                       "%lf,%lf,%" fi32 ",%" fi32 ",%" fi32 ",%" fi32 ",%" fu8,
+                       "%lf,%lf,%" fi32 ",%" fi32 ",%" fi32 ",%" fi32 ",%" fu16,
                        &time_tmp, &tp.ms_per_beat,
                        &useless, &useless, &useless, &useless,
                        &not_inherited) == 7) {
@@ -638,7 +643,8 @@ struct beatmap {
             }
 
             // older formats might not have inherit and the other info
-            if (sscanf(tok, "%lf,%lf", &time_tmp, &tp.ms_per_beat) != 2) {
+            if (sscanf(tok, "%lf,%lf", &time_tmp, &tp.ms_per_beat) != 2)
+            {
                 tp.time = (i64)time_tmp;
                 die("Invalid format for timing point");
                 return;
