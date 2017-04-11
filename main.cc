@@ -206,7 +206,7 @@ print_sig(json_print) {
     printf(
         ","
         "\"mods_str\": \"%s\","
-        "\"od\":%.17g,\"ar\":%17g,\"cs\":%.17g,\"hp\":%.17g,"
+        "\"od\":%.17g,\"ar\":%.17g,\"cs\":%.17g,\"hp\":%.17g,"
         "\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
         "\"num_circles\": %" fu16 ","
         "\"num_sliders\": %" fu16 ","
@@ -214,7 +214,7 @@ print_sig(json_print) {
         "\"misses\": %" fu16 ","
         "\"score_version\": %" fu32 ","
         "\"stars\": %.17g,\"speed_stars\": %.17g,\"aim_stars\": %.17g,"
-        "\"rhythm_awkwardness\": %17g,"
+        "\"rhythm_awkwardness\": %.17g,"
         "\"nsingles\": %" fu16 ","
         "\"nsingles_timing\": %" fu16 ","
         "\"nsingles_threshold\": %" fu16 ","
