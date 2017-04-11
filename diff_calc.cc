@@ -160,7 +160,7 @@ f64 calculate_difficulty(u8 type) {
     i64 interval_end = strain_step;
     f64 max_strain = 0.0;
 
-    d_obj* prev = nullptr;
+    d_obj* prev = 0;
     for (size_t i = 0; i < num_objects; i++) {
         auto& o = objects[i];
 

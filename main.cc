@@ -467,7 +467,7 @@ int main(int argc, char* argv[]) {
 
     profile(prid, "arguments parse");
     char* output_module_name = (char*)"text";
-    char* mods_str = nullptr;
+    char* mods_str = 0;
     f64 acc = 0;
     f32 ar, od, cs;
     u32 mods = mods::nomod;
@@ -539,7 +539,7 @@ int main(int argc, char* argv[]) {
         }
 
         // mods
-        char* tmp_mods_str = nullptr;
+        char* tmp_mods_str = 0;
         for (size_t j = 0; j < num_mods; j++) {
             if (strstr(a, mod_strs[j])) {
                 tmp_mods_str = a;

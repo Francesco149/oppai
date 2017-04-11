@@ -141,10 +141,10 @@ bool find_fwd(char*& tok, const char* str)
     dbgprintf("skipping until %s", str);
     while (tok) {
         if (strstr(tok, str)) {
-            tok = strtok(nullptr, "\n");
+            tok = strtok(0, "\n");
             return true;
         }
-        tok = strtok(nullptr, "\n");
+        tok = strtok(0, "\n");
     }
     return false;
 };
@@ -382,7 +382,7 @@ struct beatmap {
 
         char* tok = strtok((char*)buf, "\n");
 
-#define fwd() tok = strtok(nullptr, "\n")
+#define fwd() tok = strtok(0, "\n")
 #define not_section() (tok && *tok != '[')
 
         // ---
@@ -770,9 +770,9 @@ struct beatmap {
             std::string sline(tok);
             char* line = &sline[0];
 
-            char* saveptr = nullptr;
+            char* saveptr = 0;
             char* slider_tok = strtok_r(line, "|", &saveptr);
-            slider_tok = strtok_r(nullptr, "|", &saveptr); // skip first token
+            slider_tok = strtok_r(0, "|", &saveptr); // skip first token
 
             // I don't use sliders anymore
 
@@ -780,7 +780,7 @@ struct beatmap {
             //sl.points.push_back(ho.pos);
             dbgputs("first slider point");
 
-            for (; slider_tok; slider_tok = strtok_r(nullptr, "|", &saveptr)) {
+            for (; slider_tok; slider_tok = strtok_r(0, "|", &saveptr)) {
                 //sl.points.push_back(v2f{});
                 //auto& pt = sl.points[sl.points.size() - 1];
                 //v2f pt;
@@ -883,7 +883,7 @@ struct beatmap {
     // find parent of a inherited timing point
     timing_point* parent_timing(timing_point* t)
     {
-        timing_point* res = nullptr;
+        timing_point* res = 0;
 
         if (!t->inherit) {
             return t;
