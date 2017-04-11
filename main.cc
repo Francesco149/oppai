@@ -120,9 +120,9 @@ print_sig(text_print) {
     speed = macro_round(speed * 100.0) / 100.0;
     stars = macro_round(stars * 100.0) / 100.0;
     res.pp = macro_round(res.pp * 100.0) / 100.0;
-    res.pp = macro_round(res.aim_pp * 100.0) / 100.0;
-    res.pp = macro_round(res.speed_pp * 100.0) / 100.0;
-    res.pp = macro_round(res.acc_pp * 100.0) / 100.0;
+    res.aim_pp = macro_round(res.aim_pp * 100.0) / 100.0;
+    res.speed_pp = macro_round(res.speed_pp * 100.0) / 100.0;
+    res.acc_pp = macro_round(res.acc_pp * 100.0) / 100.0;
 
     printf("o p p a i | v%s\n", version_string);
     puts("s     d n | ");
