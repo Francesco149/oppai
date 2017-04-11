@@ -578,7 +578,7 @@ int main(int argc, char* argv[]) {
     chk();
 
     u16 nsingles = 0, nsingles_timing = 0, nsingles_threshold = 0;
-    f64 aim, speed, rhythm_complexity;
+    f64 aim, speed, rhythm_complexity = 0;
     f64 stars =
         d_calc(
             b,
