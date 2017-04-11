@@ -389,7 +389,7 @@ struct beatmap {
 
         // ---
 
-        profile(prid, "prepare lambdas");
+        profile(prid, "prepare token");
 
         char* tok = strtok((char*)buf, "\n");
 
@@ -855,10 +855,10 @@ struct beatmap {
             b.max_combo += ticks - 1; // -1 because we already did ++ earlier
         }
 
-        profile(prid, "");
-
         if (!disable_cache && !cachefd)
         {
+            profile(prid, "I/O (cache creation)");
+
             cachefd = fopen(cachefile, "wb");
             if (!cachefd) {
                 perror("fopen");
@@ -868,6 +868,8 @@ struct beatmap {
                 dbgputs("beatmap written to cache");
             }
         }
+
+        profile(prid, "");
 
         dbgputs("\nparsing done");
     }

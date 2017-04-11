@@ -1,6 +1,6 @@
 #if OPPAI_PROFILING
 #include <time.h>
-#include <unordered_map>
+#include <map>
 #include <string>
 
 // profiling is linux-only for now since it's mainly for myself
@@ -25,13 +25,14 @@ f64 profile_last[MAX_PROFILERS];
 
 struct iterations
 {
-    u64 n;
+    u32 n;
     f64 sum;
 
     iterations() : n(0), sum(0) {}
 };
 
-std::unordered_map<std::string, iterations> profile_iterations[MAX_PROFILERS];
+// TODO: don't use map
+std::map<std::string, iterations> profile_iterations[MAX_PROFILERS];
 
 void profile_init() {
     memset(profile_last_name, 0, sizeof(profile_last_name));
@@ -49,7 +50,7 @@ void profile(int i, char const* name)
 
     if (profile_last_name[i])
     {
-        auto& it = profile_iterations[i][profile_last_name[i]];
+        iterations& it = profile_iterations[i][profile_last_name[i]];
         ++it.n;
         it.sum += now - profile_last[i];
     }
@@ -64,14 +65,16 @@ void profile_end()
     {
         f64 total_time = 0;
 
-        for (auto pair = profile_iterations[i].begin();
+        for (std::map<std::string, iterations>::iterator pair =
+                profile_iterations[i].begin();
              pair != profile_iterations[i].end();
              ++pair)
         {
             total_time += pair->second.sum;
         }
 
-        for (auto pair = profile_iterations[i].begin();
+        for (std::map<std::string, iterations>::iterator pair =
+                profile_iterations[i].begin();
              pair != profile_iterations[i].end();
              ++pair)
         {
