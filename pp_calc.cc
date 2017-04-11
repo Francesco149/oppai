@@ -60,8 +60,9 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
 
     // input validation
     if (!b.max_combo) {
-        die("Max combo cannot be zero");
-        return res;
+        //die("Max combo cannot be zero");
+        //return res;
+        b.max_combo = 1; // prevent division by zero
     }
 
     u16 total_hits = c300 + c100 + c50 + misses;
