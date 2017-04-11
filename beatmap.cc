@@ -147,7 +147,18 @@ bool find_fwd(char*& tok, const char* str)
         tok = strtok(0, "\n");
     }
     return false;
-};
+}
+
+bool whitespace(const char* s)
+{
+    while (*s) {
+        if (!isspace(*s)) {
+            return false;
+        }
+        s++;
+    }
+    return true;
+}
 
 // note: values not required for diff calc will be omitted from this parser
 // at least for now
@@ -596,17 +607,6 @@ struct beatmap {
         // ---
 
         i32 useless;
-
-        // TODO: move this func elsewhere
-        auto whitespace = [](const char* s) -> bool {
-            while (*s) {
-                if (!isspace(*s)) {
-                    return false;
-                }
-                s++;
-            }
-            return true;
-        };
 
         for (; not_section(); fwd()) {
 
