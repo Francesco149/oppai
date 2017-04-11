@@ -81,7 +81,7 @@ struct d_obj {
 
     void calculate_strain(d_obj& prev, u8 dtype) {
         f64 res = 0;
-        i64 time_elapsed = ho->time - prev.ho->time;
+        i32 time_elapsed = ho->time - prev.ho->time;
         f64 decay = pow(decay_base[dtype], time_elapsed / 1000.0);
         f64 scaling = weight_scaling[dtype];
 
@@ -99,7 +99,7 @@ struct d_obj {
                 return;
         }
 
-        res /= std::max(time_elapsed, (i64)50);
+        res /= std::max(time_elapsed, (i32)50);
         strains[dtype] = prev.strains[dtype] * decay + res;
     }
 
@@ -146,7 +146,7 @@ const f32 playfield_width = 512.f; // in osu!pixels
 // strains are calculated by analyzing the map in chunks and then taking the
 // peak strains in each chunk.
 // this is the length of a strain interval in milliseconds.
-const i64 strain_step = 400;
+const i32 strain_step = 400;
 
 // max strains are weighted from highest to lowest, and this is how much the
 // weight decays.
@@ -157,7 +157,7 @@ size_t num_objects;
 
 f64 calculate_difficulty(u8 type) {
     std::vector<f64> highest_strains;
-    i64 interval_end = strain_step;
+    i32 interval_end = strain_step;
     f64 max_strain = 0.0;
 
     d_obj* prev = 0;
@@ -213,7 +213,7 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
            u16* nsingles,
            u16* nsingles_timing,
            u16* nsingles_threshold,
-           i64 singletap_threshold)
+           i32 singletap_threshold)
 {
     dbgputs("\ndiff calc");
 
@@ -237,10 +237,11 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
     }
 
     // TODO: don't use vector
-    std::vector<i64> intervals;
+    std::vector<i32> intervals;
 
     d_obj* prev = &objects[0];
-    for (size_t i = 1; i < b.num_objects; i++) {
+    for (size_t i = 1; i < b.num_objects; i++)
+    {
         d_obj& o = objects[i];
 
         o.calculate_strains(*prev);
@@ -248,19 +249,19 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
             return 0;
         }
 
-        dbgprintf("%" fi64 ": type %" fi32 ", strains %g %g, "
+        dbgprintf("%" fi32 ": type %" fi32 ", strains %g %g, "
                 "norm pos %s-%s, pos %s\n",
                 o.ho->time, (int)o.ho->type, o.strains[0], o.strains[1],
                 o.norm_start.str(), o.norm_end.str(), o.ho->pos.str());
 
-        i64 interval = o.ho->time - prev->ho->time;
+        i32 interval = o.ho->time - prev->ho->time;
         intervals.push_back(interval);
 
         if (nsingles && o.is_single) {
             ++*nsingles;
         }
 
-        i64 one_half_threshold = (i64)(b.timing(o.ho->time)->ms_per_beat / 2);
+        i32 one_half_threshold = (i32)(b.timing(o.ho->time)->ms_per_beat / 2);
 
         if (nsingles_timing && interval >= one_half_threshold) {
             ++*nsingles_timing;
@@ -273,9 +274,9 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
         prev = &o;
     }
 
-    std::vector<i64> group;
+    std::vector<i32> group;
 
-    u64 noffsets = 0;
+    u32 noffsets = 0;
 
     if (!rhythm_awkwardness) {
         goto skip_awkwardness;

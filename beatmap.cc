@@ -6,7 +6,7 @@
 #include <direct.h>
 #define mkdir _mkdir
 
-i64 get_exe_path(char* buf, i64 bufsize) {
+size_t get_exe_path(char* buf, size_t bufsize) {
     return GetModuleFileNameA(0, buf, (DWORD)bufsize);
 }
 #else
@@ -15,27 +15,28 @@ i64 get_exe_path(char* buf, i64 bufsize) {
 #include <sys/stat.h>
 #define mkdir(x) mkdir(x, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
 
-i64 get_exe_path(char* buf, i64 bufsize)
+size_t get_exe_path(char* buf, size_t bufsize)
 {
-    i64 res;
+    ssize_t res;
 
     res = readlink("/proc/self/exe", buf, bufsize);
     if (res >= 0) {
-        return res;
+        return (size_t)res;
     }
 
     res = readlink("/proc/curproc/file", buf, bufsize);
     if (res >= 0) {
-        return res;
+        return (size_t)res;
     }
 
     res = readlink("/proc/self/path/a.out", buf, bufsize);
     if (res >= 0) {
-        return res;
+        return (size_t)res;
     }
 
     perror("readlink");
     strcpy(buf, ".");
+
     return 1;
 }
 #endif
@@ -87,9 +88,9 @@ struct slider_data {
 
 struct hit_object {
     v2f pos;
-    i64 time;
+    i32 time;
     u8 type;
-    i64 end_time; // for spinners and sliders
+    i32 end_time; // for spinners and sliders
     slider_data slider;
 
     hit_object() :
@@ -101,7 +102,7 @@ struct hit_object {
 };
 
 struct timing_point {
-    i64 time;
+    i32 time;
     f64 ms_per_beat;
     bool inherit;
 
@@ -312,7 +313,7 @@ struct beatmap {
     }
 
     static
-    i64 get_cache_file(char* cache_path, i64 bufsize, bool mk = true)
+    size_t get_cache_file(char* cache_path, size_t bufsize, bool mk = true)
     {
         u8 digest_bytes[MD5_DIGEST_LENGTH];
         char* p = cache_path;
@@ -636,7 +637,7 @@ struct beatmap {
                        &useless, &useless, &useless, &useless,
                        &not_inherited) == 7) {
 
-                tp.time = (i64)time_tmp;
+                tp.time = (i32)time_tmp;
                 tp.inherit = not_inherited == 0;
                 goto parsed_timing_pt;
             }
@@ -644,7 +645,7 @@ struct beatmap {
             // older formats might not have inherit and the other info
             if (sscanf(tok, "%lf,%lf", &time_tmp, &tp.ms_per_beat) != 2)
             {
-                tp.time = (i64)time_tmp;
+                tp.time = (i32)time_tmp;
                 die("Invalid format for timing point");
                 return;
             }
@@ -688,7 +689,7 @@ struct beatmap {
             i32 type_num;
 
             // slider
-            if (sscanf(tok, "%f,%f,%" fi64 ",%*" fi32 ",%*" fi32 ",%c",
+            if (sscanf(tok, "%f,%f,%" fi32 ",%*" fi32 ",%*" fi32 ",%c",
                        &ho.pos.x, &ho.pos.y, &ho.time, &ho.slider.type) == 4 &&
                         ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
 
@@ -701,7 +702,7 @@ struct beatmap {
             }
 
             // circle, or spinner
-            else if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 ",%" fi64,
+            else if (sscanf(tok, "%f,%f,%" fi32 ",%" fi32 ",%" fi32 ",%" fi32,
                        &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless,
                        &ho.end_time) == 6) {
 
@@ -716,7 +717,7 @@ struct beatmap {
             }
 
             // old circle
-            else if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 "",
+            else if (sscanf(tok, "%f,%f,%" fi32 ",%" fi32 ",%" fi32 "",
                 &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless) == 5) {
 
                 ho.type = obj::circle;
@@ -826,7 +827,7 @@ struct beatmap {
             // calculate slider end time
             f64 px_per_beat = b.sv * 100.0 * sv_multiplier;
             f64 num_beats = (sl.length * sl.repetitions) / px_per_beat;
-            i64 duration = (i64)std::ceil(num_beats * parent->ms_per_beat);
+            i32 duration = (i32)std::ceil(num_beats * parent->ms_per_beat);
             ho.end_time = ho.time + duration;
 
             // sliders get 2 + ticks combo (head, tail and ticks)
@@ -872,8 +873,10 @@ struct beatmap {
     }
 
     // get timing point at the given time
-    timing_point* timing(i64 time) {
-        for (i64 i = (i64)num_timing_points - 1; i >= 0; i--) {
+    timing_point* timing(i32 time)
+    {
+        for (i32 i = (i32)num_timing_points - 1; i >= 0; i--)
+        {
             timing_point& cur = timing_points[i];
 
             if (cur.time <= time) {
@@ -893,7 +896,7 @@ struct beatmap {
             return t;
         }
 
-        for (i64 i = (i64)num_timing_points - 1; i >= 0; i--)
+        for (i32 i = (i32)num_timing_points - 1; i >= 0; i--)
         {
             timing_point& cur = timing_points[i];
 
@@ -995,7 +998,7 @@ struct beatmap {
 
         for (size_t i = 0; i < num_timing_points; i++) {
             timing_point&tp = timing_points[i];
-            tp.time = (i64)((f64)tp.time / speed);
+            tp.time = (i32)((f64)tp.time / speed);
             if (!tp.inherit) {
                 tp.ms_per_beat /= speed;
             }
@@ -1003,8 +1006,8 @@ struct beatmap {
 
         for (size_t i = 0; i < num_objects; i++) {
             hit_object& o = objects[i];
-            o.time = (i64)((f64)o.time / speed);
-            o.end_time = (i64)((f64)o.end_time / speed);
+            o.time = (i32)((f64)o.time / speed);
+            o.end_time = (i32)((f64)o.end_time / speed);
         }
     }
 };

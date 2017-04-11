@@ -475,7 +475,7 @@ int main(int argc, char* argv[]) {
     u16 misses = 0;
     u32 scoring = 1;
     u16 c100 = 0, c50 = 0;
-    i64 single_max_bpm = 240;
+    i32 single_max_bpm = 240;
 
     // TODO: bitmask
     bool no_percent = true;
@@ -501,8 +501,8 @@ int main(int argc, char* argv[]) {
             }
 
             // singletap threshold
-            i64 tmp;
-            if (sscanf(a + 1, "st%" fi64, &tmp) == 1) {
+            i32 tmp;
+            if (sscanf(a + 1, "st%" fi32, &tmp) == 1) {
                 single_max_bpm = tmp;
                 continue;
             }
@@ -625,7 +625,7 @@ int main(int argc, char* argv[]) {
             &nsingles,
             &nsingles_timing,
             &nsingles_threshold,
-            (i64)((60000.0f / single_max_bpm) / 2)
+            (i32)((60000.0f / single_max_bpm) / 2)
         );
     chk();
 
@@ -677,12 +677,12 @@ void print_beatmap() {
         b.hp, b.cs, b.od, b.ar, b.sv
     );
 
-    printf("> %" fu64 " timing points\n", (u64)b.num_timing_points);
+    printf("> %" fu32 " timing points\n", (u32)b.num_timing_points);
 
     for (size_t i = 0; i < b.num_timing_points; i++)
     {
         timing_point& tp = b.timing_points[i];
-        printf("%" fi64 ": ", tp.time);
+        printf("%" fi32 ": ", tp.time);
 
         if (!tp.inherit) {
             printf("%g bpm\n", 60000.0 / tp.ms_per_beat);
@@ -691,19 +691,19 @@ void print_beatmap() {
         }
     }
 
-    printf("\n> %" fu64 " hit objects\n", (u64)b.num_objects);
+    printf("\n> %" fu32 " hit objects\n", (u32)b.num_objects);
 
     for (size_t i = 0; i < b.num_objects; i++) {
 
         hit_object& ho = b.objects[i];
         switch (ho.type) {
             case obj::circle:
-                printf("%" fi64 ": Circle (%g, %g)\n",
+                printf("%" fi32 ": Circle (%g, %g)\n",
                     ho.time, ho.pos.x, ho.pos.y);
                 break;
 
             case obj::spinner:
-                printf("%" fi64 "-%" fi64 ": Spinner\n",
+                printf("%" fi32 "-%" fi32 ": Spinner\n",
                         ho.time, ho.end_time);
                 break;
 
@@ -712,7 +712,7 @@ void print_beatmap() {
                 slider_data& sl = ho.slider;
 
                 printf(
-                    "%" fi64 "-%" fi64 ": Slider "
+                    "%" fi32 "-%" fi32 ": Slider "
                     "[Type %c, Length %g, %" fu16 " Repetitions] ",
                     ho.time, ho.end_time, sl.type,
                     sl.length, sl.repetitions);
