@@ -2,7 +2,7 @@
 
 #define internal static
 
-#if _WIN32
+#if _WIN32 || _WIN64
 #define NEEDS_TO_INSTALL_GENTOO 1
 #define strtok_r strtok_s
 #define __func__ __FUNCTION__

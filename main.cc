@@ -677,10 +677,13 @@ void print_beatmap() {
         b.hp, b.cs, b.od, b.ar, b.sv
     );
 
-    printf("> %zd timing points\n", b.num_timing_points);
-    for (size_t i = 0; i < b.num_timing_points; i++) {
-        auto& tp = b.timing_points[i];
+    printf("> %" fu64 " timing points\n", (u64)b.num_timing_points);
+
+    for (size_t i = 0; i < b.num_timing_points; i++)
+    {
+        timing_point& tp = b.timing_points[i];
         printf("%" fi64 ": ", tp.time);
+
         if (!tp.inherit) {
             printf("%g bpm\n", 60000.0 / tp.ms_per_beat);
         } else {
@@ -688,11 +691,11 @@ void print_beatmap() {
         }
     }
 
-    printf("\n> %zd hit objects\n", b.num_objects);
+    printf("\n> %" fu64 " hit objects\n", (u64)b.num_objects);
 
     for (size_t i = 0; i < b.num_objects; i++) {
 
-        auto& ho = b.objects[i];
+        hit_object& ho = b.objects[i];
         switch (ho.type) {
             case obj::circle:
                 printf("%" fi64 ": Circle (%g, %g)\n",
@@ -706,20 +709,13 @@ void print_beatmap() {
 
             case obj::slider:
             {
-                auto& sl = ho.slider;
+                slider_data& sl = ho.slider;
 
                 printf(
                     "%" fi64 "-%" fi64 ": Slider "
                     "[Type %c, Length %g, %" fu16 " Repetitions] ",
                     ho.time, ho.end_time, sl.type,
                     sl.length, sl.repetitions);
-
-#if 0
-                for (size_t j = 0; j < sl.points.size(); j++) {
-                    auto& pt = sl.points[j];
-                    printf("(%g, %g) ", pt.x, pt.y);
-                }
-#endif
 
                 puts("");
 

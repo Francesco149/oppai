@@ -4,6 +4,7 @@ ${CXX:-g++}         \
     -std=c++98      \
     -pedantic       \
     -O2             \
+    $@              \
     -Wall -Werror   \
     main.cc         \
     -lm -lstdc++    \

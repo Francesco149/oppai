@@ -61,12 +61,11 @@ const f32   od_ms_step = 6,
 
 namespace obj
 {
-    enum t {
+    const u8
         invalid = 0,
-        circle,
-        spinner,
-        slider
-    };
+        circle = 1,
+        spinner = 2,
+        slider = 3;
 }
 
 struct slider_data {
@@ -89,7 +88,7 @@ struct slider_data {
 struct hit_object {
     v2f pos;
     i64 time;
-    obj::t type;
+    u8 type;
     i64 end_time; // for spinners and sliders
     slider_data slider;
 
@@ -689,9 +688,8 @@ struct beatmap {
             i32 type_num;
 
             // slider
-            if (sscanf(tok, "%f,%f,%" fi64 ",%" fi32 ",%" fi32 ",%c",
-                       &ho.pos.x, &ho.pos.y, &ho.time, &useless, &useless,
-                       &ho.slider.type) == 6 &&
+            if (sscanf(tok, "%f,%f,%" fi64 ",%*" fi32 ",%*" fi32 ",%c",
+                       &ho.pos.x, &ho.pos.y, &ho.time, &ho.slider.type) == 4 &&
                         ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
 
                 // the slider type check is for old maps that have trailing
@@ -795,7 +793,7 @@ struct beatmap {
                 //      edgeHitsound,edgeAddition,addition
                 if (sscanf(slider_tok,
                           "%*f:%*f,%" fu16 ",%lf",
-                          /*&pt.x, &pt.y,*/ &sl.repetitions, &sl.length) == 4) {
+                          /*&pt.x, &pt.y,*/ &sl.repetitions, &sl.length) == 2) {
 
                     dbgputs("last slider point");
                     // end of point list
