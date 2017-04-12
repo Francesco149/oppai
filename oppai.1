@@ -64,6 +64,11 @@ How map information is printed to the screen, such as outputting JSON. By defaul
 .TP
 .BI \-no-awkwardness
 Disables rhythm awkwardness calculation for speed (gains ~10% performance).
+.TP
+.BI \-no-cache
+Disables caching for very slow drives or really fast CPUs that parse the beatmap
+faster than the cache can read it. The caching system usually boosts performance
+by up to 25%, so it's recommended to keep it on.
 .SH RETURN CODES
 0 is returned if the program exited normally, nonzero is returned otherwise.
 .SH EXAMPLES

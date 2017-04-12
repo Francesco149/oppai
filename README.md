@@ -55,6 +55,18 @@ NOTE: to obtain the beatmap url, just open the desired map's page in your
 browser, click on the desired difficulty and copy the url, then replace /b/ with
 /osu/.
 
+# Caching beatmaps
+oppai automatically caches pre-parsed beatmaps in binary format in the
+"oppai\_cache" folder in the same directory as the oppai executable.
+
+This speeds up subsequent calculations for that same map by up to 25%,
+especially on slow CPU's. The cache filesize is about 65kb per map on average.
+
+If you have a machine with really slow I/O (networked filesystem, old HDD) or
+a cpu with really good single core performance, you might want to try passing
+```--no-cache``` to disable caching and see if that makes it faster (it usually
+makes it SLOWER though).
+
 # Compiling from source (Linux)
 ```bash
 git clone https://github.com/Francesco149/oppai.git
