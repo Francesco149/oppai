@@ -1067,11 +1067,11 @@ object_type_done:
         // convert OD and AR back into their stat form
         //od = (-(odms - od0_ms)) / od_ms_step;
         od = (od0_ms - odms) / od_ms_step;
-        ar = ar <= 5.0f
-            //? (      (-(arms - ar0_ms)) / ar_ms_step1)
-            //: (5.0 + (-(arms - ar5_ms)) / ar_ms_step2);
-            ? (       (ar0_ms - arms) / ar_ms_step1)
-            : (5.0f + (ar5_ms - arms) / ar_ms_step2);
+        ar = arms >= ar5_ms
+            ? (       (-(arms - ar0_ms)) / ar_ms_step1)
+            : (5.0f + (-(arms - ar5_ms)) / ar_ms_step2);
+            //? (       (ar0_ms - arms) / ar_ms_step1)
+            //: (5.0f + (ar5_ms - arms) / ar_ms_step2);
 
         cs *= cs_multiplier;
         cs = std::max(0.0f, std::min(10.0f, cs));
