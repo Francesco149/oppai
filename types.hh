@@ -19,7 +19,7 @@ typedef uint_least8_t   u8;
 #define fu32 "u"
 #define fu16 "hu"
 
-#if _WIN32 || _WIN64
+#if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 typedef SSIZE_T ssize_t;
 #endif
