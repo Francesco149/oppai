@@ -6,6 +6,7 @@
 #include <direct.h>
 #define mkdir _mkdir
 
+internal
 size_t get_exe_path(char* buf, size_t bufsize) {
     return GetModuleFileNameA(0, buf, (DWORD)bufsize);
 }
@@ -15,6 +16,7 @@ size_t get_exe_path(char* buf, size_t bufsize) {
 #include <sys/stat.h>
 #define mkdir(x) mkdir(x, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
 
+internal
 size_t get_exe_path(char* buf, size_t bufsize)
 {
     ssize_t res;
@@ -46,7 +48,7 @@ size_t get_exe_path(char* buf, size_t bufsize)
 //             and I don't support any malicious use of it
 
 const size_t bufsize = 2000000; // 2 mb
-u8 buf[bufsize];
+globvar u8 buf[bufsize];
 
 const f32   od0_ms = 79.5,
             od10_ms = 19.5,
@@ -69,7 +71,8 @@ namespace obj
         slider = 3;
 }
 
-struct slider_data {
+struct slider_data
+{
     char type;
 
     // this implementation of diff calc does not
@@ -86,7 +89,8 @@ struct slider_data {
     {};
 };
 
-struct hit_object {
+struct hit_object
+{
     v2f pos;
     i32 time;
     u8 type;
@@ -101,7 +105,8 @@ struct hit_object {
     {}
 };
 
-struct timing_point {
+struct timing_point
+{
     i32 time;
     f64 ms_per_beat;
     bool inherit;
@@ -113,17 +118,19 @@ struct timing_point {
     {}
 };
 
-// TODO: move this
+internal
 bool decode_str(FILE* fd, char* str)
 {
     u16 len;
 
-    if (fread(&len, 2, 1, fd) != 1) {
+    if (fread(&len, 2, 1, fd) != 1)
+    {
         perror("fread");
         return false;
     }
 
-    if (fread(str, 1, len, fd) != (size_t)len) {
+    if (fread(str, 1, len, fd) != (size_t)len)
+    {
         perror("fread");
         return false;
     }
@@ -133,36 +140,45 @@ bool decode_str(FILE* fd, char* str)
     return true;
 }
 
-//TODO: move this
+internal
 bool find_fwd(char*& tok, const char* str)
 {
     // skips forward until tok is the line right after
     // the one that contains str
+
     dbgprintf("skipping until %s", str);
-    while (tok) {
-        if (strstr(tok, str)) {
+
+    while (tok)
+    {
+        if (strstr(tok, str))
+        {
             tok = strtok(0, "\n");
             return true;
         }
+
         tok = strtok(0, "\n");
     }
     return false;
 }
 
+internal
 bool whitespace(const char* s)
 {
-    while (*s) {
+    while (*s)
+    {
         if (!isspace(*s)) {
             return false;
         }
+
         s++;
     }
+
     return true;
 }
 
 // note: values not required for diff calc will be omitted from this parser
-// at least for now
-struct beatmap {
+struct beatmap
+{
     u32 format_version;
 
     // general
@@ -477,6 +493,7 @@ struct beatmap {
 
             // %[^\r\n] means accept all characters except \r\n
             // which means that it'll grab the string until it finds \r or \n
+
             if (sscanf(tok, "Title: %[^\r\n]",
                        cachefd ? tmp_title : b.title) == 1) {
                 continue;
@@ -502,15 +519,11 @@ struct beatmap {
 
         if (cachefd)
         {
-            int n = b.read(cachefd) ? 1 : -1;
-
-            if (n != 1) {
-                perror("fread");
-            }
+            bool found_cache = b.read(cachefd);
 
             fclose(cachefd);
 
-            if (n == 1 &&
+            if (found_cache &&
                 !strcmp(b.title, tmp_title) &&
                 !strcmp(b.artist, tmp_artist) &&
                 !strcmp(b.creator, tmp_creator) &&
@@ -548,8 +561,8 @@ struct beatmap {
 
         // ---
 
-        for (; not_section(); fwd()) {
-
+        for (; not_section(); fwd())
+        {
             if (sscanf(tok, "HPDrainRate: %f", &b.hp) == 1) {
                 continue;
             }
@@ -613,8 +626,8 @@ struct beatmap {
 
         i32 useless;
 
-        for (; not_section(); fwd()) {
-
+        for (; not_section(); fwd())
+        {
             if (whitespace(tok)) {
                 dbgputs("skipping whitespace line");
                 continue;
@@ -689,23 +702,39 @@ struct beatmap {
             i32 type_num;
 
             // slider
-            if (sscanf(tok, "%f,%f,%" fi32 ",%*" fi32 ",%*" fi32 ",%c",
-                       &ho.pos.x, &ho.pos.y, &ho.time, &ho.slider.type) == 4 &&
-                        ho.slider.type >= 'A' && ho.slider.type <= 'Z') {
+            int scanf_result =
+                sscanf(
+                    tok,
+                    "%f,%f,%" fi32 ",%*" fi32 ",%*" fi32 ",%c",
+                    &ho.pos.x, &ho.pos.y, &ho.time, &ho.slider.type
+                );
 
+            if (scanf_result == 4 &&
+                ho.slider.type >= 'A' && ho.slider.type <= 'Z')
+            {
                 // the slider type check is for old maps that have trailing
                 // commas on circles and sliders
 
                 // x,y,time,type,hitSound,sliderType|curveX:curveY|...,repeat,
                 //      pixelLength,edgeHitsound,edgeAddition,addition
                 ho.type = obj::slider;
+
+                goto object_type_done;
             }
 
             // circle, or spinner
-            else if (sscanf(tok, "%f,%f,%" fi32 ",%" fi32 ",%" fi32 ",%" fi32,
-                       &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless,
-                       &ho.end_time) == 6) {
+            scanf_result =
+                sscanf(
+                    tok,
+                    "%f,%f,%" fi32 ",%" fi32 ",%*" fi32 ",%" fi32,
+                    &ho.pos.x, &ho.pos.y,
+                    &ho.time,
+                    &type_num,
+                    &ho.end_time
+                );
 
+            if (scanf_result == 5)
+            {
                 if (type_num & 8) {
                     // x,y,time,type,hitSound,endTime,addition
                     ho.type = obj::spinner;
@@ -714,27 +743,37 @@ struct beatmap {
                     ho.type = obj::circle;
                     ho.end_time = ho.time;
                 }
+
+                goto object_type_done;
             }
 
             // old circle
-            else if (sscanf(tok, "%f,%f,%" fi32 ",%" fi32 ",%" fi32 "",
-                &ho.pos.x, &ho.pos.y, &ho.time, &type_num, &useless) == 5) {
+            scanf_result =
+                sscanf(
+                    tok,
+                    "%f,%f,%" fi32 ",%" fi32 ",%*" fi32 "",
+                    &ho.pos.x, &ho.pos.y, &ho.time, &type_num
+                );
 
+            if (scanf_result == 4)
+            {
                 ho.type = obj::circle;
                 ho.end_time = ho.time;
+                goto object_type_done;
             }
 
-            else {
-                die("Invalid hit object found");
-                return;
-            }
+            die("Invalid hit object found");
+            return;
 
+object_type_done:
             b.num_objects++;
             dbgprintf("\n\nobject %zd\n", b.num_objects);
 
             // increase max combo and circle/slider count
             b.max_combo++; // slider ticks are calculated later
-            switch (ho.type) {
+
+            switch (ho.type)
+            {
                 case obj::circle:
                     dbgputs("it's a circle!");
                     b.num_circles++;
@@ -779,41 +818,37 @@ struct beatmap {
             char* slider_tok = strtok_r(line, "|", &saveptr);
             slider_tok = strtok_r(0, "|", &saveptr); // skip first token
 
-            // I don't use sliders anymore
+            // I don't use sliders anymore, so now it only parses the info
+            // to get the end time
+            // TODO: get rid of end time as well?
 
-            // TODO: prevent useless copying here and in other vector usages
-            //sl.points.push_back(ho.pos);
             dbgputs("first slider point");
 
-            for (; slider_tok; slider_tok = strtok_r(0, "|", &saveptr)) {
-                //sl.points.push_back(v2f{});
-                //v2f& pt = sl.points[sl.points.size() - 1];
-                //v2f pt;
-
+            for (; slider_tok; slider_tok = strtok_r(0, "|", &saveptr))
+            {
                 // lastcurveX:lastcurveY,repeat,pixelLength,
                 //      edgeHitsound,edgeAddition,addition
-                if (sscanf(slider_tok,
-                          "%*f:%*f,%" fu16 ",%lf",
-                          /*&pt.x, &pt.y,*/ &sl.repetitions, &sl.length) == 2) {
+                scanf_result =
+                    sscanf(
+                        slider_tok,
+                        "%*f:%*f,%" fu16 ",%lf",
+                        &sl.repetitions, &sl.length
+                    );
 
+                if (scanf_result == 2)
+                {
                     dbgputs("last slider point");
                     // end of point list
                     break;
                 }
-
-                // curveX:curveY
-                //else if (sscanf(slider_tok, "%f:%f", &pt.x, &pt.y) != 2) {
-                //    die("Invalid slider found");
-                //    return;
-                //}
-
-                //dbgprintf("slider point %zd\n", sl.points.size());
             }
 
             profile(prid, "timing calculations");
+
             // find which timing section the slider belongs to
             timing_point* tp = b.timing(ho.time);
             timing_point* parent = b.parent_timing(tp);
+
             if (err()) {
                 return;
             }
@@ -836,14 +871,17 @@ struct beatmap {
             // calculate the number of slider ticks for one repetition
             // ---
             // example: a 3.75 beats slider at 1x tick rate will go:
-            // beat0 (head), beat1 (tick), beat2(tick), beat3(tick), beat3.75(tail)
-            // so all we have to do is ceil the number of beats and subtract 1 to
-            // take out the tail
+            // beat0 (head), beat1 (tick), beat2(tick), beat3(tick),
+            // beat3.75(tail)
+            // so all we have to do is ceil the number of beats and subtract 1
+            // to take out the tail
             // ---
             // the -.01 is there to prevent ceil from ceiling whole values
             // like 1.0 to 2.0 randomly
-            u16 ticks = (u16)std::ceil(
-                    (num_beats - 0.1) / sl.repetitions * b.tick_rate);
+
+            u16 ticks = (u16)
+                std::ceil((num_beats - 0.1) / sl.repetitions * b.tick_rate);
+
             ticks--;
 
             ticks *= sl.repetitions; // multiply slider ticks by repetitions
@@ -872,6 +910,9 @@ struct beatmap {
         profile(prid, "");
 
         dbgputs("\nparsing done");
+
+#undef fwd
+#undef not_section
     }
 
     // get timing point at the given time
@@ -918,7 +959,8 @@ struct beatmap {
     }
 
     // apply map-modifying mods (such as EZ, HR, DT, HT)
-    void apply_mods(u32 mods) {
+    void apply_mods(u32 mods)
+    {
         if ((mods & mods::map_changing) == 0) {
             return;
         }
@@ -998,15 +1040,18 @@ struct beatmap {
 
         // apply speed-changing mods
 
-        for (size_t i = 0; i < num_timing_points; i++) {
+        for (size_t i = 0; i < num_timing_points; i++)
+        {
             timing_point&tp = timing_points[i];
             tp.time = (i32)((f64)tp.time / speed);
+
             if (!tp.inherit) {
                 tp.ms_per_beat /= speed;
             }
         }
 
-        for (size_t i = 0; i < num_objects; i++) {
+        for (size_t i = 0; i < num_objects; i++)
+        {
             hit_object& o = objects[i];
             o.time = (i32)((f64)o.time / speed);
             o.end_time = (i32)((f64)o.end_time / speed);

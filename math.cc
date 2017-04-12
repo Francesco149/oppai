@@ -1,4 +1,5 @@
-class v2f {
+class v2f
+{
 public:
     f32 x, y;
 
@@ -8,7 +9,8 @@ public:
     v2f()             : x(0), y(0) { i(); }
     v2f(f32 v)        : x(v), y(v) { i(); }
 
-    const char* str() {
+    const char* str()
+    {
         sprintf(buf, "(%g %g)", x, y);
         return buf;
     }

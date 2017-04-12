@@ -20,9 +20,11 @@ const char* version_string = "0.9.0";
 // sets the last error to msg if it's not already set
 #define die(msg) dbgputs(msg); die_impl(msg)
 
-const char* last_err = 0;
+globvar const char* last_err = 0;
 
-void die_impl(const char* msg) {
+internal
+void die_impl(const char* msg)
+{
     if (last_err) {
         return;
     }
@@ -31,10 +33,12 @@ void die_impl(const char* msg) {
 }
 
 // returns the last error, or 0 if no error has occurred
+internal
 const char* err() {
     return last_err;
 }
 
+internal
 void chk() {
     if (!err()) {
         return;
@@ -49,7 +53,8 @@ void chk() {
 
 // these don't necessarily need to match the pp processor's bitmask 1:1 but
 // I'll keep them consistent just because
-namespace mods {
+namespace mods
+{
     const u32
         nomod = 0,
         nf = 1 << 0,
@@ -68,10 +73,12 @@ namespace mods {
 const char* const mod_strs[] = {
     "nomod", "nf", "ez", "hd", "hr", "dt", "ht", "nc", "fl", "so"
 };
+
 const u32 mod_masks[] = {
     mods::nomod, mods::nf, mods::ez, mods::hd, mods::hr, mods::dt, mods::ht,
     mods::nc, mods::fl, mods::so
 };
+
 const size_t num_mods = sizeof(mod_masks) / sizeof(mod_masks[0]);
 
 // -----------------------------------------------------------------------------
@@ -92,7 +99,7 @@ bool encode_str(FILE* fd, const char* str);
 beatmap b;
 
 #ifdef SHOW_BEATMAP
-void print_beatmap();
+internal void print_beatmap();
 #endif
 
 // -----------------------------------------------------------------------------
@@ -114,7 +121,9 @@ void print_beatmap();
         pp_calc_result& res)
 
 // text output
-print_sig(text_print) {
+internal
+print_sig(text_print)
+{
     // round to 2 decimal places
     aim = macro_round(aim * 100.0) / 100.0;
     speed = macro_round(speed * 100.0) / 100.0;
@@ -172,7 +181,9 @@ print_sig(text_print) {
 }
 
 // json output
-void print_escaped_json_string(const char* str) {
+internal
+void print_escaped_json_string(const char* str)
+{
     putchar('"');
 
     const char* chars_to_escape = "\\\"";
@@ -190,7 +201,9 @@ void print_escaped_json_string(const char* str) {
     putchar('"');
 }
 
-print_sig(json_print) {
+internal
+print_sig(json_print)
+{
     printf("{\"oppai_version\":");
     print_escaped_json_string(version_string);
 
@@ -261,7 +274,8 @@ bool encode_str(FILE* fd, const char* str)
 // binary format history:
 // version 2: added hp
 
-print_sig(binary_print) {
+print_sig(binary_print)
+{
     if (!freopen(0, "wb", stdout)) {
         perror(0);
         exit(1);
@@ -309,7 +323,8 @@ print_sig(binary_print) {
 #endif
 
 // binary struct output
-struct binary_output_data {
+struct binary_output_data
+{
     u8 must_be_zero;
     u8 is_struct;
     u32 output_version;
@@ -334,7 +349,8 @@ __attribute__ ((aligned (1), packed));
 #pragma pack(pop)
 #endif
 
-print_sig(binary_struct_print) {
+print_sig(binary_struct_print)
+{
     if (!freopen(0, "wb", stdout)) {
         perror(0);
         exit(1);
@@ -374,12 +390,14 @@ print_sig(binary_struct_print) {
 typedef print_sig(print_callback);
 #undef print_sig
 
-struct output_module {
+struct output_module
+{
     const char* name;
     print_callback* print;
 };
 
-output_module modules[] = {
+output_module modules[] =
+{
     { "text", text_print },
     { "json", json_print },
     { "binary", binary_print },
@@ -387,8 +405,10 @@ output_module modules[] = {
     { 0, 0 }
 };
 
-output_module* get_output_module(const char* name) {
-    for (output_module* m = modules; m->name; ++m) {
+output_module* get_output_module(const char* name)
+{
+    for (output_module* m = modules; m->name; ++m)
+    {
         if (!strcmp(m->name, name)) {
             return m;
         }
@@ -399,9 +419,12 @@ output_module* get_output_module(const char* name) {
 
 // -----------------------------------------------------------------------------
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     // TODO: abstract error outputting into the output modules
-    if (argc < 2) {
+
+    if (argc < 2)
+    {
         printf("Usage: %s /path/to/difficulty.osu "
                 "{[acc]%% or [num_100s]x100 [num_50s]x50} +[mods] "
                 "[combo]x [misses]m scorev[scoring_version] "
@@ -426,8 +449,7 @@ int main(int argc, char* argv[]) {
         printf("output_module: the module that will be used to output the "
              "results (defaults to text). currently available modules: ");
 
-        for (output_module* m = modules; m->name; ++m)
-        {
+        for (output_module* m = modules; m->name; ++m) {
             printf("%s ", m->name);
         }
 
@@ -435,6 +457,11 @@ int main(int argc, char* argv[]) {
 
         puts("-no-awkwardness: disables rhythm awkwardness calculation "
                "for speed (about 10% performance gain)");
+
+        puts("-no-cache: disables caching for very slow drives or really fast "
+             "CPUs that parse the beatmap faster than the cache can read it. "
+             "The caching system usually boosts performance by up to 25%% "
+             "so it's recommended to keep it on.");
 
         puts("\narguments in [square brackets] are optional");
         puts("(the order of the optional arguments does not matter)");
@@ -516,7 +543,8 @@ int main(int argc, char* argv[]) {
 
         // acc
         f64 tmp_acc;
-        if (sscanf(a, "%lf%s", &tmp_acc, suff) == 2 && !strcmp(suff, "%")) {
+        if (sscanf(a, "%lf%s", &tmp_acc, suff) == 2 && !strcmp(suff, "%"))
+        {
             acc = tmp_acc;
             no_percent = false;
             continue;
@@ -525,29 +553,33 @@ int main(int argc, char* argv[]) {
         // 100s, 50s
         u16 tmp_c100 = 0, tmp_c50 = 0;
         if (sscanf(a, "%" fu16 "%s", &tmp_c100, suff) == 2 &&
-            !strcmp(suff, "x100")) {
-
+            !strcmp(suff, "x100"))
+        {
             c100 = tmp_c100;
             continue;
         }
 
         if (sscanf(a, "%" fu16 "%s", &tmp_c50, suff) == 2 &&
-            !strcmp(suff, "x50")) {
-
+            !strcmp(suff, "x50"))
+        {
             c50 = tmp_c50;
             continue;
         }
 
         // mods
         char* tmp_mods_str = 0;
-        for (size_t j = 0; j < num_mods; j++) {
-            if (strstr(a, mod_strs[j])) {
+
+        for (size_t j = 0; j < num_mods; j++)
+        {
+            if (strstr(a, mod_strs[j]))
+            {
                 tmp_mods_str = a;
                 mods |= mod_masks[j];
             }
         }
 
-        if (tmp_mods_str == a && *tmp_mods_str == '+') {
+        if (tmp_mods_str == a && *tmp_mods_str == '+')
+        {
             // at least one mod found in the parameter and the prefix matches
             mods_str = tmp_mods_str;
             std::transform(mods_str, mods_str + strlen(mods_str), mods_str,
@@ -557,9 +589,10 @@ int main(int argc, char* argv[]) {
 
         // combo
         u16 tmp_combo;
-        if (sscanf(a, "%" fu16 "%s", &tmp_combo, suff) == 2 &&
-            !strcmp(suff, "x")) {
 
+        if (sscanf(a, "%" fu16 "%s", &tmp_combo, suff) == 2 &&
+            !strcmp(suff, "x"))
+        {
             combo = tmp_combo;
             continue;
         }
@@ -568,14 +601,16 @@ int main(int argc, char* argv[]) {
         u16 tmp_misses;
         if (sscanf(a, "%" fu16 "%s", &tmp_misses, suff) == 2 &&
                 (!strcmp(suff, "xm") || !strcmp(suff, "xmiss") ||
-                 !strcmp(suff, "m"))) {
+                 !strcmp(suff, "m")))
+        {
             misses = tmp_misses;
             continue;
         }
 
         // scorev1 / scorev2
         u32 tmp_scoring;
-        if (sscanf(a, "scorev%" fu32, &tmp_scoring) == 1) {
+        if (sscanf(a, "scorev%" fu32, &tmp_scoring) == 1)
+        {
             scoring = tmp_scoring;
             continue;
         }

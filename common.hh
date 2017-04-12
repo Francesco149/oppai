@@ -1,6 +1,7 @@
 #pragma once
 
 #define internal static
+#define globvar static
 
 #if _WIN32 || _WIN64
 #define NEEDS_TO_INSTALL_GENTOO 1

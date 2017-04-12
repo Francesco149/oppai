@@ -1,23 +1,29 @@
 // turns the beatmaps' strain attributes into a larger value, suitable
 // for pp calc. not 100% sure what is going on here, but it probably makes
 // strain values scale a bit exponentially.
-f64 base_strain(f64 strain) {
+f64 base_strain(f64 strain)
+{
     return std::pow(5.0 * std::max(1.0, strain / 0.0675) - 4.0, 3.0) /
         100000.0;
 }
 
-f64 acc_calc(u16 c300, u16 c100, u16 c50, u16 misses) {
+f64 acc_calc(u16 c300, u16 c100, u16 c50, u16 misses)
+{
     u16 total_hits = c300 + c100 + c50 + misses;
     f64 acc = 0.f;
-    if (total_hits > 0) {
+
+    if (total_hits > 0)
+    {
         acc = (
             c50 * 50.0 + c100 * 100.0 + c300 * 300.0) /
             (total_hits * 300.0);
     }
+
     return acc;
 }
 
-struct pp_calc_result {
+struct pp_calc_result
+{
     f64 acc_percent;
     f64 pp;
     f64 aim_pp;
@@ -37,7 +43,11 @@ struct pp_calc_result {
 //       the number of misses, 100s and 50s.
 // c100, c50: number of 100s and 50s.
 // score_version: 1 or 2, affects accuracy pp.
-pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
+
+internal
+pp_calc_result
+pp_calc(
+    f64 aim, f64 speed, beatmap& b,
     u32 used_mods=mods::nomod,
     u16 combo = 0xFFFF, u16 misses = 0, u16 c300 = 0xFFFF,
     u16 c100 = 0, u16 c50 = 0, u32 score_version = 1)
@@ -60,12 +70,11 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
 
     // input validation
     if (!b.max_combo) {
-        //die("Max combo cannot be zero");
-        //return res;
         b.max_combo = 1; // prevent division by zero
     }
 
     u16 total_hits = c300 + c100 + c50 + misses;
+
     if (total_hits != b.num_objects) {
         dbgprintf("warning: total hits(%" fu16 ") don't "
             "match hit-object count (%zd)\n", total_hits, b.num_objects);
@@ -108,7 +117,8 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
     }
 
     // low ar bonus
-    else if (ar < 8.0) {
+    else if (ar < 8.0)
+    {
         f64 low_ar_bonus = 0.01 * (8.0 - ar);
 
         if (used_mods & mods::hd) {
@@ -155,10 +165,14 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
     // acc pp ------------------------------------------------------------------
     f64 real_acc = 0.0; // accuracy calculation changes from scorev1 to scorev2
 
-    if (score_version == 2) {
+    if (score_version == 2)
+    {
         circles = total_hits;
         real_acc = acc;
-    } else {
+    }
+
+    else
+    {
         // scorev1 ignores sliders since they are free 300s
         if (circles) {
             real_acc = (
@@ -224,7 +238,10 @@ pp_calc_result pp_calc(f64 aim, f64 speed, beatmap& b,
 // combo: desired combo. 0xFFFF will assume full combo.
 // misses: amount of misses
 // score_version: 1 or 2, affects accuracy pp.
-pp_calc_result pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent,
+
+pp_calc_result
+pp_calc_acc(
+    f64 aim, f64 speed, beatmap& b, f64 acc_percent,
     u32 used_mods=mods::nomod, u16 combo = 0xFFFF, u16 misses = 0,
     u32 score_version = 1)
 {
@@ -242,7 +259,8 @@ pp_calc_result pp_calc_acc(f64 aim, f64 speed, beatmap& b, f64 acc_percent,
     u16 c100 = (u16)macro_round(-3.0 * ((acc_percent * 0.01 - 1.0) *
         b.num_objects + misses) * 0.5);
 
-    if (c100 > b.num_objects - misses) {
+    if (c100 > b.num_objects - misses)
+    {
         // acc lower than all 100s, use 50s
         c100 = 0;
         c50 = (u16)macro_round(-6.0 * ((acc_percent * 0.01 - 1.0) *

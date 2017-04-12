@@ -25,13 +25,15 @@ const f64 weight_scaling[] = { 1400, 26.25 };
 // non-normalized diameter where the circlesize buff starts
 const f32 circlesize_buff_treshold = 30;
 
-namespace diff {
+namespace diff
+{
     const u8 speed = 0,
              aim = 1;
 }
 
 // diffcalc hit object
-struct d_obj {
+struct d_obj
+{
     hit_object* ho;
 
     f64 strains[2];
@@ -43,13 +45,15 @@ struct d_obj {
     // initialized after claulcating strains
     bool is_single;
 
-    d_obj() {
+    d_obj()
+    {
         // strains start at 1
         strains[0] = 1;
         strains[1] = 1;
     }
 
-    void init(hit_object* base_object, f32 radius) {
+    void init(hit_object* base_object, f32 radius)
+    {
         this->ho = base_object;
 
         // positions are normalized on circle radius so that we can calc as
@@ -58,7 +62,8 @@ struct d_obj {
 
         // cs buff (credits to osuElements, I have confirmed that this is
         // indeed accurate)
-        if (radius < circlesize_buff_treshold) {
+        if (radius < circlesize_buff_treshold)
+        {
             scaling_factor *= 1.f +
                 std::min((circlesize_buff_treshold - radius), 5.f) / 50.f;
         }
@@ -70,7 +75,8 @@ struct d_obj {
         // much and speeds up the calculation exponentially
     }
 
-    void calculate_strains(d_obj& prev) {
+    void calculate_strains(d_obj& prev)
+    {
         calculate_strain(prev, diff::speed);
         if (err()) {
             return;
@@ -79,13 +85,15 @@ struct d_obj {
         calculate_strain(prev, diff::aim);
     }
 
-    void calculate_strain(d_obj& prev, u8 dtype) {
+    void calculate_strain(d_obj& prev, u8 dtype)
+    {
         f64 res = 0;
         i32 time_elapsed = ho->time - prev.ho->time;
         f64 decay = pow(decay_base[dtype], time_elapsed / 1000.0);
         f64 scaling = weight_scaling[dtype];
 
-        switch (ho->type) {
+        switch (ho->type)
+        {
             case obj::slider: // we don't use sliders in this implementation
             case obj::circle:
                 res = spacing_weight(distance(prev), dtype) * scaling;
@@ -103,8 +111,10 @@ struct d_obj {
         strains[dtype] = prev.strains[dtype] * decay + res;
     }
 
-    f64 spacing_weight(f64 distance, u8 diff_type) {
-        switch (diff_type) {
+    f64 spacing_weight(f64 distance, u8 diff_type)
+    {
+        switch (diff_type)
+        {
             case diff::speed:
                 if (distance > single_spacing) {
                     is_single = true;
@@ -152,20 +162,25 @@ const i32 strain_step = 400;
 // weight decays.
 const f64 decay_weight = 0.9;
 
-d_obj objects[beatmap::max_objects];
-size_t num_objects;
+globvar d_obj objects[beatmap::max_objects];
+globvar size_t num_objects;
 
-f64 calculate_difficulty(u8 type) {
+internal
+f64 calculate_difficulty(u8 type)
+{
     std::vector<f64> highest_strains;
     i32 interval_end = strain_step;
     f64 max_strain = 0.0;
 
     d_obj* prev = 0;
-    for (size_t i = 0; i < num_objects; i++) {
+
+    for (size_t i = 0; i < num_objects; i++)
+    {
         d_obj& o = objects[i];
 
         // make previous peak strain decay until the current object
-        while (o.ho->time > interval_end) {
+        while (o.ho->time > interval_end)
+        {
             highest_strains.push_back(max_strain);
 
             if (!prev) {
@@ -190,7 +205,6 @@ f64 calculate_difficulty(u8 type) {
     // sort strains from greatest to lowest
     std::sort(highest_strains.begin(), highest_strains.end(),
         std::greater<f64>());
-    // TODO: get rid of std::greater
 
     // weigh the top strains
     for (std::vector<f64>::iterator it = highest_strains.begin();
@@ -218,7 +232,7 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
     dbgputs("\ndiff calc");
 
     if (b.mode != 0) {
-        //die("This gamemode is not supported");
+        die("This gamemode is not supported");
         return 0;
     }
 
@@ -229,7 +243,9 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
 
     num_objects = b.num_objects;
     dbgputs("initializing objects");
-    for (size_t i = 0; i < b.num_objects; i++) {
+
+    for (size_t i = 0; i < b.num_objects; i++)
+    {
         objects[i].init(&b.objects[i], circle_radius);
         if (err()) {
             return 0;
@@ -283,7 +299,8 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
     }
 
     *rhythm_awkwardness = 0;
-    for (size_t i = 0; i < intervals.size(); ++i) {
+    for (size_t i = 0; i < intervals.size(); ++i)
+    {
         // TODO: actually compute break time length for the map's AR
         bool isbreak = intervals[i] >= 1200;
 
@@ -293,8 +310,10 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
 
         if (isbreak || group.size() >= 5 || i == intervals.size() - 1)
         {
-            for (size_t j = 0; j < group.size(); ++j) {
-                for (size_t k = 1; k < group.size(); ++k) {
+            for (size_t j = 0; j < group.size(); ++j)
+            {
+                for (size_t k = 1; k < group.size(); ++k)
+                {
                     if (k == j) {
                         continue;
                     }
@@ -322,9 +341,10 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
     *rhythm_awkwardness *= 82;
 
 skip_awkwardness:
-    *aim = calculate_difficulty(diff::aim);
+    *aim   = calculate_difficulty(diff::aim);
     *speed = calculate_difficulty(diff::speed);
-    *aim = sqrt(*aim) * star_scaling_factor;
+
+    *aim   = sqrt(*aim)   * star_scaling_factor;
     *speed = sqrt(*speed) * star_scaling_factor;
 
     f64 stars = *aim + *speed +
