@@ -1,89 +1,9 @@
 #include <string>
 
-// TODO: separate platform specific code
-#ifdef _MSC_VER
-#include <Windows.h>
-#include <direct.h>
-#include <Wincrypt.h>
-#define mkdir _mkdir
-
-internalfn
-size_t get_exe_path(char* buf, size_t bufsize) {
-    return GetModuleFileNameA(0, buf, (u32)bufsize);
-}
-
-#define MD5_DIGEST_LENGTH 16
-
-internalfn
-void MD5(u8 const* buf, size_t buflen, u8* digest)
-{
-    HCRYPTPROV prov;
-
-    if (!CryptAcquireContext(&prov, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
-    {
-        fprintf(stderr, "CryptAcquireContext 0x%08X\n", GetLastError());
-        return;
-    }
-
-    HCRYPTHASH hash;
-
-    if (!CryptCreateHash(prov, CALG_MD5, 0, 0, &hash))
-    {
-        fprintf(stderr, "CryptCreateHash 0x%08X\n", GetLastError());
-        goto cleanup;
-    }
-
-    if (!CryptHashData(hash, buf, (DWORD)buflen, 0))
-    {
-        fprintf(stderr, "CryptHashData 0x%08X\n", GetLastError());
-        goto cleanup2;
-    }
-
-    DWORD hashlen = MD5_DIGEST_LENGTH;
-
-    if (!CryptGetHashParam(hash, HP_HASHVAL, digest, &hashlen, 0))
-    {
-        fprintf(stderr, "CryptGetHashParam 0x%08X\n", GetLastError());
-    }
-
-cleanup2:
-    CryptDestroyHash(hash);
-
-cleanup:
-    CryptReleaseContext(prov, 0);
-}
+#if defined(_WIN32) | defined(_WIN64)
+# include "beatmap_win.cc"
 #else
-#include <openssl/md5.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#define mkdir(x) mkdir(x, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
-
-internalfn
-size_t get_exe_path(char* buf, size_t bufsize)
-{
-    ssize_t res;
-
-    res = readlink("/proc/self/exe", buf, bufsize);
-    if (res >= 0) {
-        return (size_t)res;
-    }
-
-    res = readlink("/proc/curproc/file", buf, bufsize);
-    if (res >= 0) {
-        return (size_t)res;
-    }
-
-    res = readlink("/proc/self/path/a.out", buf, bufsize);
-    if (res >= 0) {
-        return (size_t)res;
-    }
-
-    perror("readlink");
-    strcpy(buf, ".");
-
-    return 1;
-}
+# include "beatmap_unix.cc"
 #endif
 
 // shit code ahead! I am way too lazy to write nice code for parsers, sorry

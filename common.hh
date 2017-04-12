@@ -3,7 +3,7 @@
 #define internalfn static
 #define globvar static
 
-#if _WIN32 || _WIN64
+#if defined(_WIN32) || defined(_WIN64)
 #define NEEDS_TO_INSTALL_GENTOO 1
 #define strtok_r strtok_s
 #define __func__ __FUNCTION__

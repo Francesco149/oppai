@@ -1,8 +1,18 @@
-oppai
+# Binaries
+build/
+/oppai
 obj
-*.o
+*.[oad]
+
+# Artifacts
 *.tar.gz
+tags
+
+# Project settings
+.ycm_extra_conf.py*
+
+# Misc
 *.swp
 *~
-tags
-build/
+*.bak
+
