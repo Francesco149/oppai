@@ -44,7 +44,7 @@ struct pp_calc_result
 // c100, c50: number of 100s and 50s.
 // score_version: 1 or 2, affects accuracy pp.
 
-internal
+internalfn
 pp_calc_result
 pp_calc(
     f64 aim, f64 speed, beatmap& b,

@@ -165,7 +165,7 @@ const f64 decay_weight = 0.9;
 globvar d_obj objects[beatmap::max_objects];
 globvar size_t num_objects;
 
-internal
+internalfn
 f64 calculate_difficulty(u8 type)
 {
     std::vector<f64> highest_strains;

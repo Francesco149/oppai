@@ -1,6 +1,6 @@
 #pragma once
 
-#define internal static
+#define internalfn static
 #define globvar static
 
 #if _WIN32 || _WIN64

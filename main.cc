@@ -22,7 +22,7 @@ const char* version_string = "0.9.0";
 
 globvar const char* last_err = 0;
 
-internal
+internalfn
 void die_impl(const char* msg)
 {
     if (last_err) {
@@ -33,12 +33,12 @@ void die_impl(const char* msg)
 }
 
 // returns the last error, or 0 if no error has occurred
-internal
+internalfn
 const char* err() {
     return last_err;
 }
 
-internal
+internalfn
 void chk() {
     if (!err()) {
         return;
@@ -99,7 +99,7 @@ bool encode_str(FILE* fd, const char* str);
 beatmap b;
 
 #ifdef SHOW_BEATMAP
-internal void print_beatmap();
+internalfn void print_beatmap();
 #endif
 
 // -----------------------------------------------------------------------------
@@ -121,7 +121,7 @@ internal void print_beatmap();
         pp_calc_result& res)
 
 // text output
-internal
+internalfn
 print_sig(text_print)
 {
     // round to 2 decimal places
@@ -181,7 +181,7 @@ print_sig(text_print)
 }
 
 // json output
-internal
+internalfn
 void print_escaped_json_string(const char* str)
 {
     putchar('"');
@@ -201,7 +201,7 @@ void print_escaped_json_string(const char* str)
     putchar('"');
 }
 
-internal
+internalfn
 print_sig(json_print)
 {
     printf("{\"oppai_version\":");
@@ -693,6 +693,7 @@ int main(int argc, char* argv[])
 }
 
 #ifdef SHOW_BEATMAP
+internalfn
 void print_beatmap() {
     printf(
         "Format version: %" fi32 "\n"
