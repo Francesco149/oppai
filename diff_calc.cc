@@ -34,6 +34,7 @@ namespace diff
 // diffcalc hit object
 struct d_obj
 {
+    oppai_ctx* ctx;
     hit_object* ho;
 
     f64 strains[2];
@@ -52,8 +53,9 @@ struct d_obj
         strains[1] = 1;
     }
 
-    void init(hit_object* base_object, f32 radius)
+    void init(oppai_ctx* ctx, hit_object* base_object, f32 radius)
     {
+        this->ctx = ctx;
         this->ho = base_object;
 
         // positions are normalized on circle radius so that we can calc as
@@ -78,7 +80,7 @@ struct d_obj
     void calculate_strains(d_obj& prev)
     {
         calculate_strain(prev, diff::speed);
-        if (err()) {
+        if (oppai_err(ctx)) {
             return;
         }
 
@@ -103,7 +105,7 @@ struct d_obj
                 break;
 
             case obj::invalid:
-                die("Found invalid hit object");
+                die(ctx, "Found invalid hit object");
                 return;
         }
 
@@ -162,11 +164,17 @@ const i32 strain_step = 400;
 // weight decays.
 const f64 decay_weight = 0.9;
 
-globvar d_obj objects[beatmap::max_objects];
-globvar size_t num_objects;
+struct d_calc_ctx
+{
+    oppai_ctx* octx;
+    d_obj objects[beatmap::max_objects];
+    size_t num_objects;
+
+    d_calc_ctx(oppai_ctx* octx) : octx(octx) {}
+};
 
 internalfn
-f64 calculate_difficulty(u8 type)
+f64 calculate_difficulty(d_calc_ctx* ctx, u8 type)
 {
     std::vector<f64> highest_strains;
     i32 interval_end = strain_step;
@@ -174,9 +182,9 @@ f64 calculate_difficulty(u8 type)
 
     d_obj* prev = 0;
 
-    for (size_t i = 0; i < num_objects; i++)
+    for (size_t i = 0; i < ctx->num_objects; i++)
     {
-        d_obj& o = objects[i];
+        d_obj& o = ctx->objects[i];
 
         // make previous peak strain decay until the current object
         while (o.ho->time > interval_end)
@@ -222,17 +230,21 @@ f64 calculate_difficulty(u8 type)
 // aim, speed: pointers to the variables where
 //             aim and speed stars will be stored.
 // returns overall stars
-f64 d_calc(beatmap& b, f64* aim, f64* speed,
-           f64* rhythm_awkwardness,
-           u16* nsingles,
-           u16* nsingles_timing,
-           u16* nsingles_threshold,
-           i32 singletap_threshold)
+
+OPPAIAPI
+f64 d_calc(
+    d_calc_ctx* ctx,
+    beatmap& b, f64* aim, f64* speed,
+    f64* rhythm_awkwardness = 0,
+    u16* nsingles = 0,
+    u16* nsingles_timing = 0,
+    u16* nsingles_threshold = 0,
+    i32 singletap_threshold = 240)
 {
     dbgputs("\ndiff calc");
 
     if (b.mode != 0) {
-        die("This gamemode is not supported");
+        die(ctx->octx, "This gamemode is not supported");
         return 0;
     }
 
@@ -241,13 +253,13 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
 
     dbgprintf("circle radius: %g\n", circle_radius);
 
-    num_objects = b.num_objects;
+    ctx->num_objects = b.num_objects;
     dbgputs("initializing objects");
 
     for (size_t i = 0; i < b.num_objects; i++)
     {
-        objects[i].init(&b.objects[i], circle_radius);
-        if (err()) {
+        ctx->objects[i].init(ctx->octx, &b.objects[i], circle_radius);
+        if (oppai_err(ctx->octx)) {
             return 0;
         }
     }
@@ -255,13 +267,13 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
     // TODO: don't use vector
     std::vector<i32> intervals;
 
-    d_obj* prev = &objects[0];
+    d_obj* prev = &ctx->objects[0];
     for (size_t i = 1; i < b.num_objects; i++)
     {
-        d_obj& o = objects[i];
+        d_obj& o = ctx->objects[i];
 
         o.calculate_strains(*prev);
-        if (err()) {
+        if (oppai_err(ctx->octx)) {
             return 0;
         }
 
@@ -341,8 +353,8 @@ f64 d_calc(beatmap& b, f64* aim, f64* speed,
     *rhythm_awkwardness *= 82;
 
 skip_awkwardness:
-    *aim   = calculate_difficulty(diff::aim);
-    *speed = calculate_difficulty(diff::speed);
+    *aim   = calculate_difficulty(ctx, diff::aim);
+    *speed = calculate_difficulty(ctx, diff::speed);
 
     *aim   = sqrt(*aim)   * star_scaling_factor;
     *speed = sqrt(*speed) * star_scaling_factor;

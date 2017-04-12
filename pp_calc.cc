@@ -44,9 +44,10 @@ struct pp_calc_result
 // c100, c50: number of 100s and 50s.
 // score_version: 1 or 2, affects accuracy pp.
 
-internalfn
+OPPAIAPI
 pp_calc_result
 pp_calc(
+    oppai_ctx* ctx,
     f64 aim, f64 speed, beatmap& b,
     u32 used_mods=mods::nomod,
     u16 combo = 0xFFFF, u16 misses = 0, u16 c300 = 0xFFFF,
@@ -75,13 +76,17 @@ pp_calc(
 
     u16 total_hits = c300 + c100 + c50 + misses;
 
-    if (total_hits != b.num_objects) {
-        dbgprintf("warning: total hits(%" fu16 ") don't "
-            "match hit-object count (%zd)\n", total_hits, b.num_objects);
+    if (total_hits != b.num_objects)
+    {
+        dbgprintf(
+            "warning: total hits(%" fu16 ") don't match hit-object count "
+            "(%" fu32 ")\n",
+            total_hits, (u32)b.num_objects
+        );
     }
 
     if (score_version != 1 && score_version != 2) {
-        die("This score version does not exist or isn't supported");
+        die(ctx, "This score version does not exist or isn't supported");
         return res;
     }
 
@@ -239,9 +244,11 @@ pp_calc(
 // misses: amount of misses
 // score_version: 1 or 2, affects accuracy pp.
 
+OPPAIAPI
 pp_calc_result
 pp_calc_acc(
-    f64 aim, f64 speed, beatmap& b, f64 acc_percent,
+    oppai_ctx* ctx,
+    f64 aim, f64 speed, beatmap& b, f64 acc_percent = 100.0,
     u32 used_mods=mods::nomod, u16 combo = 0xFFFF, u16 misses = 0,
     u32 score_version = 1)
 {
@@ -274,7 +281,13 @@ pp_calc_acc(
 
     u16 c300 = (u16)b.num_objects - c100 - c50 - misses;
 
-    return pp_calc(aim, speed, b, used_mods, combo, misses, c300, c100, c50,
-        score_version);
+    return
+        pp_calc(
+            ctx,
+            aim, speed, b, used_mods,
+            combo, misses,
+            c300, c100, c50,
+            score_version
+        );
 }
 

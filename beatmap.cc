@@ -90,9 +90,6 @@ size_t get_exe_path(char* buf, size_t bufsize)
 // disclaimer: this beatmap parser is meant purely for difficulty calculation
 //             and I don't support any malicious use of it
 
-const size_t bufsize = 2000000; // 2 mb
-globvar u8 buf[bufsize];
-
 const f32   od0_ms = 79.5,
             od10_ms = 19.5,
             ar0_ms = 1800,
@@ -222,6 +219,8 @@ bool whitespace(const char* s)
 // note: values not required for diff calc will be omitted from this parser
 struct beatmap
 {
+    oppai_ctx* ctx;
+
     u32 format_version;
 
     // general
@@ -263,6 +262,10 @@ struct beatmap
             perror("fwrite"); \
             return false; \
         }
+
+        char versionbuf[64];
+        strcpy(versionbuf, version_string);
+        w(versionbuf);
 
         w(format_version)
         w(stack_leniency)
@@ -312,6 +315,13 @@ struct beatmap
             return false; \
         }
 
+        char versionbuf[64];
+        w(versionbuf);
+
+        if (strcmp(versionbuf, version_string)) {
+            return false;
+        }
+
         w(format_version)
         w(stack_leniency)
         w(mode)
@@ -352,7 +362,8 @@ struct beatmap
         return true;
     }
 
-    beatmap() :
+    beatmap(oppai_ctx* ctx) :
+        ctx(ctx),
         format_version(0),
         stack_leniency(0),
         mode(0),
@@ -372,13 +383,18 @@ struct beatmap
     }
 
     static
-    size_t get_cache_file(char* cache_path, size_t bufsize, bool mk = true)
+    size_t get_cache_file(
+        char* beatmap,
+        size_t beatmap_size,
+        char* cache_path,
+        size_t bufsize,
+        bool mk = true)
     {
         u8 digest_bytes[MD5_DIGEST_LENGTH];
         char* p = cache_path;
         char const* folder_name = "oppai_cache";
 
-        MD5((u8*)buf, strlen((char const*)buf), digest_bytes);
+        MD5((u8*)beatmap, beatmap_size, digest_bytes);
 
         p += get_exe_path(
             p,
@@ -409,28 +425,32 @@ struct beatmap
     static void parse(
         const char* osu_file,
         beatmap& b,
+        char* buf, size_t bufsize,
         bool disable_cache = false)
     {
 #if OPPAI_PROFILING
         const int prid = 1;
 #endif
 
+        oppai_ctx* ctx = b.ctx;
+
         profile(prid, "I/O");
 
         // if osu_file is "-" read from stdin instead of file
         FILE* f = (strcmp(osu_file, "-") == 0) ? stdin : fopen(osu_file, "rb");
         if (!f) {
-            die("Failed to open beatmap");
+            die(ctx, "Failed to open beatmap");
             return;
         }
 
+        dbgputs("reading .osu file");
         size_t cb = fread(buf, 1, bufsize, f);
         if (cb == bufsize) {
-            die("Beatmap is too big for the internal buffer");
+            die(ctx, "Beatmap is too big for the internal buffer");
             return;
         }
 
-        dbgprintf("%zd bytes\n", cb);
+        dbgprintf("%" fu32 " bytes\n", (u32)cb);
         fclose(f);
 
         // just to be safe
@@ -442,7 +462,7 @@ struct beatmap
         FILE* cachefd = 0;
 
         if (!disable_cache) {
-            get_cache_file(cachefile, sizeof(cachefile));
+            get_cache_file(buf, cb, cachefile, sizeof(cachefile));
             cachefd = fopen(cachefile, "rb");
         }
 
@@ -461,7 +481,8 @@ struct beatmap
 
         profile(prid, "format version");
 
-        while (not_section()) {
+        while (not_section())
+        {
             if (sscanf(tok, "osu file format v%" fu32 "",
                        cachefd ? &tmp_format_version :&b.format_version) == 1) {
                 break;
@@ -478,22 +499,22 @@ struct beatmap
         profile(prid, "general");
 
         if (!find_fwd(tok, "[General]")) {
-            die("Could not find General info");
+            die(ctx, "Could not find General info");
             return;
         }
 
         // ---
 
-        // NOTE: I could just store all properties and map them by section and name
-        // but I'd rather parse only the ones I need since I'd still need to parse
-        // them one by one and check for format errors.
+        // NOTE: I could just store all properties and map them by section and
+        // name but I'd rather parse only the ones I need since I'd still need
+        // to parse them one by one and check for format errors.
 
         f32 tmp_stack_leniency = 0;
         u16 tmp_mode = 0;
 
         // StackLeniency and Mode are not present in older formats
-        for (; not_section(); fwd()) {
-
+        for (; not_section(); fwd())
+        {
             if (sscanf(tok, "StackLeniency: %f",
                        cachefd ? &tmp_stack_leniency : &b.stack_leniency) == 1) {
                 continue;
@@ -513,7 +534,7 @@ struct beatmap
         profile(prid, "metadata");
 
         if (!find_fwd(tok, "[Metadata]")) {
-            die("Could not find Metadata");
+            die(ctx, "Could not find Metadata");
             return;
         }
 
@@ -527,9 +548,9 @@ struct beatmap
         if (cachefd)
         {
             memset(tmp_title, 0, sizeof(tmp_title));
-            memset(tmp_artist, 0, sizeof(tmp_title));
-            memset(tmp_creator, 0, sizeof(tmp_title));
-            memset(tmp_version, 0, sizeof(tmp_title));
+            memset(tmp_artist, 0, sizeof(tmp_artist));
+            memset(tmp_creator, 0, sizeof(tmp_creator));
+            memset(tmp_version, 0, sizeof(tmp_version));
         }
 
         for (; not_section(); fwd()) {
@@ -575,13 +596,9 @@ struct beatmap
                 return;
             }
 
-            dbgprintf(
-                "hash collision for %s: "
-                "%s - %s (%s) [%s] != %s - %s (%s) [%s]\n",
-                osu_file,
-                b.artist, b.title, b.creator, b.version,
-                tmp_artist, tmp_title, tmp_creator, tmp_version
-            );
+            // force recache
+            cachefd = 0;
+            fprintf(stderr, "invalid cache file for %s, recaching\n", osu_file);
 
             b.format_version = tmp_format_version;
             b.mode = (u8)tmp_mode;
@@ -598,7 +615,7 @@ struct beatmap
         profile(prid, "difficulty");
 
         if (!find_fwd(tok, "[Difficulty]")) {
-            die("Could not find Difficulty");
+            die(ctx, "Could not find Difficulty");
             return;
         }
 
@@ -632,17 +649,17 @@ struct beatmap
         }
 
         if (b.hp > 10) {
-            die("Invalid or missing HP");
+            die(ctx, "Invalid or missing HP");
             return;
         }
 
         if (b.cs > 10) {
-            die("Invalid or missing CS");
+            die(ctx, "Invalid or missing CS");
             return;
         }
 
         if (b.od > 10) {
-            die("Invalid or missing OD");
+            die(ctx, "Invalid or missing OD");
             return;
         }
 
@@ -652,7 +669,7 @@ struct beatmap
         }
 
         if (b.sv > 10) { // not sure what max sv is
-            die("Invalid or missing SV");
+            die(ctx, "Invalid or missing SV");
             return;
         }
 
@@ -661,7 +678,7 @@ struct beatmap
         profile(prid, "timing points");
 
         if (!find_fwd(tok, "[TimingPoints]")) {
-            die("Could not find TimingPoints");
+            die(ctx, "Could not find TimingPoints");
             return;
         }
 
@@ -677,7 +694,7 @@ struct beatmap
             }
 
             if (b.num_timing_points >= beatmap::max_timing_points) {
-                die("Too many timing points for the internal buffer");
+                die(ctx, "Too many timing points for the internal buffer");
                 return;
             }
 
@@ -702,7 +719,7 @@ struct beatmap
             if (sscanf(tok, "%lf,%lf", &time_tmp, &tp.ms_per_beat) != 2)
             {
                 tp.time = (i32)time_tmp;
-                die("Invalid format for timing point");
+                die(ctx, "Invalid format for timing point");
                 return;
             }
 
@@ -715,7 +732,7 @@ struct beatmap
         profile(prid, "hit objects");
 
         if (!find_fwd(tok, "[HitObjects]")) {
-            die("Could not find HitObjects");
+            die(ctx, "Could not find HitObjects");
             return;
         }
 
@@ -735,7 +752,7 @@ struct beatmap
             }
 
             if (b.num_objects >= beatmap::max_objects) {
-                die("Too many hit objects for the internal buffer");
+                die(ctx, "Too many hit objects for the internal buffer");
                 return;
             }
 
@@ -805,12 +822,12 @@ struct beatmap
                 goto object_type_done;
             }
 
-            die("Invalid hit object found");
+            die(ctx, "Invalid hit object found");
             return;
 
 object_type_done:
             b.num_objects++;
-            dbgprintf("\n\nobject %zd\n", b.num_objects);
+            dbgprintf("\n\nobject %" fu32 "\n", (u32)b.num_objects);
 
             // increase max combo and circle/slider count
             b.max_combo++; // slider ticks are calculated later
@@ -833,7 +850,7 @@ object_type_done:
                     break;
 
                 case obj::invalid:
-                    die("How did you get here????????");
+                    die(ctx, "How did you get here????????");
                     return;
             }
 
@@ -845,7 +862,7 @@ object_type_done:
 
             // not a slider yet slider points were found
             if (ho.type != obj::slider) {
-                die("Invalid slider found");
+                die(ctx, "Invalid slider found");
                 return;
             }
 
@@ -892,7 +909,7 @@ object_type_done:
             timing_point* tp = b.timing(ho.time);
             timing_point* parent = b.parent_timing(tp);
 
-            if (err()) {
+            if (oppai_err(ctx)) {
                 return;
             }
 
@@ -988,14 +1005,14 @@ object_type_done:
 
             if (cur.time <= t->time && !cur.inherit)
             {
-                if (!res || res->time > res->time) {
+                if (!res || cur.time > res->time) {
                     res = &cur;
                 }
             }
         }
 
         if (!res) {
-            die("Orphan timing section");
+            die(ctx, "Orphan timing section");
         }
 
         return res;

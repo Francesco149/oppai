@@ -4,6 +4,7 @@
 #include <string>
 
 // profiling is linux-only for now since it's mainly for myself
+internalfn
 f64 time_now()
 {
     struct timespec t;
@@ -20,8 +21,8 @@ f64 time_now()
 
 #define MAX_PROFILERS 3
 
-char const* profile_last_name[MAX_PROFILERS];
-f64 profile_last[MAX_PROFILERS];
+globvar char const* profile_last_name[MAX_PROFILERS];
+globvar f64 profile_last[MAX_PROFILERS];
 
 struct iterations
 {
@@ -32,13 +33,15 @@ struct iterations
 };
 
 // TODO: don't use map
-std::map<std::string, iterations> profile_iterations[MAX_PROFILERS];
+globvar std::map<std::string, iterations> profile_iterations[MAX_PROFILERS];
 
+internalfn
 void profile_init() {
     memset(profile_last_name, 0, sizeof(profile_last_name));
     memset(profile_last, 0, sizeof(profile_last));
 }
 
+internalfn
 void profile(int i, char const* name)
 {
     if (i > MAX_PROFILERS - 1) {
@@ -59,6 +62,7 @@ void profile(int i, char const* name)
     profile_last_name[i] = name;
 }
 
+internalfn
 void profile_end()
 {
     for (int i = 0; i < MAX_PROFILERS; ++i)
