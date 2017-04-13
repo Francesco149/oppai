@@ -31,6 +31,9 @@ typedef uint_least8_t   u8;
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
+
+#if !defined(OPPAI_SSIZE_T_DEFINED)
 typedef SSIZE_T ssize_t;
+#endif
 #endif
 
