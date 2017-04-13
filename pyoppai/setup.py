@@ -13,7 +13,7 @@ pyoppai = Extension(
     ],
     extra_compile_args = [
         "-O2",
-        "-nologo", "-MT", "-Gm-", "GR-", "-EHsc", "-W4", "-WX",
+        "-nologo", "-MT", "-Gm-", "GR-", "-EHsc", "-W4", #"-WX",
         "-wd4201", "-wd4100", "-F8000000"
     ] if "win" in sys.platform else [
         "-O2",
