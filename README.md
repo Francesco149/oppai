@@ -4,8 +4,8 @@ to do is supply it with the map's .osu file.
 
 - [Getting started](#getting-started)
 - [Caching beatmaps](#caching-beatmaps)
-- [Compiling from source (Linux)](#compiling-from-source--linux-)
-- [Compiling from source (Windows)](#compiling-from-source--windows-)
+- [Compiling from source (Linux)](#compiling-from-source--linux)
+- [Compiling from source (Windows)](#compiling-from-source--windows)
 - [Library mode and bindings](#library-mode-and-bindings)
 
 # Getting started
