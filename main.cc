@@ -26,7 +26,7 @@
 #define VERSION_SUFFIX "-lib"
 #endif
 
-const char* version_string = "0.9.2" VERSION_SUFFIX;
+const char* version_string = "0.9.3" VERSION_SUFFIX;
 
 // -----------------------------------------------------------------------------
 
@@ -131,7 +131,7 @@ internalfn void print_beatmap(beatmap& b, oppai_ctx* ctx);
 
 // !!!!!!!!! OVERRIDE PRINTF AND PUTS FOR OUTPUT MODULES !!!!!!!!!!
 #define printf(fmt, ...) fprintf(fd, fmt, __VA_ARGS__)
-#define puts(s) fputs(s, fd)
+#define puts(s) fputs(s "\n", fd)
 #define putchar(c) fputc(c, fd)
 
 // output modules

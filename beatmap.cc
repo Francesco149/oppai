@@ -302,12 +302,14 @@ struct beatmap
         memset(version, 0, sizeof(version));
     }
 
+    // basedir defaults to executable location
     static
     size_t get_cache_file(
         char* beatmap,
         size_t beatmap_size,
         char* cache_path,
         size_t bufsize,
+        char const* basedir = 0,
         bool mk = true)
     {
         u8 digest_bytes[MD5_DIGEST_LENGTH];
@@ -316,13 +318,19 @@ struct beatmap
 
         MD5((u8*)beatmap, beatmap_size, digest_bytes);
 
-        p += get_exe_path(
-            p,
-            bufsize - MD5_DIGEST_LENGTH * 2 - 3 - strlen(folder_name)
-        );
+        if (!basedir)
+        {
+            p += get_exe_path(
+                p,
+                bufsize - MD5_DIGEST_LENGTH * 2 - 3 - strlen(folder_name)
+            );
 
-        /* get base dir of exe */
-        for (; *p != '\\' && *p != '/'; --p);
+            /* get base dir of exe */
+            for (; *p != '\\' && *p != '/'; --p);
+        }
+        else {
+            p += sprintf(p, "%s", basedir);
+        }
 
         p += sprintf(p, "/oppai_cache/");
 
@@ -346,7 +354,8 @@ struct beatmap
         const char* osu_file,
         beatmap& b,
         char* buf, size_t bufsize,
-        bool disable_cache = false)
+        bool disable_cache = false,
+        char const* custom_cache_folder = 0)
     {
 #if OPPAI_PROFILING
         const int prid = 1;
@@ -381,8 +390,14 @@ struct beatmap
         char cachefile[4096];
         FILE* cachefd = 0;
 
-        if (!disable_cache) {
-            get_cache_file(buf, cb, cachefile, sizeof(cachefile));
+        if (!disable_cache)
+        {
+            get_cache_file(
+                buf, cb,
+                cachefile, sizeof(cachefile),
+                custom_cache_folder
+            );
+
             cachefd = fopen(cachefile, "rb");
         }
 
