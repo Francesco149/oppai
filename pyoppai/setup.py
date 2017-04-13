@@ -25,7 +25,7 @@ pyoppai = Extension(
     ],
 
     libraries = [
-        'Advapi32.lib' if "win" in sys.platform else 'crypto'
+        'Advapi32' if "win" in sys.platform else 'crypto'
     ],
 
     sources = ['pyoppaimodule.cc']
