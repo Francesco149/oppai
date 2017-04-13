@@ -5,7 +5,7 @@ pyoppai = Extension(
     'pyoppai',
     define_macros = [
         ('OPPAI_LIB', '1'),
-        ('_CRT_SECURE_NO_WARNINGS', '1')
+        ('_CRT_SECURE_NO_WARNINGS', '1'),
         ('NOMINMAX', '1')
     ] if "win" in sys.platform else [
         ('OPPAI_LIB', '1'),
