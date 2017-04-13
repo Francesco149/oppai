@@ -26,6 +26,7 @@ def main():
         print("Usage: " + sys.argv[0] + " file.osu")
         sys.exit(1)
 
+    # if you need to multithread, create one ctx and buffer for each thread
     ctx = pyoppai.new_ctx()
 
     # parse beatmap ------------------------------------------------------------

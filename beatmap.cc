@@ -35,11 +35,6 @@ struct slider_data
 {
     char type;
 
-    // this implementation of diff calc does not
-    // actually use sliders because they are way more expensive
-    // to compute and it's already accurate enough
-    //std::vector<v2f> points;
-
     u16 repetitions; // starts at 1 for non-repeating sliders
     f64 length; // how much distance the curve travels in osu pixels
 
@@ -350,6 +345,10 @@ struct beatmap
     }
 
     // parse .osu file into a beatmap object
+    // if osu_file is "-", input will be read from stdin
+    // disable_cache turns off beatmap caching to disk
+    // custom_cache_folder overrides the cache base directory, which defaults to
+    //                     the path of the current executable
     static void parse(
         const char* osu_file,
         beatmap& b,
@@ -954,6 +953,10 @@ object_type_done:
     }
 
     // apply map-modifying mods (such as EZ, HR, DT, HT)
+    // see mods namespace.
+    //
+    // NOTE: this is currently not reversible, so if you apply map changing mods
+    //       you will have to re-parse the map to undo them.
     void apply_mods(u32 mods)
     {
         if ((mods & mods::map_changing) == 0) {

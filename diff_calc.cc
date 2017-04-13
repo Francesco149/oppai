@@ -227,9 +227,24 @@ f64 calculate_difficulty(d_calc_ctx* ctx, u8 type)
 }
 
 // calculates overall, aim and speed stars for a map.
+//
 // aim, speed: pointers to the variables where
 //             aim and speed stars will be stored.
-// returns overall stars
+//
+// rhythm_awkwardness: optional pointer that will store the experimental
+//                     rhythm awkwardness stat.
+//
+// nsingles: optional pointer that will store the number of aim singletaps.
+//           aim singletaps are singletaps as seen by the difficulty calculator,
+//           computed based on spacing thresholds.
+//
+// nsingles_timing: optional pointer that will store the number of timing
+//                  singletaps (1/2 or slower notes).
+//
+// nsingles_threshold: optional pointer that will store the number of notes
+//                     equal or slower than 1/2 notes at singletap_threshold bpm
+//
+// returns star rating
 
 OPPAIAPI
 f64 d_calc(

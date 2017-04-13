@@ -33,16 +33,18 @@ struct pp_calc_result
 
 // calculates ppv2.
 //
-// aim: aim difficulty
-// speed: speed difficulty
-// b: the beatmap with map-modifying mods already applied
-// used_mods: the mods bitmask (see namespace mods)
-// combo: desired combo. 0xFFFF will assume full combo.
-// misses: amount of misses
-// c300: amount of 300s. 0xFFFF will automatically calculate this value based on
-//       the number of misses, 100s and 50s.
-// c100, c50: number of 100s and 50s.
+// aim:           aim difficulty
+// speed:         speed difficulty
+// b:             the beatmap with map-modifying mods already applied
+// used_mods:     the mods bitmask (see namespace mods)
+// combo:         desired combo. 0xFFFF will assume full combo.
+// misses:        amount of misses
+// c300:          amount of 300s. 0xFFFF will automatically calculate this value
+//                based on the number of misses, 100s and 50s.
+// c100, c50:     number of 100s and 50s.
 // score_version: 1 or 2, affects accuracy pp.
+//
+// return ppv2
 
 OPPAIAPI
 pp_calc_result
@@ -233,16 +235,19 @@ pp_calc(
     return res;
 }
 
-// rounds acc_percent to the closest possible 100-count and calculates ppv2.
+// rounds acc_percent to the closest possible 100-count or 50-count and
+// calculates ppv2.
 //
-// aim: aim difficulty
-// speed: speed difficulty
-// b: the beatmap with map-modifying mods already applied
-// acc_percent: the desired accuracy in percent (0-100)
-// used_mods: the mods bitmask (see namespace mods)
-// combo: desired combo. 0xFFFF will assume full combo.
-// misses: amount of misses
+// aim:           aim difficulty
+// speed:         speed difficulty
+// b:             the beatmap with map-modifying mods already applied
+// acc_percent:   the desired accuracy in percent (0-100)
+// used_mods:     the mods bitmask (see namespace mods)
+// combo:         desired combo. 0xFFFF will assume full combo.
+// misses:        amount of misses
 // score_version: 1 or 2, affects accuracy pp.
+//
+// returns ppv2
 
 OPPAIAPI
 pp_calc_result
