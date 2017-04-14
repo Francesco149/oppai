@@ -164,7 +164,7 @@ extern "C"
         PyObject* buf_capsule;
         u32 bufsize;
         int disable_cache = 0;
-        char const* custom_cache_path;
+        char const* custom_cache_path = 0;
 
         int pres =
             PyArg_ParseTuple(
@@ -463,24 +463,173 @@ extern "C"
 
     // -------------------------------------------------------------------------
 
+    PyDoc_STRVAR(
+        err_doc,
+        "Return a description of the last error, or an empty string if there\n"
+        "was no error\n\n"
+
+        "Arguments: (ctx)\n\n"
+
+        "ctx: oppai context object (see new_ctx)"
+    );
+
+    PyDoc_STRVAR(
+        new_beatmap_doc,
+        "Create an empty beatmap object\n\n"
+
+        "Arguments: (ctx)\n\n"
+
+        "ctx: oppai context object (see new_ctx)"
+    );
+
+    PyDoc_STRVAR(
+        new_buffer_doc,
+        "Allocates a new buffer for the beatmap parser\n\n"
+
+        "Arguments: (nbytes)\n\n"
+
+        "nbytes: the size in bytes of the buffer. should be at least as big\n"
+        "        as the .osu file"
+    );
+
+    PyDoc_STRVAR(
+        parse_doc,
+        "Parses a .osu file into a beatmap object\n\n"
+
+        "Arguments:\n"
+        "(filepath, beatmap, buf, bufsize, disable_cache=False,\n"
+        " cache_path=<path to current executable>)\n\n"
+
+        "filepath:      path to the .osu file, or \"-\" to read from stdin\n"
+        "beatmap:       beatmap object (see new_beatmap)\n"
+        "buf:           buffer object. must be at least as big as the\n"
+        "               .osu file\n"
+        "bufsize:       size of the buffer\n"
+        "disable_cache: by default, beatmaps are cached as pre-parsed binary\n"
+        "               files on disk. setting this to True disables this\n"
+        "               feature\n"
+        "cache_path:    by default, beatmaps are cached in the path of the\n"
+        "               current executable. because python is interpreted,\n"
+        "               this would lead to the interpreter's path. pass your\n"
+        "               script's path here or your preferred cache path"
+    );
+
+    PyDoc_STRVAR(
+        apply_mods_doc,
+        "Applies map-changing mods to a beatmap\n\n"
+
+        "Arguments: (mods_bitmask)\n\n"
+
+        "mods_bitmask: any combination of the mod constants bit-wise OR-ed\n"
+        "              together (example: pyoppai.hd | pyoppai.hr)"
+    );
+
+    PyDoc_STRVAR(
+        new_d_calc_ctx_doc,
+        "Create a new difficulty calculation context\n\n"
+
+        "Arguments: (ctx)\n\n"
+
+        "ctx: oppai context object (see new_ctx)"
+    );
+
+    PyDoc_STRVAR(
+        d_calc_doc,
+        "Calculates difficulty (star rating) for a beatmap\n\n"
+
+        "Arguments:\n"
+        "(ctx, beatmap, with_awkwardness=False, with_aim_singles=False,\n"
+        " with_timing_singles=False, with_threshold_singles=False,\n"
+        " singletap_threshold=240)\n\n"
+
+        "ctx: oppai context object (see new_ctx)\n"
+        "beatmap:                beatmap object (see new_beatmap)\n"
+        "with_awkwardness:       if True, rhythm awkwardness will be\n"
+        "                        calculated. otherwise, the 4th tuple\n"
+        "                        element returned will be undefined and\n "
+        "                        should be ignored with _\n"
+        "with_aim_singles:       if True, the number of aim singletaps will\n"
+        "                        be calculated. aim singletaps are as seen by\n"
+        "                        are difficulty calculator (based on a\n"
+        "                        spacing threshold). if False, the 5th tuple\n"
+        "                        element returned will be undefined and\n"
+        "                        should beignored with _\n"
+        "with_timing_singles:    if True, the number of 1/2 notes will be\n"
+        "                        calculated. otherwise, the 6th tuple\n"
+        "                        element returned will be undefined and\n"
+        "                        be ignored with _\n"
+        "with_threshold_singles: if True, the number of notes that are 1/2 or\n"
+        "                        slower at singletap_threshold bpm will be\n"
+        "                        calculated. otherwise, the 6th tuple element\n"
+        "                        returned  will be undefined and should be\n"
+        "                        ignored with _\n"
+        "\n"
+        "Returns tuple:\n"
+        "(stars, aim, speed, rhythm_awkwardness,\n"
+        " naim_singles, ntiming_singles, nthreshold_singles)"
+    );
+
+    PyDoc_STRVAR(
+        pp_calc_doc,
+        "Calculates ppv2 for a beatmap\n\n"
+
+        "Arguments:\n"
+        "(ctx, aim, speed, beatmap, mods_bitmask=pyoppai.nomod, combo=0xFFFF,\n"
+        " misses=0, c300=0xFFFF, c100=0, c50=0, score_version=1)\n\n"
+
+        "ctx:           oppai context object (see new_ctx)\n"
+        "aim:           aim stars (see d_calc)\n"
+        "speed:         speed stars (see d_calc)\n"
+        "beatmap:       beatmap object (see new_beatmap)\n"
+        "mods_bitmask:  any combination of the mod constants bit-wise OR-ed\n"
+        "               together (example: pyoppai.hd | pyoppai.hr)\n"
+        "combo:         passing 0xFFFF defaults to the map's max combo\n"
+        "score_version: 1 or 2. the default is 1. scorev2 affects accuracy pp\n"
+        "\n"
+        "Returns tuple (acc_percent, pp, aim_pp, speed_pp, acc_pp)"
+    );
+
+    PyDoc_STRVAR(
+        pp_calc_acc_doc,
+        "Same as pp_calc but uses percentage accuracy\n\n"
+
+        "Arguments:\n"
+        "(ctx, aim, speed, beatmap, acc_percent=100.0,\n"
+        " mods_bitmask=pyoppai.nomod, combo=0xFFFF, misses=0, score_version=1)"
+        "\n\n"
+
+        "ctx:           oppai context object (see new_ctx)\n"
+        "aim:           aim stars (see d_calc)\n"
+        "speed:         speed stars (see d_calc)\n"
+        "beatmap:       beatmap object (see new_beatmap)\n"
+        "mods_bitmask:  any combination of the mod constants bit-wise OR-ed\n"
+        "               together (example: pyoppai.hd | pyoppai.hr)\n"
+        "combo:         passing 0xFFFF defaults to the map's max combo\n"
+        "score_version: 1 or 2. the default is 1. scorev2 affects accuracy pp\n"
+        "\n"
+        "Returns tuple (acc_percent, pp, aim_pp, speed_pp, acc_pp)"
+    );
+
+    // -------------------------------------------------------------------------
+
 #define m(name, desc) { #name, pyoppai_##name, METH_VARARGS, desc }
 
     globvar PyMethodDef pyoppai_methods[] =
     {
         m(new_ctx,        "Create a new oppai context"),
-        m(err,            "Returns last error description (empty str if none)"),
-        m(new_beatmap,    "Create an empty beatmap object"),
-        m(new_buffer,     "Allocate a buffer of n bytes (used by the parser)"),
-        m(parse,          "Parses a .osu file into a beatmap object"),
-        m(apply_mods,     "Applies mods to a beatmap"),
-        m(new_d_calc_ctx, "Create a new difficulty calculation context"),
-        m(d_calc,         "Calculates difficulty (star rating) for a beatmap"),
-        m(pp_calc,        "Calculates ppv2 for a beatmap"),
-        m(pp_calc_acc,    "Same as pp_calc but acc is provided in percent"),
+        m(err,            err_doc),
+        m(new_beatmap,    new_beatmap_doc),
+        m(new_buffer,     new_buffer_doc),
+        m(parse,          parse_doc),
+        m(apply_mods,     apply_mods_doc),
+        m(new_d_calc_ctx, new_d_calc_ctx_doc),
+        m(d_calc,         d_calc_doc),
+        m(pp_calc,        pp_calc_doc),
+        m(pp_calc_acc,    pp_calc_acc_doc),
 
 #define g(tname, name, lname) m(name, "Gets a " #tname "'s " lname)
 
-        g(beatmap, stats,        "stats (CS, OD, AR, HP)"),
+        g(beatmap, stats,        "stats (CS, OD, AR, HP) as a tuple"),
         g(beatmap, mode,         "gamemode"),
         g(beatmap, num_circles,  "number of circles"),
         g(beatmap, num_sliders,  "number of sliders"),
