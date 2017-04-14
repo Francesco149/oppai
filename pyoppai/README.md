@@ -22,6 +22,15 @@ python setup.py install
 
 (use sudo for the last command if you're on Linux).
 
+# Documentation
+Start the python interpreter and run the following to see the full documentation
+
+```python
+import pyoppai
+
+help(pyoppai)
+```
+
 # Usage
 Here's a minimal example of parsing a beatmap, calculating difficulty and
 calculating pp. No error checking for brevity. See ```example.py``` for full
