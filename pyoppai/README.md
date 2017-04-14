@@ -1,7 +1,6 @@
 Python bindings for oppai. Tested on windows and linux.
 
-Supports Python 2.7 and 3+ only for now (might also support slightly earlier or
-later versions).
+Supports Python 2.7 and 3+.
 
 # What is this and why should I use it
 Bindings are much cleaner and high-performance than spawning an oppai process,
