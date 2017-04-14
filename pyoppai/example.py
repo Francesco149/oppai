@@ -18,7 +18,7 @@ def chk(ctx):
     err = pyoppai.err(ctx)
 
     if err:
-        print err
+        print(err)
         sys.exit(1)
 
 def main():

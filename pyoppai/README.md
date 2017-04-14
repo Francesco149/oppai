@@ -1,6 +1,7 @@
 Python bindings for oppai. Tested on windows and linux.
 
-Python 2.7 only for now (might also support slightly earlier or later versions).
+Supports Python 2.7 and 3+ only for now (might also support slightly earlier or
+later versions).
 
 # What is this and why should I use it
 Bindings are much cleaner and high-performance than spawning an oppai process,
@@ -9,8 +10,7 @@ It also makes it easier to handle errors and customize behaviour beyond what
 the command line tool can do.
 
 # How to install
-Make sure you have python 2.7 or a version that's compatible with 2.7 modules.
-You will also need git to clone this repository. On linux it's usually available
+Make sure you have git to clone this repository. On linux it's usually available
 in your package manager if not already installed, while on windows you will need
 to install git bash.
 

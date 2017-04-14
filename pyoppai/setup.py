@@ -1,6 +1,8 @@
 import sys
 from distutils.core import setup, Extension
 
+# TODO: should i split this into one setup.py per platform? this feels messy
+
 pyoppai = Extension(
     'pyoppai',
 
@@ -28,12 +30,15 @@ pyoppai = Extension(
         'Advapi32' if "win" in sys.platform else 'crypto'
     ],
 
-    sources = ['pyoppaimodule.cc']
+    sources = [
+        'python27_pyoppaimodule.cc' if sys.version_info[0] < 3 else
+        'python3_pyoppaimodule.cc'
+    ]
 )
 
 setup(
     name = 'pyoppai',
-    version = '0.9.3-b1.1',
+    version = '0.9.3-b1.2',
     description = 'Python bindings for the oppai osu! pp calculator',
     ext_modules = [pyoppai]
 )

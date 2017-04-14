@@ -659,10 +659,18 @@ extern "C"
 
     // -------------------------------------------------------------------------
 
+#define PYOPPAI_NAME "pyoppai"
+#define PYOPPAI_DESC "ppv2 and difficulty calculator for osu!"
+
     PyMODINIT_FUNC
-    initpyoppai()
+    PYTHON_MODINIT_FUNC_NAME(pyoppai)()
     {
-        PyObject* m = Py_InitModule("pyoppai", pyoppai_methods);
+        PyObject* m =
+            python_init_module(
+                PYOPPAI_NAME,
+                PYOPPAI_DESC,
+                pyoppai_methods
+            );
 
 #define mod(name) PyModule_AddIntConstant(m, #name, mods::name)
         mod(nomod);
@@ -678,16 +686,9 @@ extern "C"
         mod(fl);
         mod(so);
 #undef mod
+
+        PYTHON_MODINIT_FUNC_RETURN(m);
     }
 
     // -------------------------------------------------------------------------
-}
-
-int main(int argc, char* argv[])
-{
-    Py_SetProgramName(argv[0]);
-    Py_Initialize();
-    initpyoppai();
-
-    return 0;
 }
