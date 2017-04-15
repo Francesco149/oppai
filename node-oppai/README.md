@@ -26,7 +26,9 @@ system, ```node -v``` and full output of ```npm install oppai```.
 
 # Usage
 Here's a rather minimal example that parses a beatmap and calculates difficulty
-and pp. You can find full documentation here:
+and pp.
+
+You can find full documentation here:
 [Markdown Documentation](https://github.com/Francesco149/oppai/blob/master/node-oppai/docs/README.md).
 
 ```javascript
