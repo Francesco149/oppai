@@ -339,6 +339,7 @@ namespace oppai
          * @param {uint32} usedMods - the mods bitmask, which can be built by
          *                            bit-wise OR-ing the mod constants
          *
+         * @name applyMods
          * @memberof Beatmap
          * @static
          *
@@ -368,6 +369,7 @@ namespace oppai
          * @param {string} [customCacheFolder="path/to/current/executable"] -
          *     overrides the base cache directory.
          *
+         * @name parse
          * @memberof Beatmap
          * @static
          *
@@ -616,7 +618,7 @@ namespace oppai
      * @param {uint16} [misses=0] - amount of misses
      * @param {uint32} [scoreVersion=1] - 1 or 2, affects accuracy pp
      *
-     * @name ppCalc
+     * @name ppCalcAcc
      * @memberof Ctx
      * @static
      * @returns {object} an object containing 'accPercent', 'pp', 'accPp',
@@ -782,6 +784,7 @@ namespace oppai
          *     optionally, 'rhythmAwkwardness', 'nSingles', 'nSinglesTiming' and
          *     'nSinglesThreshold'.
          *
+         * @name DiffCalc
          * @memberof DiffCalcCtx
          * @static
          *

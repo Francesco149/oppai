@@ -5,10 +5,13 @@
 -   [Ctx](#ctx)
     -   [err](#err)
     -   [ppCalc](#ppcalc)
-    -   [ppCalc](#ppcalc-1)
+    -   [ppCalcAcc](#ppcalcacc)
 -   [Buffer](#buffer)
 -   [Beatmap](#beatmap)
+    -   [applyMods](#applymods)
+    -   [parse](#parse)
 -   [DiffCalcCtx](#diffcalcctx)
+    -   [DiffCalc](#diffcalc)
 
 ## Ctx
 
@@ -83,7 +86,7 @@ console.log(
 Returns **[object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** an object containing 'accPercent', 'pp', 'accPp',
                   'speedPp' and 'aimPp'.
 
-### ppCalc
+### ppCalcAcc
 
 Same as 'Ctx.ppCalc' but uses accuracy percentage instead of number of
 100/50s. Accuracy is automatically rounded to the closest 100/50 count.
@@ -150,7 +153,7 @@ buf = oppai.Buffer(2000000)
 Creates an empty Beatmap object. See 'Beatmap.parse' to fill this
 object.
 
-### 
+### applyMods
 
 Applies map-changing mods. Note that this is currently not reversible
 and you will have to re-parse the map to undo mods like DT.
@@ -170,7 +173,7 @@ b.parse("some_file.osu", buf, 2000000, true);
 b.applyMods(oppai.hd | oppai.hr);
 ```
 
-### 
+### parse
 
 Parse .osu file into a 'oppai.Beatmap' object.
 
@@ -198,7 +201,7 @@ b.parse("some_file.osu", buf, 2000000, true);
 Creates a difficulty calculation context for the current thread.
 Each instance should not be used concurrently.
 
-### 
+### DiffCalc
 
 Calculates overall, aim and speed stars for a map.
 
