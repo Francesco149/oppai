@@ -29,7 +29,7 @@ Here's a rather minimal example that parses a beatmap and calculates difficulty
 and pp. You can find full documentation here:
 [Markdown Documentation](https://github.com/Francesco149/oppai/blob/master/node-oppai/docs/README.md).
 
-```nodejs
+```javascript
 const path = require('path');
 const util = require('util');
 const oppai = require('oppai');
