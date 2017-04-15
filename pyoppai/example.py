@@ -127,6 +127,8 @@ def main():
 
     # remember that CS is map-changing so difficulty must be recomputed
     stars, aim, speed, _, _, _, _ = pyoppai.d_calc(dctx, b)
+    chk(ctx)
+
     print_diff(stars, aim, speed)
 
     acc, pp, aim_pp, speed_pp, acc_pp = \
@@ -147,6 +149,8 @@ def main():
 
     # mods are map-changing, recompute diff
     stars, aim, speed, _, _, _, _ = pyoppai.d_calc(dctx, b)
+    chk(ctx)
+
     print_diff(stars, aim, speed)
 
     acc, pp, aim_pp, speed_pp, acc_pp = \

@@ -1,0 +1,16 @@
+{
+  "name": "oppai",
+  "version": "0.1.8",
+  "description": "ppv2 and difficulty calculator for osu!",
+  "homepage": "https://github.com/Francesco149/oppai",
+  "author": {
+    "name": "Franc[e]sco",
+    "email": "lolisamurai@tfwno.gf",
+    "url": "http://weeb.ddns.net/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Francesco149/oppai.git"
+  },
+  "license": "GPL-3.0"
+}

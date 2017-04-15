@@ -398,7 +398,8 @@ print_sig(binary_struct_print)
         exit(1);
     }
 
-    binary_output_data d = {0};
+    binary_output_data d;
+    memset(&d, 0, sizeof(binary_output_data));
 
     d.is_struct = 1;
     d.output_version = 1;
