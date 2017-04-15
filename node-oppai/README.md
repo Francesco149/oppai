@@ -67,8 +67,6 @@ function main()
         script_path
     );
 
-    chk(ctx);
-
     console.log("Cache folder: " + script_path + "\n");
 
     console.log(
@@ -87,9 +85,7 @@ function main()
 
     // diff calc ---------------------------------------------------------------
     dctx = oppai.DiffCalcCtx(ctx);
-
     diff = dctx.diffCalc(b);
-    chk(ctx);
 
     console.log(
         util.format(
@@ -100,7 +96,6 @@ function main()
 
     // pp calc -----------------------------------------------------------------
     res = ctx.ppCalc(diff.aim, diff.speed, b);
-    chk(ctx);
 
     console.log(
         util.format(
