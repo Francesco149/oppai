@@ -121,6 +121,7 @@ programming language.
 
 Currently available bindings:
 * pyoppai (Python): https://github.com/Francesco149/oppai/tree/master/pyoppai
+* node-oppai (node.js): https://github.com/Francesco149/oppai/tree/master/node-oppai
 
 The library mode API is still new and nothing is set in stone, but I don't see
 it changing in the future.
