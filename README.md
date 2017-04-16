@@ -6,6 +6,7 @@ to do is supply it with the map's .osu file.
 - [Caching beatmaps](#caching-beatmaps)
 - [Compiling from source (Linux)](#compiling-from-source-linux)
 - [Compiling from source (Windows)](#compiling-from-source-windows)
+- [Compiling from source (OSX)](#compiling-from-source-osx)
 - [Library mode and bindings](#library-mode-and-bindings)
 
 # Getting started
@@ -108,6 +109,28 @@ build.bat
 ```
 
 The executable will be found in the build directory.
+
+# Compiling from source (OSX)
+Via homebrew:
+```bash
+brew install --HEAD pmrowla/homebrew-tap/oppai
+```
+Note that installing with ```--HEAD``` is not required, but it is recommended
+since the tap may not always be up to date with the current oppai release
+tarball. Installing from homebrew will place the executable in your homebrew
+path.
+
+Compiling from source in OSX will still require the use of homebrew since Apple
+no longer bundles OpenSSL headers with OSX. Also note that homebrew may give
+warnings about not symlinking OpenSSL, this is intended behavior and you should
+not ```brew link --force openssl``` due to potential conflicts with the Apple
+bundled OpenSSL.
+```bash
+brew install openssl
+git clone https://github.com/Francesco149/oppai.git
+cd oppai
+./build-osx.sh
+```
 
 # Library mode and bindings
 oppai can now be compiled in library mode by defining OPPAI_LIB=1. this allows
