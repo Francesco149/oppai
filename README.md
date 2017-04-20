@@ -1,4 +1,4 @@
-osu! pp advanced inspector (oppai) is a difficulty and pp calculator for osu! 
+osu! pp advanced inspector (oppai) is a difficulty and pp calculator for osu!
 standard beatmaps. It works on any map, even unsubmitted ones and all you have
 to do is supply it with the map's .osu file.
 
@@ -10,19 +10,19 @@ to do is supply it with the map's .osu file.
 - [Library mode and bindings](#library-mode-and-bindings)
 
 # Getting started
-Demonstration usage video on windows and linux: 
+Demonstration usage video on windows and linux:
 [here](https://my.mixtape.moe/wasune.webm).
 
-* If you are on arch linux, you can use the AUR packages 
-[oppai](https://aur.archlinux.org/packages/oppai/) or 
-[oppai-git](https://aur.archlinux.org/packages/oppai-git/) maintained by 
+* If you are on arch linux, you can use the AUR packages
+[oppai](https://aur.archlinux.org/packages/oppai/) or
+[oppai-git](https://aur.archlinux.org/packages/oppai-git/) maintained by
 ammongit.
-Otherwise, download the latest binaries for your OS from 
-[here](https://github.com/Francesco149/oppai/releases), extract the archive 
+Otherwise, download the latest binaries for your OS from
+[here](https://github.com/Francesco149/oppai/releases), extract the archive
 and place the executable anywhere you like. Advanced users are free to add oppai
 to their PATH to use it anywhere.
-* Open cmd (or your favorite terminal emulator if you're on linux) and 
-`cd /path/to/your/oppai/folder` (forward slashes might be backwards on 
+* Open cmd (or your favorite terminal emulator if you're on linux) and
+`cd /path/to/your/oppai/folder` (forward slashes might be backwards on
 windows)
 * Type `./oppai` for a list of possible parameters.
 
@@ -44,15 +44,15 @@ Windows examples of piping (using powershell):
 (New-Object System.Net.WebClient).DownloadString("https://osu.ppy.sh/osu/37658") | ./oppai - +HDHR 99% 600x 1m
 ```
 
-NOTE: to obtain the beatmap url, just open the desired map's page in your 
+NOTE: to obtain the beatmap url, just open the desired map's page in your
 browser, click on the desired difficulty and copy the url, then replace /b/ with
 /osu/.
 
-If you don't feel like using the command line, you can hop on the 
+If you don't feel like using the command line, you can hop on the
 [shigetora chat](https://www.twitch.tv/shigetora) and type
 `!oppai url_to_beatmap` followed by the parameters. But remember, you won't get
-the full output which contains much more useful info than just pp! So I 
-recommend spending 1 minute downloading the tool and learning to use it from 
+the full output which contains much more useful info than just pp! So I
+recommend spending 1 minute downloading the tool and learning to use it from
 the command line.
 
 Examples:
@@ -86,11 +86,11 @@ cd oppai
 ./build.sh
 ```
 
-To cross compile, you can edit the build.sh and add, for example, ```-m32``` 
+To cross compile, you can edit the build.sh and add, for example, ```-m32```
 after g++ in CXX.
 
 # Compiling from source (Windows)
-You need to have git bash installed. The easiest way to get it is to install 
+You need to have git bash installed. The easiest way to get it is to install
 GitHub desktop.
 
 You will also need visual studio. Any version should do. You don't even need the
@@ -129,7 +129,7 @@ bundled OpenSSL.
 brew install openssl
 git clone https://github.com/Francesco149/oppai.git
 cd oppai
-./build-osx.sh
+./build.sh
 ```
 
 # Library mode and bindings
