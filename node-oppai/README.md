@@ -89,20 +89,20 @@ function main()
 
     console.log(
         util.format(
-            "\n%d aim\n%d speed\n%d acc\n%d pp\nfor %d%%",
-            res.aimPp, res.speedPp, res.accPp, res.pp, res.accPercent
+            "\n%d stars\n%d aim stars\n%d speed stars",
+            diff.stars, diff.aim, diff.speed
         )
-    );
+    )
 
     // pp calc -----------------------------------------------------------------
     res = ctx.ppCalc(diff.aim, diff.speed, b);
 
     console.log(
         util.format(
-            "\n%d stars\n%d aim stars\n%d speed stars",
-            diff.stars, diff.aim, diff.speed
+            "\n%d aim\n%d speed\n%d acc\n%d pp\nfor %d%%",
+            res.aimPp, res.speedPp, res.accPp, res.pp, res.accPercent
         )
-    )
+    );
 }
 
 main();
