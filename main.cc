@@ -26,7 +26,7 @@
 #define VERSION_SUFFIX "-lib"
 #endif
 
-const char* version_string = "0.9.4" VERSION_SUFFIX;
+const char* version_string = "0.9.5" VERSION_SUFFIX;
 
 // -----------------------------------------------------------------------------
 
@@ -181,7 +181,14 @@ print_sig(text_print)
     printf("\n%s - %s [%s] (%s) %s\n",
             b.artist, b.title, b.version, b.creator, mods_str ? mods_str : "");
 
-    printf("od%g ar%g cs%g hp%g\n", b.od, b.ar, b.cs, b.hp);
+    printf(
+        "od%g ar%g cs%g hp%g\n",
+        (i32)(b.od * 100.0) / 100.0,
+        (i32)(b.ar * 100.0) / 100.0,
+        (i32)(b.cs * 100.0) / 100.0,
+        (i32)(b.hp * 100.0) / 100.0
+    );
+
     printf("%" fu16 "/%" fu16 " combo\n", combo, b.max_combo);
     printf("%" fu16 " circles, %" fu16 " sliders %" fu16 " spinners\n",
             b.num_circles, b.num_sliders, b.num_spinners);
@@ -259,7 +266,7 @@ print_sig(json_print)
     printf(
         ","
         "\"mods_str\": \"%s\","
-        "\"od\":%.4g,\"ar\":%.4g,\"cs\":%.4g,\"hp\":%.4g,"
+        "\"od\":%g,\"ar\":%g,\"cs\":%g,\"hp\":%g,"
         "\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
         "\"num_circles\": %" fu16 ","
         "\"num_sliders\": %" fu16 ","
@@ -274,7 +281,10 @@ print_sig(json_print)
         "\"pp\":%.17g"
         "}\n",
         mods_str ? mods_str : "",
-        b.od, b.ar, b.cs, b.hp,
+        (i32)(b.od * 100.0) / 100.0,
+        (i32)(b.ar * 100.0) / 100.0,
+        (i32)(b.cs * 100.0) / 100.0,
+        (i32)(b.hp * 100.0) / 100.0,
         combo, b.max_combo,
         b.num_circles, b.num_sliders, b.num_spinners,
         misses, scoring,
