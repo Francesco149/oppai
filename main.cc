@@ -26,7 +26,7 @@
 #define VERSION_SUFFIX "-lib"
 #endif
 
-const char* version_string = "0.9.3" VERSION_SUFFIX;
+const char* version_string = "0.9.4" VERSION_SUFFIX;
 
 // -----------------------------------------------------------------------------
 
@@ -259,7 +259,7 @@ print_sig(json_print)
     printf(
         ","
         "\"mods_str\": \"%s\","
-        "\"od\":%.2g,\"ar\":%.2g,\"cs\":%.2g,\"hp\":%.2g,"
+        "\"od\":%.4g,\"ar\":%.4g,\"cs\":%.4g,\"hp\":%.4g,"
         "\"combo\": %" fu16 ",\"max_combo\": %" fu16 ","
         "\"num_circles\": %" fu16 ","
         "\"num_sliders\": %" fu16 ","
