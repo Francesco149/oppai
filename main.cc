@@ -13,6 +13,9 @@
 
 #include <ctype.h> // tolower/toupper
 
+char toupper_wrapper(char c) { return (char)toupper(c); }
+char tolower_wrapper(char c) { return (char)tolower(c); }
+
 #ifndef OPPAI_LIB
 #define OPPAIAPI internalfn
 #define VERSION_SUFFIX
@@ -596,7 +599,7 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        std::transform(a, a + strlen(a), a, tolower);
+        std::transform(a, a + strlen(a), a, tolower_wrapper);
 
         if (a[0] == '-')
         {
@@ -662,7 +665,7 @@ int main(int argc, char* argv[])
             // at least one mod found in the parameter and the prefix matches
             mods_str = tmp_mods_str;
             std::transform(mods_str, mods_str + strlen(mods_str), mods_str,
-                    toupper);
+                    toupper_wrapper);
             continue;
         }
 
