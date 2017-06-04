@@ -18,7 +18,8 @@ const f32   od0_ms = 79.5,
 
 const f32   od_ms_step = 6,
             ar_ms_step1 = 120, // ar0-5
-            ar_ms_step2 = 150; // ar5-10
+            ar_ms_step2 = 150, // ar5-10
+            hp_max = 10;
 
 // -----------------------------------------------------------------------------
 
@@ -992,7 +993,7 @@ object_type_done:
         ar *= od_ar_hp_multiplier;
 
         // hp
-        hp *= od_ar_hp_multiplier;
+        hp = std::min(hp * od_ar_hp_multiplier, hp_max);
 
         // convert AR into its milliseconds value
         f32 arms = ar <= 5
@@ -1056,4 +1057,3 @@ object_type_done:
         }
     }
 };
-
