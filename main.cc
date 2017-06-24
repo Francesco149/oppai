@@ -29,7 +29,7 @@ char tolower_wrapper(char c) { return (char)tolower(c); }
 #define VERSION_SUFFIX "-lib"
 #endif
 
-const char* version_string = "0.9.5" VERSION_SUFFIX;
+const char* version_string = "0.9.6" VERSION_SUFFIX;
 
 // -----------------------------------------------------------------------------
 
@@ -486,7 +486,7 @@ output_module* get_output_module(const char* name)
 // -----------------------------------------------------------------------------
 
 #ifndef OPPAI_LIB
-const size_t bufsize = 2000000;
+const size_t bufsize = 8000000;
 globvar char buf[bufsize];
 
 int main(int argc, char* argv[])
