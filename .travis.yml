@@ -1,0 +1,15 @@
+language: cpp
+
+matrix:
+  include:
+    - os: linux
+      dist: precise
+    - os: linux
+      dist: trusty
+    - os: osx
+
+
+install: true
+
+script:
+  - ./build.sh
