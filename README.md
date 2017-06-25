@@ -71,7 +71,7 @@ especially on slow CPU's. The cache filesize is about 65kb per map on average.
 
 If you have a machine with really slow I/O (networked filesystem, old HDD) or
 a cpu with really good single core performance, you might want to try passing
-```--no-cache``` to disable caching and see if that makes it faster (it usually
+```-no-cache``` to disable caching and see if that makes it faster (it usually
 makes it SLOWER though).
 
 NOTE: cache files are not guaranteed to be compatible across architecture, so
@@ -88,6 +88,14 @@ cd oppai
 
 To cross compile, you can edit the build.sh and add, for example, ```-m32```
 after g++ in CXX.
+
+OpenSSL is required to build oppai on Linux. The library and header files are
+bundled in the package `libssl-dev` on most distributions. On Debian it can be
+obtained as follows:
+
+```bash
+sudo apt-get install libssl-dev
+```
 
 # Compiling from source (Windows)
 You need to have git bash installed. The easiest way to get it is to install
