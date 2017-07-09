@@ -230,7 +230,7 @@ extern "C"
         int with_aim_singles = 0;
         int with_timing_singles = 0;
         int with_threshold_singles = 0;
-        i32 singletap_threshold = 240;
+        i32 singletap_threshold = 125;
 
         int ptres =
             PyArg_ParseTuple(
@@ -261,7 +261,8 @@ extern "C"
                 with_awkwardness ? &rhythm_awkwardness : 0,
                 with_aim_singles ? &nsingles : 0,
                 with_timing_singles ? &nsingles_timing : 0,
-                with_threshold_singles ? &nsingles_threshold : 0
+                with_threshold_singles ? &nsingles_threshold : 0,
+				singletap_threshold
             );
 
         pydbgprintf(
@@ -540,7 +541,7 @@ extern "C"
         "Arguments:\n"
         "(ctx, beatmap, with_awkwardness=False, with_aim_singles=False,\n"
         " with_timing_singles=False, with_threshold_singles=False,\n"
-        " singletap_threshold=240)\n\n"
+        " singletap_threshold=125)\n\n"
 
         "ctx: oppai context object (see new_ctx)\n"
         "beatmap:                beatmap object (see new_beatmap)\n"
@@ -559,7 +560,7 @@ extern "C"
         "                        element returned will be undefined and\n"
         "                        be ignored with _\n"
         "with_threshold_singles: if True, the number of notes that are 1/2 or\n"
-        "                        slower at singletap_threshold bpm will be\n"
+        "                        slower at singletap_threshold ms will be\n"
         "                        calculated. otherwise, the 6th tuple element\n"
         "                        returned  will be undefined and should be\n"
         "                        ignored with _\n"
