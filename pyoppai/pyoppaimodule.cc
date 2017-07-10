@@ -261,7 +261,8 @@ extern "C"
                 with_awkwardness ? &rhythm_awkwardness : 0,
                 with_aim_singles ? &nsingles : 0,
                 with_timing_singles ? &nsingles_timing : 0,
-                with_threshold_singles ? &nsingles_threshold : 0
+                with_threshold_singles ? &nsingles_threshold : 0,
+				singletap_threshold
             );
 
         pydbgprintf(
