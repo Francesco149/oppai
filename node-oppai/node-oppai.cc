@@ -776,9 +776,9 @@ namespace oppai
          *     to the returned object.
          * @param {boolean} [withNSinglesThreshold=false] -
          *     calculates and adds the number of notes that are 1/2 or slower at
-         *     singletapThreshold BPM.
-         * @param {uint32} [singletapThreshold=240] -
-         *     singletap threshold BPM for withNSinglesThreshold
+         *     singletapThreshold ms.
+         * @param {uint32} [singletapThreshold=250] -
+         *     singletap threshold ms for withNSinglesThreshold
          *
          * @returns {object} an object containing 'stars', 'aim', 'speed' and,
          *     optionally, 'rhythmAwkwardness', 'nSingles', 'nSinglesTiming' and
