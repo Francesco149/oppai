@@ -254,7 +254,7 @@ f64 d_calc(
     u16* nsingles = 0,
     u16* nsingles_timing = 0,
     u16* nsingles_threshold = 0,
-    i32 singletap_threshold = 240)
+    i32 singletap_threshold = 125)
 {
     dbgputs("\ndiff calc");
 

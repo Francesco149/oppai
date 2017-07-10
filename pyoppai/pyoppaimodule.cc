@@ -230,7 +230,7 @@ extern "C"
         int with_aim_singles = 0;
         int with_timing_singles = 0;
         int with_threshold_singles = 0;
-        i32 singletap_threshold = 240;
+        i32 singletap_threshold = 125;
 
         int ptres =
             PyArg_ParseTuple(
@@ -540,7 +540,7 @@ extern "C"
         "Arguments:\n"
         "(ctx, beatmap, with_awkwardness=False, with_aim_singles=False,\n"
         " with_timing_singles=False, with_threshold_singles=False,\n"
-        " singletap_threshold=240)\n\n"
+        " singletap_threshold=125)\n\n"
 
         "ctx: oppai context object (see new_ctx)\n"
         "beatmap:                beatmap object (see new_beatmap)\n"
