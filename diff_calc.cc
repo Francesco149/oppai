@@ -242,7 +242,7 @@ f64 calculate_difficulty(d_calc_ctx* ctx, u8 type)
 //                  singletaps (1/2 or slower notes).
 //
 // nsingles_threshold: optional pointer that will store the number of notes
-//                     equal or slower than 1/2 notes at singletap_threshold bpm
+//                     equal or slower than 1/2 notes at singletap_threshold ms
 //
 // returns star rating
 
