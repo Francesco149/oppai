@@ -226,7 +226,7 @@ f64 calculate_difficulty(d_calc_ctx* ctx, u8 type)
     return difficulty;
 }
 
-// calculates overall, aim and speed stars for a map.
+// calculates overall aim, speed and stars for a map.
 //
 // aim, speed: pointers to the variables where
 //             aim and speed stars will be stored.
