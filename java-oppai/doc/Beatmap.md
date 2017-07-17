@@ -1,5 +1,14 @@
 # Beatmap class Documentation
 
+## `public static final int DEFAULT_SINGLETAP_THRESHOLD = 125`
+## `public static final short DEFAULT_COMBO = (short)0xFFFF`
+## `public static final short DEFAULT_MISSES = 0`
+## `public static final short DEFAULT_C300 = (short)0xFFFF`
+## `public static final short DEFAULT_C100 = 0`
+## `public static final short DEFAULT_C50 = 0`
+## `public static final int DEFAULT_SCORE_VER = 1`
+## `public static final double DEFAULT_ACCURACY = 100.0`
+
 ## `public Beatmap(OppaiCtx ctx)`
 
 Constructor for class Beatmap. Constructs a new beatmap with the given context.
