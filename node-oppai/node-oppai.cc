@@ -776,9 +776,9 @@ namespace oppai
          *     to the returned object.
          * @param {boolean} [withNSinglesThreshold=false] -
          *     calculates and adds the number of notes that are 1/2 or slower at
-         *     singletapThreshold ms.
-         * @param {uint32} [singletapThreshold=125] -
-         *     singletap threshold ms for withNSinglesThreshold
+         *     singletapThreshold BPM.
+         * @param {uint32} [singletapThreshold=240] -
+         *     singletap threshold BPM for withNSinglesThreshold
          *
          * @returns {object} an object containing 'stars', 'aim', 'speed' and,
          *     optionally, 'rhythmAwkwardness', 'nSingles', 'nSinglesTiming' and
@@ -816,7 +816,7 @@ namespace oppai
 
             f64 aim = 0, speed = 0, rhythm_awkwardness = 0;
             u16 nsingles = 0, nsingles_timing = 0, nsingles_threshold = 0;
-            i32 singletap_threshold = 125;
+            i32 singletap_threshold = 240;
 
             if (args[5]->IsInt32()) {
                 singletap_threshold = args[5]->Int32Value();
@@ -918,8 +918,6 @@ namespace oppai
         mod(nf);
         mod(ez);
         mod(hd);
-        mod(hr);
-        mod(dt);
         mod(hr);
         mod(dt);
         mod(ht);
