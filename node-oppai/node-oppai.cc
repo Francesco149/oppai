@@ -920,8 +920,6 @@ namespace oppai
         mod(hd);
         mod(hr);
         mod(dt);
-        mod(hr);
-        mod(dt);
         mod(ht);
         mod(nc);
         mod(fl);
