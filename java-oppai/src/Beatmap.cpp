@@ -1,6 +1,6 @@
 // This is the main file of the dll
 #include "dp_oppai_Beatmap.h"
-#include "..\..\main.cc"
+#include "../../main.cc"
 #include "handle.h"
 #include <iostream>
 #include "OppaiCtx.cpp"
