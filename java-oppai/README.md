@@ -63,10 +63,43 @@ so make sure you change these paths if this is different for you, the rest shoul
 It's quite simpler to compile on Linux since you can set your architecture and platform from the compiler flags
 and you don't have to dl any tools.
 
+You may have to install openSSL if you don't have it yet, take a look at compiling oppai for linux in the main README.
+
 Just run this and make sure your platform matches the java platform youre using:
 ```bash
-g++
+g++ -std=c++98 -fPIC -shared -I/usr/lib/jvm/java-8-openjdk-amd64/include
+-I/usr/lib/jvm/java-8-openjdk-amd64/include/linux
+-pedantic -O2 -Wno-variadic-macros -Wall -Werror
+Beatmap.cpp -lm -lstdc++ -lcrypto -o liboppai.so
 ```
+You may have to change the include paths as well as add a target platform flag. (if your java is 32 bit although youre on a 64 bit system)
+
+### For OSX
+
+This is untested but should work. Open an issue if you have any problems.
+
+```bash
+g++ -I/path/to/brew/prefix/opt/openssl/include -L/path/to/brew/prefix/opt/openssl/lib
+-I/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Headers
+-I/Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers
+-std=c++98 -pedantic -O2 -Wno-variadic-macros -Wall -Werror -dynamiclib Beatmap.cpp -lm -lstdc++ -lcrypto
+-o liboppai.jnilib
+```
+Change ```/path/to/brew/prefix``` to the path you get from ```brew --prefix``` and make sure you have openSSL
+installed.
+You may also have to change the jdk paths.
+
+# Using the library
 
 Now that you have both the DLL and the jar file in your directory, you can add them to your project 
-by adding the jar to your classpath and the DLL to your java build path 
+by adding the jar to your classpath and the DLL to your java build path.
+
+# Usage
+
+For a good example with proper error checking and object disposal take a look at ```Example.java```
+
+# Documentation
+
+for the full documentation (which I suggest you to read if you plan on using this for a proper project) go to /doc
+
+Have fun!
