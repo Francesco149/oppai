@@ -10,3 +10,4 @@
 *.class
 
 /src/*.jar
+/src/*.lib
