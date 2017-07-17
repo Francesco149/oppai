@@ -207,7 +207,7 @@ Java_dp_oppai_Beatmap_nativeCalcPPAcc(JNIEnv* env, jobject obj, jobject ctxObjec
 	pp_calc_result res =
 		pp_calc_acc(
 			ctx,
-			aim, speed,
+			_aim, _speed,
 			*b,
 			accPercent,
 			_usedMods,
@@ -242,7 +242,7 @@ JNIEXPORT void JNICALL
 Java_dp_oppai_Beatmap_applyMods(JNIEnv* env, jobject obj, jint modMask) {
 	u32 modBitMask = (u32)modMask;
 	beatmap* b = getHandle<beatmap>(env, obj);
-	b->apply_mods(modMask);
+	b->apply_mods(modBitMask);
 }
 
 #define setter(name, funcName, varType, varJNIType)                                   \
@@ -250,7 +250,7 @@ JNIEXPORT void JNICALL                                                          
 Java_dp_oppai_Beatmap_set##funcName(JNIEnv* env, jobject obj, varJNIType valToSet) {  \
 	varType value = (varType)valToSet;                                                \
 	beatmap* p = getHandle<beatmap>(env, obj);                                        \
-	p->name = valToSet;                                                               \
+	p->name = value;                                                                  \
 }
 
 #define fsetter(name, funcName) setter(name, funcName, f32, jfloat)
