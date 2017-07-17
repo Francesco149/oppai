@@ -89,19 +89,19 @@ Change ```/path/to/brew/prefix``` to the path you get from ```brew --prefix``` a
 installed.
 You may also have to change the jdk paths.
 
-# Running Example.java
+# Using the library
 
-Here is an example of running `Example.java` so you can see how to add the jar and dll to the classpath and build path.
+Now that you have both the shared library and the jar file in your directory, you can add them to your project 
+by adding the jar to your classpath and the shared library to your java build path.
+
+Here is an example of running `Example.java` so you can see how to add the jar and shared library to the classpath and build path.
 
 ```bash
 owo@ubuntu:~/oppai/java-oppai$ javac -cp '.:./src/oppai.jar' ./test/Example.java
 
 owo@ubuntu:~/oppai/java-oppai$ java -Djava.library.path="./src;${env_var:PATH}" -cp '.:./src/oppai.jar' test/Example /path/to/song.osu
 ```
-# Using the library
-
-Now that you have both the DLL and the jar file in your directory, you can add them to your project 
-by adding the jar to your classpath and the DLL to your java build path.
+Just add the path to the shared lib to `java.library.path` and the path to the jar file to `-cp`
 
 # Usage
 
