@@ -23,7 +23,7 @@ public class Example {
 	
 	public static void main(String[] args) {
 		if(args.length != 1) {
-			System.out.println("Usage: java -Djava.library.path=\"./;${env_var:PATH}\" path/to/main file.osu");
+			System.out.println("Usage: java -Djava.library.path=\"path/to/shared/lib;${env_var:PATH}\" -cp '.:path/to/jar' path/to/main file.osu");
 			return;
 		}
 		
