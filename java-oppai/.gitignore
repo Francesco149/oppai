@@ -1,0 +1,13 @@
+/bin/
+
+.classpath
+.project
+/src/*.obj
+/src/*.exp
+/src/*.dll
+/src/*.so
+/src/oppai_cache
+*.class
+
+/src/*.jar
+/src/*.lib
