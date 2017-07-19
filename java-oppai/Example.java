@@ -1,4 +1,3 @@
-package test;
 import dp.oppai.*;
 public class Example {
 	public static boolean checkError(OppaiCtx ctx) {
