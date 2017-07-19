@@ -47,11 +47,16 @@ what you set will be reset back)
 Navigate back (in the same dev command prompt) to /oppai/java-oppai/src and run the following:
 
 ```bash
-cl /D_CRT_SECURE_NO_WARNINGS=1 /DNOMINMAX=1 /DOPPAI_LIB=1 /O2 /nologo /MD /LD /Gm /GR /EHsc 
-/W4 /WX /wd4201 /wd4100 /wd4458 /wd4800 /wd4189 /F8000000 
-/I"C:\Program Files\Java\jdk1.8.0_131\include" 
-/I"C:\Program Files\Java\jdk1.8.0_131\include\win32" 
-/Feoppai.dll Beatmap.cpp Advapi32.lib
+cl ^
+  /D_CRT_SECURE_NO_WARNINGS=1 /DNOMINMAX=1 /DOPPAI_LIB=1 ^
+  /O2 /nologo /MD /LD /Gm /GR /EHsc ^
+  /W4 /WX /wd4201 /wd4100 /wd4458 /wd4800 /wd4189 ^
+  /F8000000 ^
+  /I"C:\Program Files\Java\jdk1.8.0_131\include" ^
+  /I"C:\Program Files\Java\jdk1.8.0_131\include\win32" ^
+  /Feoppai.dll ^
+  Beatmap.cpp ^
+  Advapi32.lib
 ```
 
 Note that the paths to \include and \include\win32 will change according to where your jdk
@@ -67,10 +72,15 @@ You may have to install openSSL if you don't have it yet, take a look at compili
 
 Just run this and make sure your platform matches the java platform youre using:
 ```bash
-g++ -std=c++98 -fPIC -shared -I/usr/lib/jvm/java-8-openjdk-amd64/include
--I/usr/lib/jvm/java-8-openjdk-amd64/include/linux
--pedantic -O2 -Wno-variadic-macros -Wall -Werror
-Beatmap.cpp -lm -lstdc++ -lcrypto -o liboppai.so
+g++ \
+  -std=c++98 -fPIC -shared \
+  -I/usr/lib/jvm/java-8-openjdk-amd64/include \
+  -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux \
+   -pedantic -O2 \
+   -Wno-variadic-macros -Wall -Werror \
+   Beatmap.cpp \
+   -lm -lstdc++ -lcrypto \
+   -o liboppai.so
 ```
 You may have to change the include paths as well as add a target platform flag. (if your java is 32 bit although youre on a 64 bit system)
 
@@ -79,11 +89,16 @@ You may have to change the include paths as well as add a target platform flag. 
 This is untested but should work. Open an issue if you have any problems.
 
 ```bash
-g++ -I/path/to/brew/prefix/opt/openssl/include -L/path/to/brew/prefix/opt/openssl/lib
--I/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Headers
--I/Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers
--std=c++98 -pedantic -O2 -Wno-variadic-macros -Wall -Werror -dynamiclib Beatmap.cpp -lm -lstdc++ -lcrypto
--o liboppai.jnilib
+g++ \
+  -I$brew_prefix/opt/openssl/include \
+  -L$brew_prefix/opt/openssl/lib \
+  -I/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Headers \
+  -I/Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers \
+  -std=c++98 -pedantic -O2 \
+  -Wno-variadic-macros -Wall -Werror -dynamiclib \
+  Beatmap.cpp \
+  -lm -lstdc++ -lcrypto \
+  -o liboppai.jnilib
 ```
 Change ```/path/to/brew/prefix``` to the path you get from ```brew --prefix``` and make sure you have openSSL
 installed.
