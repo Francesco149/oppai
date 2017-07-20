@@ -1,5 +1,4 @@
 #include "dp_oppai_Buffer.h"
-#include "handle.h"
 #include <stdlib.h>
 
 JNIEXPORT void JNICALL

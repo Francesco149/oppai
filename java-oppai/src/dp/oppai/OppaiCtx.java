@@ -2,7 +2,7 @@ package dp.oppai;
 /**
  * OppaiCtx represents an ctx struct. It can represent either a regular context or a diff context.
  * 
- * @author Daniel
+ * @author dpisdaniel
  * @version 1.0
  */
 public class OppaiCtx {

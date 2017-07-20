@@ -7,213 +7,173 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#undef dp_oppai_Beatmap_DEFAULT_SINGLETAP_THRESHOLD
-#define dp_oppai_Beatmap_DEFAULT_SINGLETAP_THRESHOLD 125L
-#undef dp_oppai_Beatmap_DEFAULT_COMBO
-#define dp_oppai_Beatmap_DEFAULT_COMBO -1L
-#undef dp_oppai_Beatmap_DEFAULT_MISSES
-#define dp_oppai_Beatmap_DEFAULT_MISSES 0L
-#undef dp_oppai_Beatmap_DEFAULT_C300
-#define dp_oppai_Beatmap_DEFAULT_C300 -1L
-#undef dp_oppai_Beatmap_DEFAULT_C100
-#define dp_oppai_Beatmap_DEFAULT_C100 0L
-#undef dp_oppai_Beatmap_DEFAULT_C50
-#define dp_oppai_Beatmap_DEFAULT_C50 0L
-#undef dp_oppai_Beatmap_DEFAULT_SCORE_VER
-#define dp_oppai_Beatmap_DEFAULT_SCORE_VER 1L
-#undef dp_oppai_Beatmap_DEFAULT_ACCURACY
-#define dp_oppai_Beatmap_DEFAULT_ACCURACY 100.0
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getCS
- * Signature: ()F
- */
-JNIEXPORT jfloat JNICALL Java_dp_oppai_Beatmap_getCS
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getCS
+	* Signature: ()F
+	*/
+	JNIEXPORT jfloat JNICALL Java_dp_oppai_Beatmap_getCS
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getOD
- * Signature: ()F
- */
-JNIEXPORT jfloat JNICALL Java_dp_oppai_Beatmap_getOD
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getOD
+	* Signature: ()F
+	*/
+	JNIEXPORT jfloat JNICALL Java_dp_oppai_Beatmap_getOD
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getAR
- * Signature: ()F
- */
-JNIEXPORT jfloat JNICALL Java_dp_oppai_Beatmap_getAR
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getAR
+	* Signature: ()F
+	*/
+	JNIEXPORT jfloat JNICALL Java_dp_oppai_Beatmap_getAR
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getHP
- * Signature: ()F
- */
-JNIEXPORT jfloat JNICALL Java_dp_oppai_Beatmap_getHP
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getHP
+	* Signature: ()F
+	*/
+	JNIEXPORT jfloat JNICALL Java_dp_oppai_Beatmap_getHP
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    setCS
- * Signature: (F)V
- */
-JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_setCS
-  (JNIEnv *, jobject, jfloat);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    setCS
+	* Signature: (F)V
+	*/
+	JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_setCS
+	(JNIEnv *, jobject, jfloat);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    setOD
- * Signature: (F)V
- */
-JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_setOD
-  (JNIEnv *, jobject, jfloat);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    setOD
+	* Signature: (F)V
+	*/
+	JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_setOD
+	(JNIEnv *, jobject, jfloat);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    setAR
- * Signature: (F)V
- */
-JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_setAR
-  (JNIEnv *, jobject, jfloat);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    setAR
+	* Signature: (F)V
+	*/
+	JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_setAR
+	(JNIEnv *, jobject, jfloat);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getArtist
- * Signature: ()Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_dp_oppai_Beatmap_getArtist
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getArtist
+	* Signature: ()Ljava/lang/String;
+	*/
+	JNIEXPORT jstring JNICALL Java_dp_oppai_Beatmap_getArtist
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getTitle
- * Signature: ()Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_dp_oppai_Beatmap_getTitle
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getTitle
+	* Signature: ()Ljava/lang/String;
+	*/
+	JNIEXPORT jstring JNICALL Java_dp_oppai_Beatmap_getTitle
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getVersion
- * Signature: ()Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_dp_oppai_Beatmap_getVersion
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getVersion
+	* Signature: ()Ljava/lang/String;
+	*/
+	JNIEXPORT jstring JNICALL Java_dp_oppai_Beatmap_getVersion
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getCreator
- * Signature: ()Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_dp_oppai_Beatmap_getCreator
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getCreator
+	* Signature: ()Ljava/lang/String;
+	*/
+	JNIEXPORT jstring JNICALL Java_dp_oppai_Beatmap_getCreator
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getNumObjects
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_dp_oppai_Beatmap_getNumObjects
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getNumObjects
+	* Signature: ()I
+	*/
+	JNIEXPORT jint JNICALL Java_dp_oppai_Beatmap_getNumObjects
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getNumCircles
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_dp_oppai_Beatmap_getNumCircles
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getNumCircles
+	* Signature: ()I
+	*/
+	JNIEXPORT jint JNICALL Java_dp_oppai_Beatmap_getNumCircles
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getNumSliders
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_dp_oppai_Beatmap_getNumSliders
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getNumSliders
+	* Signature: ()I
+	*/
+	JNIEXPORT jint JNICALL Java_dp_oppai_Beatmap_getNumSliders
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getNumSpinners
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_dp_oppai_Beatmap_getNumSpinners
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getNumSpinners
+	* Signature: ()I
+	*/
+	JNIEXPORT jint JNICALL Java_dp_oppai_Beatmap_getNumSpinners
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getMaxCombo
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_dp_oppai_Beatmap_getMaxCombo
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getMaxCombo
+	* Signature: ()I
+	*/
+	JNIEXPORT jint JNICALL Java_dp_oppai_Beatmap_getMaxCombo
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    getMode
- * Signature: ()S
- */
-JNIEXPORT jshort JNICALL Java_dp_oppai_Beatmap_getMode
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    getMode
+	* Signature: ()S
+	*/
+	JNIEXPORT jshort JNICALL Java_dp_oppai_Beatmap_getMode
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    applyMods
- * Signature: (I)V
- */
-JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_applyMods
-  (JNIEnv *, jobject, jint);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    applyMods
+	* Signature: (I)V
+	*/
+	JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_applyMods
+	(JNIEnv *, jobject, jint);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_dispose
-  (JNIEnv *, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    dispose
+	* Signature: ()V
+	*/
+	JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_dispose
+	(JNIEnv *, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    newBeatmap
- * Signature: (Ldp/oppai/OppaiCtx;)V
- */
-JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_newBeatmap
-  (JNIEnv *, jobject, jobject);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    newBeatmap
+	* Signature: (Ldp/oppai/OppaiCtx;)V
+	*/
+	JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_newBeatmap
+	(JNIEnv *, jobject, jobject);
 
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    nativeParse
- * Signature: (Ljava/lang/String;Ldp/oppai/Buffer;IZLjava/lang/String;)V
- */
-JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_nativeParse
-  (JNIEnv *, jobject, jstring, jobject, jint, jboolean, jstring);
-
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    nativeDiffCalc
- * Signature: (Ldp/oppai/OppaiCtx;ZZZZI)V
- */
-JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_nativeDiffCalc
-  (JNIEnv *, jobject, jobject, jboolean, jboolean, jboolean, jboolean, jint);
-
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    nativeCalcPP
- * Signature: (Ldp/oppai/OppaiCtx;DDIIIIIII)V
- */
-JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_nativeCalcPP
-  (JNIEnv *, jobject, jobject, jdouble, jdouble, jint, jint, jint, jint, jint, jint, jint);
-
-/*
- * Class:     dp_oppai_Beatmap
- * Method:    nativeCalcPPAcc
- * Signature: (Ldp/oppai/OppaiCtx;DDDIIII)V
- */
-JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_nativeCalcPPAcc
-  (JNIEnv *, jobject, jobject, jdouble, jdouble, jdouble, jint, jint, jint, jint);
+	/*
+	* Class:     dp_oppai_Beatmap
+	* Method:    nativeParse
+	* Signature: (Ljava/lang/String;Ldp/oppai/Buffer;IZLjava/lang/String;)V
+	*/
+	JNIEXPORT void JNICALL Java_dp_oppai_Beatmap_nativeParse
+	(JNIEnv *, jobject, jstring, jobject, jint, jboolean, jstring);
 
 #ifdef __cplusplus
 }
