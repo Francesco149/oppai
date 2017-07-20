@@ -1,9 +1,7 @@
 #include "dp_oppai_OppaiCtx.h"
-#include "handle.h"
-
 
 JNIEXPORT void JNICALL
-	Java_dp_oppai_OppaiCtx_newCtx(JNIEnv *env, jobject obj) {
+Java_dp_oppai_OppaiCtx_newCtx(JNIEnv *env, jobject obj) {
 	oppai_ctx *ctx = new oppai_ctx();
 	setHandle(env, obj, ctx);
 }
@@ -27,7 +25,7 @@ Java_dp_oppai_OppaiCtx_nativeGetLastErr(JNIEnv *env, jobject obj) {
 	return env->NewStringUTF(error);
 }
 
-JNIEXPORT void JNICALL 
+JNIEXPORT void JNICALL
 Java_dp_oppai_OppaiCtx_dispose(JNIEnv* env, jobject obj) {
 	oppai_ctx* ctx = getHandle<oppai_ctx>(env, obj);
 	if (!ctx)
