@@ -55,7 +55,7 @@ cl ^
   /I"C:\Program Files\Java\jdk1.8.0_131\include" ^
   /I"C:\Program Files\Java\jdk1.8.0_131\include\win32" ^
   /Feoppai.dll ^
-  Beatmap.cpp ^
+  Build.cpp ^
   Advapi32.lib
 ```
 
@@ -78,7 +78,7 @@ g++ \
   -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux \
    -pedantic -O2 \
    -Wno-variadic-macros -Wall -Werror \
-   Beatmap.cpp \
+   Build.cpp \
    -lm -lstdc++ -lcrypto \
    -o liboppai.so
 ```
@@ -96,7 +96,7 @@ g++ \
   -I/Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers \
   -std=c++98 -pedantic -O2 \
   -Wno-variadic-macros -Wall -Werror -dynamiclib \
-  Beatmap.cpp \
+  Build.cpp \
   -lm -lstdc++ -lcrypto \
   -o liboppai.jnilib
 ```
