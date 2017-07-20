@@ -56,39 +56,41 @@ public class Example {
 		// diff calc ----------------------------------------------------------------
 		
 		OppaiCtx dctx = new OppaiCtx(ctx); // Passing a ctx object will create a diff ctx object
+		DiffCalc dCalcer = new DiffCalc();
+		dCalcer.diffCalc(b, dctx, true, true, true, true);
 		
-		b.diffCalc(dctx, true, true, true, true);
 		if(checkError(ctx))
 			return;
 		
-		printDiff(b.getStars(), b.getAim(), b.getSpeed());
+		printDiff(dCalcer.getStars(), dCalcer.getAim(), dCalcer.getSpeed());
 		
 		// pp calc ------------------------------------------------------------------
-		b.calcPP(ctx, b.getAim(), b.getSpeed());
+		PPCalc ppCalcer = new PPCalc();
+		ppCalcer.calcPP(b, ctx, dCalcer.getAim(), dCalcer.getSpeed());
 		
 		if(checkError(ctx))
 			return;
 		
-		printPP(b.getAccPercent(), b.getPp(), b.getAimPP(), b.getSpeedPP(), b.getAccPP());
+		printPP(ppCalcer.getAccPercent(), ppCalcer.getPp(), ppCalcer.getAimPP(), ppCalcer.getSpeedPP(), ppCalcer.getAccPP());
 		
 		// pp calc (with acc %) -----------------------------------------------------
-		b.calcPPAcc(ctx, b.getAim(), b.getSpeed(), 90.0);
+		ppCalcer.calcPPAcc(b, ctx, dCalcer.getAim(), dCalcer.getSpeed(), 90.0);
 		
 		if(checkError(ctx))
 			return;
 		
-		printPP(b.getAccPercent(), b.getPp(), b.getAimPP(), b.getSpeedPP(), b.getAccPP());
+		printPP(ppCalcer.getAccPercent(), ppCalcer.getPp(), ppCalcer.getAimPP(), ppCalcer.getSpeedPP(), ppCalcer.getAccPP());
 		
 		// override OD example ------------------------------------------------------
 		System.out.println("\n----\nIf the map was od10:");
 		b.setOD(10);
 		
-		b.calcPP(ctx, b.getAim(), b.getSpeed());
+		ppCalcer.calcPP(b, ctx, dCalcer.getAim(), dCalcer.getSpeed());
 		
 		if(checkError(ctx))
 			return;
 		
-		printPP(b.getAccPercent(), b.getPp(), b.getAimPP(), b.getSpeedPP(), b.getAccPP());
+		printPP(ppCalcer.getAccPercent(), ppCalcer.getPp(), ppCalcer.getAimPP(), ppCalcer.getSpeedPP(), ppCalcer.getAccPP());
 		
 		b.setOD(od);
 		
@@ -96,12 +98,12 @@ public class Example {
 		System.out.println("\n----\nIf the map was ar11:");
 		b.setAR(11);
 		
-		b.calcPP(ctx, b.getAim(), b.getSpeed());
+		ppCalcer.calcPP(b, ctx, dCalcer.getAim(), dCalcer.getSpeed());
 		
 		if(checkError(ctx))
 			return;
 		
-		printPP(b.getAccPercent(), b.getPp(), b.getAimPP(), b.getSpeedPP(), b.getAccPP());
+		printPP(ppCalcer.getAccPercent(), ppCalcer.getPp(), ppCalcer.getAimPP(), ppCalcer.getSpeedPP(), ppCalcer.getAccPP());
 		
 		b.setAR(ar);
 		// override CS example ------------------------------------------------------
@@ -109,19 +111,19 @@ public class Example {
 		b.setCS(6.5f);
 		
 		// remember that CS is map-changing so difficulty must be recomputed
-		b.diffCalc(dctx, true, true, true, true);
+		dCalcer.diffCalc(b, dctx, true, true, true, true);
 		
 		if(checkError(ctx))
 			return;
 		
-		printDiff(b.getStars(), b.getAim(), b.getSpeed());
+		printDiff(dCalcer.getStars(), dCalcer.getAim(), dCalcer.getSpeed());
 		
-		b.calcPP(ctx, b.getAim(), b.getSpeed());
+		ppCalcer.calcPP(b, ctx, dCalcer.getAim(), dCalcer.getSpeed());
 		
 		if(checkError(ctx))
 			return;
 		
-		printPP(b.getAccPercent(), b.getPp(), b.getAimPP(), b.getSpeedPP(), b.getAccPP());
+		printPP(ppCalcer.getAccPercent(), ppCalcer.getPp(), ppCalcer.getAimPP(), ppCalcer.getSpeedPP(), ppCalcer.getAccPP());
 		
 		b.setCS(cs);
 		
@@ -133,19 +135,19 @@ public class Example {
 		b.applyMods(mods);
 		
 		// Some mods (like HR) are map-changing, so we need to recompute the diff
-		b.diffCalc(dctx, true, true, true, true);
+		dCalcer.diffCalc(b, dctx, true, true, true, true);
 		
 		if(checkError(ctx))
 			return;
 		
-		printDiff(b.getStars(), b.getAim(), b.getSpeed());
+		printDiff(dCalcer.getStars(), dCalcer.getAim(), dCalcer.getSpeed());
 		
-		b.calcPP(ctx, b.getAim(), b.getSpeed(), mods);
+		ppCalcer.calcPP(b, ctx, dCalcer.getAim(), dCalcer.getSpeed());
 		
 		if(checkError(ctx))
 			return;
 		
-		printPP(b.getAccPercent(), b.getPp(), b.getAimPP(), b.getSpeedPP(), b.getAccPP());
+		printPP(ppCalcer.getAccPercent(), ppCalcer.getPp(), ppCalcer.getAimPP(), ppCalcer.getSpeedPP(), ppCalcer.getAccPP());
 		
 		// Dispose of our contexts and beatmap, since we no longer needed. 
 		b.dispose();
