@@ -5,7 +5,6 @@
 Buffer represents a buffer used for containing all the beatmap data.
 
  * **Author:** dpisdaniel
- * **Version:** 1.0
 
 ## `public Buffer(int bufferLength)`
 

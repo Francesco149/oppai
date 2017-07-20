@@ -5,7 +5,6 @@
 OppaiCtx represents an ctx struct. It can represent either a regular context or a diff context.
 
  * **Author:** dpisdaniel
- * **Version:** 1.0
 
 ## `public OppaiCtx()`
 
