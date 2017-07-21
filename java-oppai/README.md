@@ -112,9 +112,9 @@ by adding the jar to your classpath and the shared library to your java build pa
 Here is an example of running `Example.java` so you can see how to add the jar and shared library to the classpath and build path.
 
 ```bash
-$ javac -cp '.:./src/oppai.jar' Example.java
+$ javac -cp src/oppai.jar Example.java
 
-$ java -Djava.library.path="./src;${env_var:PATH}" -cp '.:./src/oppai.jar' Example /path/to/song.osu
+$ java -Djava.library.path=./src -cp .:src/oppai.jar Example /path/to/song.osu
 ```
 Just add the path to the shared lib to `java.library.path` and the path to the jar file to `-cp`
 
