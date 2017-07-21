@@ -44,24 +44,18 @@ Open up a developer command prompt (if you don't have this, download visual stud
 and follow the guide [here](https://msdn.microsoft.com/en-us/library/f2ccy3wt.aspx) to set the compiler's
 target platform to java's target platform. (NOTE: this will only be set for this particular command prompt and ocne you close and reopen it,
 what you set will be reset back)
-Navigate back (in the same dev command prompt) to /oppai/java-oppai/src and run the following:
+Navigate back (in the same dev command prompt) to /oppai/java-oppai/src and run build.bat:
 
 ```bash
-cl ^
-  /D_CRT_SECURE_NO_WARNINGS=1 /DNOMINMAX=1 /DOPPAI_LIB=1 ^
-  /O2 /nologo /MD /LD /Gm /GR /EHsc ^
-  /W4 /WX /wd4201 /wd4100 /wd4458 /wd4800 /wd4189 ^
-  /F8000000 ^
-  /I"C:\Program Files\Java\jdk1.8.0_131\include" ^
-  /I"C:\Program Files\Java\jdk1.8.0_131\include\win32" ^
-  /Feoppai.dll ^
-  Build.cpp ^
-  Advapi32.lib
+build.bat
 ```
-
 Note that the paths to \include and \include\win32 will change according to where your jdk
 was isntalled and whether or not it's for 64 or 32 bits (i.e Program Files(x86) for 32 and Program Files for 64)
-so make sure you change these paths if this is different for you, the rest should work.
+so make sure you change these paths if this is different for you using the environment variable ```CXXFLAGS``` like this:
+
+```bash
+set CXXFLAGS="/I\path\to\inc /I\path\to\inc\windows"
+```
 
 ### For Linux
 
@@ -71,38 +65,33 @@ and you don't have to dl any tools.
 You may have to install openSSL if you don't have it yet, take a look at compiling oppai for linux in the main README.
 
 Just run this and make sure your platform matches the java platform youre using:
+
 ```bash
-g++ \
-  -std=c++98 -fPIC -shared \
-  -I/usr/lib/jvm/java-8-openjdk-amd64/include \
-  -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux \
-   -pedantic -O2 \
-   -Wno-variadic-macros -Wall -Werror \
-   Build.cpp \
-   -lm -lstdc++ -lcrypto \
-   -o liboppai.so
+./build.sh
 ```
 You may have to change the include paths as well as add a target platform flag. (if your java is 32 bit although youre on a 64 bit system)
+If you need to change your include paths, run ```build.sh``` like so:
+
+```bash
+CXXFLAGS="-I/path/to/include -I/path/to/include/linux" ./build.sh
+```
+
+you can also add a flag to change the target platform in ```CXXFLAGS```
 
 ### For OSX
 
 This is untested but should work. Open an issue if you have any problems.
+Run the ```build.sh```:
 
 ```bash
-g++ \
-  -I$brew_prefix/opt/openssl/include \
-  -L$brew_prefix/opt/openssl/lib \
-  -I/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Headers \
-  -I/Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers \
-  -std=c++98 -pedantic -O2 \
-  -Wno-variadic-macros -Wall -Werror -dynamiclib \
-  Build.cpp \
-  -lm -lstdc++ -lcrypto \
-  -o liboppai.jnilib
+./build.sh
 ```
-Change ```/path/to/brew/prefix``` to the path you get from ```brew --prefix``` and make sure you have openSSL
-installed.
-You may also have to change the jdk paths.
+You may have to change the include paths as well as add a target platform flag. (if your java is 32 bit although youre on a 64 bit system)
+If you need to change your include paths, run ```build.sh``` like so:
+
+```bash
+CXXFLAGS="-I/path/to/include -I/path/to/include/linux" ./build.sh
+```
 
 # Using the library
 
