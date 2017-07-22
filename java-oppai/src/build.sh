@@ -7,7 +7,7 @@ if [ $(uname) = "Darwin" ]; then
 	${CXX:-clang++}							\
 		-I$brew_prefix/opt/openssl/include	\
 		-L$brew_prefix/opt/openssl/lib		\
-		$cxxflags							\ 
+		$cxxflags							\
 		-std=c++98							\
 		-pedantic							\
 		-O2									\
