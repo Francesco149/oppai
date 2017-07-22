@@ -8,16 +8,16 @@ if [ $(uname) = "Darwin" ]; then
 		-I$brew_prefix/opt/openssl/include	\
 		-L$brew_prefix/opt/openssl/lib		\
 		$cxxflags							\ 
-        -std=c++98                         	\
-        -pedantic                          	\
-        -O2                                	\
-        $@                                 	\
-        -Wno-variadic-macros               	\
-        -Wall -Werror                      	\
-        Build.cpp                          	\
-        -lm -lstdc++                       	\
-        -lcrypto                           	\
-        -o liboppai.jnilib
+		-std=c++98							\
+		-pedantic							\
+		-O2									\
+		$@									\
+		-Wno-variadic-macros				\
+		-Wall -Werror						\
+		Build.cpp							\
+		-lm -lstdc++						\
+		-lcrypto							\
+		-o liboppai.jnilib
 else
 	cxxflags="$cxxflags -I/usr/lib/jvm/java-8-openjdk-amd64/include"
 	cxxflags="$cxxflags -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux"
@@ -26,14 +26,14 @@ else
 		-fPIC					\
 		-shared					\
 		$cxxflags				\
-		-pedantic            	\
-		-O2                  	\
-        $@                   	\
-        -Wno-variadic-macros 	\
-        -Wall -Werror        	\
-        Build.cpp            	\
-        -lm -lstdc++         	\
-        -lcrypto             	\
-        -o liboppai.so
-    [ -f ./oppai ] && strip -R .comment ./oppai
+		-pedantic				\
+		-O2						\
+		$@						\
+		-Wno-variadic-macros	\
+		-Wall -Werror			\
+		Build.cpp				\
+		-lm -lstdc++			\
+		-lcrypto				\
+		-o liboppai.so
+	[ -f ./oppai ] && strip -R .comment ./oppai
 fi
