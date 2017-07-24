@@ -14,7 +14,7 @@ if [ $(uname) = "Darwin" ]; then
 		$@									\
 		-Wno-variadic-macros				\
 		-Wall -Werror						\
-		Build.cpp							\
+		build.cpp							\
 		-lm -lstdc++						\
 		-lcrypto							\
 		-o liboppai.jnilib
@@ -31,7 +31,7 @@ else
 		$@						\
 		-Wno-variadic-macros	\
 		-Wall -Werror			\
-		Build.cpp				\
+		build.cpp				\
 		-lm -lstdc++			\
 		-lcrypto				\
 		-o liboppai.so
