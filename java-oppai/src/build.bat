@@ -18,7 +18,7 @@ cl /D_CRT_SECURE_NO_WARNINGS=1 ^
 	/F8000000 ^
 	%CXXFLAGS%  ^
 	/Fe"oppai.dll" ^
-	Build.cpp ^
+	build.cpp ^
 	Advapi32.lib
 
 	
