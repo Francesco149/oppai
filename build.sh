@@ -1,5 +1,6 @@
 #!/bin/sh
 
+dir=$(dirname $0)
 if [ $(uname) = "Darwin" ]; then
     brew_prefix=$(brew --prefix)
     ${CXX:-clang++}                        \
@@ -11,7 +12,7 @@ if [ $(uname) = "Darwin" ]; then
         $@                                 \
         -Wno-variadic-macros               \
         -Wall -Werror                      \
-        main.cc                            \
+        $dir/main.cc                       \
         -lm -lstdc++                       \
         -lcrypto                           \
         -o oppai
@@ -23,7 +24,7 @@ else
         $@                   \
         -Wno-variadic-macros \
         -Wall -Werror        \
-        main.cc              \
+        $dir/main.cc         \
         -lm -lstdc++         \
         -lcrypto             \
         -o oppai
