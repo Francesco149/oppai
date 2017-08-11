@@ -528,10 +528,16 @@ int main(int argc, char* argv[])
         puts("-no-awkwardness: disables rhythm awkwardness calculation "
                "for speed (about 10% performance gain)");
 
-        puts("-no-cache: disables caching for very slow drives or really fast "
-             "CPUs that parse the beatmap faster than the cache can read it. "
-             "The caching system usually boosts performance by up to 25%% "
-             "so it's recommended to keep it on.");
+        puts("-no-cache: disables caching. since caching is disabled by "
+             "default as of 0.9.7, this flag does nothing and is just kept "
+             "for backwards compatibility.");
+
+        puts("-cache: enables caching of pre-parsed beatmap data to the "
+             "oppai_cache folder where the oppai binary is located. This "
+             "usually boosts performance by ~25% on reasonably fast drives.\n"
+             "Warning: the cache files might not be portable to different "
+             "machines and might cause incorrect calculations if corrupt.");
+
 
         puts("\narguments in [square brackets] are optional");
         puts("(the order of the optional arguments does not matter)");
