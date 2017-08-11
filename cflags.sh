@@ -29,3 +29,6 @@ fi
 ) \
 > flags.log
 
+export cflags="$cflags"
+export ldflags="$ldflags"
+
