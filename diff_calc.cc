@@ -46,7 +46,7 @@ struct d_obj
     // initialized after claulcating strains
     bool is_single;
 
-    d_obj()
+    d_obj() : is_single(false)
     {
         // strains start at 1
         strains[0] = 1;
@@ -306,12 +306,15 @@ f64 d_calc(
 
         i32 one_half_threshold = (i32)(b.timing(o.ho->time)->ms_per_beat / 2);
 
-        if (nsingles_timing && interval >= one_half_threshold) {
-            ++*nsingles_timing;
-        }
+        if (o.ho->type == obj::circle || o.ho->type == obj::slider)
+        {
+            if (nsingles_timing && interval >= one_half_threshold) {
+                ++*nsingles_timing;
+            }
 
-        if (nsingles_threshold && interval >= singletap_threshold) {
-            ++*nsingles_threshold;
+            if (nsingles_threshold && interval >= singletap_threshold) {
+                ++*nsingles_threshold;
+            }
         }
 
         prev = &o;

@@ -29,7 +29,7 @@ char tolower_wrapper(char c) { return (char)tolower(c); }
 #define VERSION_SUFFIX "-lib"
 #endif
 
-const char* version_string = "0.9.8" VERSION_SUFFIX;
+const char* version_string = "0.9.9" VERSION_SUFFIX;
 
 // -----------------------------------------------------------------------------
 
@@ -215,16 +215,18 @@ print_sig(text_print)
         printf("awkwardness acc pp bonus (beta): %g\n", awkwardness_bonus);
     }
 
+    // first object is ignored since it has no previous to compare with
+    u16 nmaxsingles = b.num_circles + b.num_sliders - 1;
+
     printf("%" fu16 " spacing singletaps (%g%%)\n",
-           nsingles, (f32)nsingles / (b.num_circles + b.num_sliders) * 100.0f);
+           nsingles, (f32)nsingles / nmaxsingles * 100.0f);
 
     printf("%" fu16 " timing singletaps (%g%%)\n",
-           nsingles_timing,
-           (f32)nsingles_timing / (b.num_circles + b.num_sliders) * 100.0f);
+           nsingles_timing, (f32)nsingles_timing / nmaxsingles * 100.0f);
 
     printf("%" fu16 " notes within singletap threshold (%g%%)\n",
            nsingles_threshold,
-           (f32)nsingles_threshold / (b.num_circles + b.num_sliders) * 100.0f);
+           (f32)nsingles_threshold / nmaxsingles * 100.0f);
 
     printf("\n%gpp\n", pp);
 }
