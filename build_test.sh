@@ -2,7 +2,7 @@
 
 dir=$(dirname $0)
 
-source "$dir"/cflags.sh
+. "$dir"/cflags.sh
 ldflags="-lcrypto -lcurl $ldflags"
 
 if [ $(uname) = "Darwin" ]
