@@ -354,7 +354,7 @@ struct beatmap
         const char* osu_file,
         beatmap& b,
         char* buf, size_t bufsize,
-        bool disable_cache = false,
+        bool disable_cache = true,
         char const* custom_cache_folder = 0)
     {
 #if OPPAI_PROFILING

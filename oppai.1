@@ -1,4 +1,4 @@
-.TH OPPAI 1 2017-04-12 "oppai 0.9.0" "osu!"
+.TH OPPAI 1 2017-08-12 "oppai 0.9.7" "osu!"
 .\" %%%LICENSE_START(GPLv3_DOC_FULL)
 .\" This is free documentation; you can redistribute it and/or
 .\" modify it under the terms of the GNU General Public License as
@@ -65,10 +65,13 @@ How map information is printed to the screen, such as outputting JSON. By defaul
 .BI \-no-awkwardness
 Disables rhythm awkwardness calculation for speed (gains ~10% performance).
 .TP
+.BI \-cache
+Enables caching of pre-parsed beatmap data to the oppai_cache folder where the oppai binary is located.
+This usually boosts performance by ~25% on reasonably fast drives.
+Warning: the cache files might not be portable to different machines and might cause incorrect calculations if corrupt.
+.TP
 .BI \-no-cache
-Disables caching for very slow drives or really fast CPUs that parse the beatmap
-faster than the cache can read it. The caching system usually boosts performance
-by up to 25%, so it's recommended to keep it on.
+Disables caching. Since caching is disabled by default as of 0.9.7, this flag does nothing and is just kept for backwards compatibility.
 .SH RETURN CODES
 0 is returned if the program exited normally, nonzero is returned otherwise.
 .SH EXAMPLES

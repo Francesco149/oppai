@@ -29,7 +29,7 @@ char tolower_wrapper(char c) { return (char)tolower(c); }
 #define VERSION_SUFFIX "-lib"
 #endif
 
-const char* version_string = "0.9.6" VERSION_SUFFIX;
+const char* version_string = "0.9.7" VERSION_SUFFIX;
 
 // -----------------------------------------------------------------------------
 
@@ -545,14 +545,20 @@ int main(int argc, char* argv[])
     const int prid = 0;
 #endif
 
-    bool no_cache = false;
+    bool no_cache = true;
 
     // TODO: find a way to do this without using 2 loops
     for (int i = 2; i < argc; i++)
     {
-        // no cache
+        // no cache (purely for backwards compatibility)
         if (!strcmp(argv[i], "-no-cache")) {
             no_cache = true;
+            argv[i] = 0;
+            break;
+        }
+
+        if (!strcmp(argv[i], "-cache")) {
+            no_cache = false;
             argv[i] = 0;
             break;
         }
