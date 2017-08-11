@@ -1,11 +1,13 @@
 # Binaries
 build/
 /oppai
+/oppai_test
 obj
 *.[oad]
 
 # Artifacts
 *.tar.gz
+*.tar.xz
 tags
 
 # Project settings
@@ -16,3 +18,5 @@ tags
 *~
 *.bak
 /oppai_cache
+/test_suite.json
+/test_suite
