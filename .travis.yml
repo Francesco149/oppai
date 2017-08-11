@@ -10,6 +10,12 @@ matrix:
 
 
 install: true
+cache:
+    directories:
+        - test_suite
 
 script:
   - ./build.sh
+  - ./download_test.sh
+  - ./build_test.sh
+  - ./oppai_test
