@@ -8,7 +8,7 @@ if [ $(uname) = "Darwin" ]; then
         -L$brew_prefix/opt/openssl/lib     \
         -std=c++98                         \
         -pedantic                          \
-        -O2                                \
+        -O3                                \
         $@                                 \
         -Wno-variadic-macros -Wall         \
         $dir/main.cc                       \
@@ -19,7 +19,7 @@ else
     ${CXX:-g++}                    \
         -std=c++98                 \
         -pedantic                  \
-        -O2                        \
+        -O3                        \
         $@                         \
         -Wno-variadic-macros -Wall \
         $dir/main.cc               \
