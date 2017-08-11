@@ -9,6 +9,7 @@ obj
 *.tar.gz
 *.tar.xz
 tags
+flags.log
 
 # Project settings
 .ycm_extra_conf.py*
