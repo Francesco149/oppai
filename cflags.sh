@@ -31,4 +31,5 @@ fi
 
 export cflags="$cflags"
 export ldflags="$ldflags"
+export cxx="$cxx"
 
