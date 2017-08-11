@@ -1,4 +1,4 @@
-.TH OPPAI 1 2017-08-12 "oppai 0.9.7" "osu!"
+.TH OPPAI 1 2017-08-12 "oppai 0.9.8" "osu!"
 .\" %%%LICENSE_START(GPLv3_DOC_FULL)
 .\" This is free documentation; you can redistribute it and/or
 .\" modify it under the terms of the GNU General Public License as
@@ -63,7 +63,10 @@ Defaults to 240bpm.
 How map information is printed to the screen, such as outputting JSON. By default it is printed as \fItext\fP.
 .TP
 .BI \-no-awkwardness
-Disables rhythm awkwardness calculation for speed (gains ~10% performance).
+-no-awkwardness: disables rhythm awkwardness calculation. since this is disabled by default as of 0.9.8, this flag is only kept for backwards compatibility
+.TP
+.BI \-awkwardness
+Enables experimental rhythm awkwardness calculations, ~10% slower.
 .TP
 .BI \-cache
 Enables caching of pre-parsed beatmap data to the oppai_cache folder where the oppai binary is located.

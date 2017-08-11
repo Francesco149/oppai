@@ -29,7 +29,7 @@ char tolower_wrapper(char c) { return (char)tolower(c); }
 #define VERSION_SUFFIX "-lib"
 #endif
 
-const char* version_string = "0.9.7" VERSION_SUFFIX;
+const char* version_string = "0.9.8" VERSION_SUFFIX;
 
 // -----------------------------------------------------------------------------
 
@@ -148,6 +148,7 @@ internalfn void print_beatmap(beatmap& b, oppai_ctx* ctx);
         f64             stars,              \
         f64             aim,                \
         f64             speed,              \
+        bool            has_awkwardness,    \
         f64             rhythm_awkwardness, \
         u16             nsingles,           \
         u16             nsingles_timing,    \
@@ -205,11 +206,14 @@ print_sig(text_print)
     printf("speed: %g\n", speed_pp);
     printf("accuracy: %g\n", acc_pp);
 
-    printf("\nrhythm awkwardness (beta): %g\n", rhythm_awkwardness);
+    if (has_awkwardness)
+    {
+        printf("\nrhythm awkwardness (beta): %g\n", rhythm_awkwardness);
 
-    f64 awkwardness_bonus =
-        std::max(1.0, std::min(1.15, std::pow(rhythm_awkwardness, 0.3)));
-    printf("awkwardness acc pp bonus (beta): %g\n", awkwardness_bonus);
+        f64 awkwardness_bonus =
+            std::max(1.0, std::min(1.15, std::pow(rhythm_awkwardness, 0.3)));
+        printf("awkwardness acc pp bonus (beta): %g\n", awkwardness_bonus);
+    }
 
     printf("%" fu16 " spacing singletaps (%g%%)\n",
            nsingles, (f32)nsingles / (b.num_circles + b.num_sliders) * 100.0f);
@@ -276,13 +280,8 @@ print_sig(json_print)
         "\"num_spinners\": %" fu16 ","
         "\"misses\": %" fu16 ","
         "\"score_version\": %" fu32 ","
-        "\"stars\": %.17g,\"speed_stars\": %.17g,\"aim_stars\": %.17g,"
-        "\"rhythm_awkwardness\": %.17g,"
-        "\"nsingles\": %" fu16 ","
-        "\"nsingles_timing\": %" fu16 ","
-        "\"nsingles_threshold\": %" fu16 ","
-        "\"pp\":%.17g"
-        "}\n",
+        "\"stars\": %.17g,\"speed_stars\": %.17g,\"aim_stars\": %.17g,",
+
         mods_str ? mods_str : "",
         (i32)(b.od * 100.0) / 100.0,
         (i32)(b.ar * 100.0) / 100.0,
@@ -291,8 +290,20 @@ print_sig(json_print)
         combo, b.max_combo,
         b.num_circles, b.num_sliders, b.num_spinners,
         misses, scoring,
-        stars, speed, aim,
-        rhythm_awkwardness,
+        stars, speed, aim
+    );
+
+    if (has_awkwardness) {
+        printf("\"rhythm_awkwardness\": %.17g,", rhythm_awkwardness);
+    }
+
+    printf(
+        "\"nsingles\": %" fu16 ","
+        "\"nsingles_timing\": %" fu16 ","
+        "\"nsingles_threshold\": %" fu16 ","
+        "\"pp\":%.17g"
+        "}\n",
+
         nsingles, nsingles_timing, nsingles_threshold,
         res.pp
     );
@@ -524,8 +535,12 @@ int main(int argc, char* argv[])
 
         puts("");
 
-        puts("-no-awkwardness: disables rhythm awkwardness calculation "
-               "for speed (about 10% performance gain)");
+        puts("-no-awkwardness: disables rhythm awkwardness calculation. since "
+             "this is disabled by default as of 0.9.8, this flag is only kept "
+             "for backwards compatibility");
+
+        puts("-awkwardness: enables experimental rhythm awkwardness "
+             "calculations, ~10% slower");
 
         puts("-no-cache: disables caching. since caching is disabled by "
              "default as of 0.9.7, this flag does nothing and is just kept "
@@ -597,7 +612,7 @@ int main(int argc, char* argv[])
 
     // TODO: bitmask
     bool no_percent = true;
-    bool no_awkwardness = false;
+    bool no_awkwardness = true;
 
     dbgputs("\nparsing arguments");
 
@@ -627,9 +642,15 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            // no rhythm awkwardness
+            // no rhythm awkwardness (purely for backwards compatibility)
             if (!strcmp(a + 1, "no-awkwardness")) {
                 no_awkwardness = true;
+                continue;
+            }
+
+            // enable rhythm awkwardness
+            if (!strcmp(a + 1, "awkwardness")) {
+                no_awkwardness = false;
                 continue;
             }
         }
@@ -783,7 +804,7 @@ int main(int argc, char* argv[])
     chk(&ctx);
 
     m->print(stdout, mods_str, combo, misses, scoring,
-             stars, aim, speed, rhythm_complexity,
+             stars, aim, speed, !no_awkwardness, rhythm_complexity,
              nsingles, nsingles_timing, nsingles_threshold, res, b);
 
     // ---
