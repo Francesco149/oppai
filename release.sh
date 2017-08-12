@@ -5,7 +5,7 @@ dir=$(dirname $0)
 git pull origin master
 
 echo -e "\nCompiling and Stripping"
-. "$dir"/build.sh -static || exit 1
+. "$dir"/build.sh -static -no-pie || exit 1
 
 echo -e "\nPackaging"
 folder="oppai-$(./oppai -version)-"
