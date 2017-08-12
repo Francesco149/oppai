@@ -10,6 +10,7 @@ obj
 *.tar.xz
 tags
 flags.log
+/node-oppai/oppaisrc
 
 # Project settings
 .ycm_extra_conf.py*
