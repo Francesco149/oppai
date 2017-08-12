@@ -1,4 +1,4 @@
-.TH OPPAI 1 2017-08-12 "oppai 0.9.8" "osu!"
+.TH OPPAI 1 2017-08-12 "oppai 0.9.9" "osu!"
 .\" %%%LICENSE_START(GPLv3_DOC_FULL)
 .\" This is free documentation; you can redistribute it and/or
 .\" modify it under the terms of the GNU General Public License as
@@ -24,7 +24,9 @@ oppai \- osu! pp advanced inspector
 .P
 oppai \fIFILE\fP [\fIOPTION\fP]...
 .SH DESCRIPTION
-A difficulty and pp calculator for osu! standard beatmaps. It works all maps, even unranked or unsubmitted ones. All you need to do is supply the map's \fI*.osu\fP file.
+A difficulty and pp calculator for osu! standard beatmaps. It works all maps,
+even unranked or unsubmitted ones. All you need to do is supply the map's
+\fI*.osu\fP file.
 .P
 When FILE is \-, read standard input.
 .SH OPTIONS
@@ -35,10 +37,12 @@ Set the play accuracy. The default is \fI100%\fP.
 .IB "number of 100s" x100
 .TP
 .IB "number of 50s" x50
-Sets the number of imperfect hits. The default is to assume every note is a \fI300\fP.
+Sets the number of imperfect hits. The default is to assume every note is a
+\fI300\fP.
 .TP
 .BI + mods
-Sets which mods were used. When multiple mods are used, simply concatenate their names, such as "HDHR". The default is to use no mods.
+Sets which mods were used. When multiple mods are used, simply concatenate
+their names, such as "HDHR". The default is to use no mods.
 .TP
 .IB combo x
 Sets the combo. By default full combo is used.
@@ -60,21 +64,26 @@ This is used to count how many notes are within 1/2 singletaps of this bpm.
 Defaults to 240bpm.
 .TP
 .BI \-o "output module"
-How map information is printed to the screen, such as outputting JSON. By default it is printed as \fItext\fP.
+How map information is printed to the screen, such as outputting JSON. By
+default it is printed as \fItext\fP.
 .TP
 .BI \-no-awkwardness
--no-awkwardness: disables rhythm awkwardness calculation. since this is disabled by default as of 0.9.8, this flag is only kept for backwards compatibility
+-no-awkwardness: disables rhythm awkwardness calculation. since this is disabled
+by default as of 0.9.8, this flag is only kept for backwards compatibility
 .TP
 .BI \-awkwardness
 Enables experimental rhythm awkwardness calculations, ~10% slower.
 .TP
 .BI \-cache
-Enables caching of pre-parsed beatmap data to the oppai_cache folder where the oppai binary is located.
+Enables caching of pre-parsed beatmap data to the oppai_cache folder where the
+oppai binary is located.
 This usually boosts performance by ~25% on reasonably fast drives.
-Warning: the cache files might not be portable to different machines and might cause incorrect calculations if corrupt.
+Warning: the cache files might not be portable to different machines and might
+cause incorrect calculations if corrupt.
 .TP
 .BI \-no-cache
-Disables caching. Since caching is disabled by default as of 0.9.7, this flag does nothing and is just kept for backwards compatibility.
+Disables caching. Since caching is disabled by default as of 0.9.7, this flag
+does nothing and is just kept for backwards compatibility.
 .SH RETURN CODES
 0 is returned if the program exited normally, nonzero is returned otherwise.
 .SH EXAMPLES
@@ -83,7 +92,8 @@ oppai "gtmn. (witch's slave) - furioso melodia (Alumetorz) [Wrath].osu"
 Give scoring and difficulty information about a downloaded map.
 .TP
 oppai my_map.osu +HR 98% 4x100
-Calculate the pp that would earned from a play of the given map with hard rock (HR), 98% accuracy, and 4 100s.
+Calculate the pp that would earned from a play of the given map with hard rock
+(HR), 98% accuracy, and 4 100s.
 .TP
 curl https://osu.ppy.sh/osu/37658 | oppai -
 Download beatmap information from the osu! website and give information on it.
