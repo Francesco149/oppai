@@ -1,4 +1,4 @@
-#include "main.cc"
+#include "oppaisrc/main.cc"
 
 #ifdef OPPAI_MODULE_DEBUG
 #define ndbgprintf(fmt, ...)           \
