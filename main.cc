@@ -10,6 +10,7 @@
 #include <string.h>
 #include <algorithm>
 #include <cmath>
+#include <float.h> // DBL_MAX
 
 #include <ctype.h> // tolower/toupper
 
@@ -29,7 +30,7 @@ char tolower_wrapper(char c) { return (char)tolower(c); }
 #define VERSION_SUFFIX "-lib"
 #endif
 
-const char* version_string = "0.9.9" VERSION_SUFFIX;
+const char* version_string = "0.9.10" VERSION_SUFFIX;
 
 // -----------------------------------------------------------------------------
 
@@ -254,9 +255,57 @@ void print_escaped_json_string(FILE* fd, const char* str)
     putchar('"');
 }
 
+// https://www.doc.ic.ac.uk/%7Eeedwards/compsys/float/nan.html
+
+bool is_inf(double b)
+{
+    u64* p = (u64*)&b;
+    return *p == 0x7FF0000000000000LL ||
+           *p == 0xFFF0000000000000LL;
+}
+
+bool is_nan(double b)
+{
+    u64* p = (u64*)&b;
+    return
+        (*p > 0x7FF0000000000000LL && *p < 0x8000000000000000LL) ||
+        (*p > 0xFFF7FFFFFFFFFFFFLL && *p <= 0xFFFFFFFFFFFFFFFFLL);
+}
+
+// json is mentally challenged and can't handle inf and nan so we/re gonna be
+// mathematically incorrect
+void fix_json_f64(double* v)
+{
+    if (is_inf(*v)) {
+        *v = DBL_MAX;
+    }
+
+    if (is_nan(*v)) {
+        *v = 0;
+    }
+}
+
 internalfn
 print_sig(json_print)
 {
+    double dod = b.od;
+    double dar = b.ar;
+    double dcs = b.cs;
+    double dhp = b.hp;
+
+    fix_json_f64(&res.acc_percent);
+    fix_json_f64(&res.pp);
+    fix_json_f64(&res.speed_pp);
+    fix_json_f64(&res.acc_pp);
+    fix_json_f64(&stars);
+    fix_json_f64(&aim);
+    fix_json_f64(&speed);
+    fix_json_f64(&rhythm_awkwardness);
+    fix_json_f64(&dod);
+    fix_json_f64(&dar);
+    fix_json_f64(&dcs);
+    fix_json_f64(&dhp);
+
     printf("%s", "{\"oppai_version\":");
     print_escaped_json_string(fd, version_string);
 
@@ -285,10 +334,10 @@ print_sig(json_print)
         "\"stars\": %.17g,\"speed_stars\": %.17g,\"aim_stars\": %.17g,",
 
         mods_str ? mods_str : "",
-        (i32)(b.od * 100.0) / 100.0,
-        (i32)(b.ar * 100.0) / 100.0,
-        (i32)(b.cs * 100.0) / 100.0,
-        (i32)(b.hp * 100.0) / 100.0,
+        (i32)(dod * 100.0) / 100.0,
+        (i32)(dar * 100.0) / 100.0,
+        (i32)(dcs * 100.0) / 100.0,
+        (i32)(dhp * 100.0) / 100.0,
         combo, b.max_combo,
         b.num_circles, b.num_sliders, b.num_spinners,
         misses, scoring,

@@ -2,7 +2,7 @@
 
 cflags="-std=c++98 -pedantic"
 cflags="$cflags -O3"
-cflags="$cflags -Wno-variadic-macros -Wall"
+cflags="$cflags -Wno-variadic-macros -Wno-long-long -Wall"
 cflags="$cflags -ffunction-sections -fdata-sections"
 cflags="$cflags -g0 -fno-unwind-tables -s"
 cflags="$cflags -fno-asynchronous-unwind-tables"
