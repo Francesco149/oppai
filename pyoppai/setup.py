@@ -38,7 +38,7 @@ pyoppai = Extension(
 
 setup(
     name = 'pyoppai',
-    version = '0.9.3-b1.2',
+    version = '0.9.9-b1.2',
     description = 'Python bindings for the oppai osu! pp calculator',
     ext_modules = [pyoppai]
 )
