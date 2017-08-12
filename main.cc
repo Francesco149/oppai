@@ -30,7 +30,7 @@ char tolower_wrapper(char c) { return (char)tolower(c); }
 #define VERSION_SUFFIX "-lib"
 #endif
 
-const char* version_string = "0.9.10" VERSION_SUFFIX;
+const char* version_string = "0.9.11" VERSION_SUFFIX;
 
 // -----------------------------------------------------------------------------
 
@@ -603,6 +603,7 @@ int main(int argc, char* argv[])
              "WARNING: the cache files might not be portable to different "
              "machines and might cause incorrect calculations if corrupt\n");
 
+        puts("-version: prints version number");
 
         puts("arguments in [square brackets] are optional");
         puts("(the order of the optional arguments does not matter)");
@@ -617,6 +618,11 @@ int main(int argc, char* argv[])
 #endif
 
     bool no_cache = true;
+
+    if (!strcmp(argv[1], "-version")) {
+        puts(version_string);
+        exit(0);
+    }
 
     // TODO: find a way to do this without using 2 loops
     for (int i = 2; i < argc; i++)

@@ -8,7 +8,8 @@ echo -e "\nCompiling and Stripping"
 . "$dir"/build.sh -static || exit 1
 
 echo -e "\nPackaging"
-folder="oppai-$(uname | tr '[:upper:]' '[:lower:]')-$(uname -m)"
+folder="oppai-$(./oppai -version)-"
+folder="${folder}$(uname | tr '[:upper:]' '[:lower:]')-$(uname -m)"
 mkdir -p "$folder"
 mv ./oppai $folder/oppai
 cp ./LICENSE $folder/LICENSE
