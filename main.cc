@@ -562,20 +562,20 @@ int main(int argc, char* argv[])
                 "[combo]x [misses]m scorev[scoring_version] "
                 "AR[ar_override] OD[od_override] CS[cs_override] "
                 "[other options]\n\n", *argv);
-        puts("use \"-\" instead of a path to an .osu file to read from stdin");
-        puts("acc: the accuracy in percent (example: 99.99%)");
-        puts("num_100s, num_50s: used to specify accuracy in 100 and 50 count");
+        puts("use \"-\" instead of a path to an .osu file to read from stdin\n");
+        puts("acc: the accuracy in percent (example: 99.99%)\n");
+        puts("num_100s, num_50s: specify accuracy in 100 and 50 count\n");
         puts("mods: any combination of nomod, nf, ez, hd, hr, dt, ht"
-                ", nc, fl, so (example: +hddthr)");
-        puts("combo: the highest combo (example: 1337x)");
-        puts("misses: amount of misses (example: 1m)");
-        puts("scoring_version: can only be 1 or 2 (example: scorev2)");
+                ", nc, fl, so (example: +hddthr)\n");
+        puts("combo: the highest combo (example: 1337x)\n");
+        puts("misses: amount of misses (example: 1m)\n");
+        puts("scoring_version: can only be 1 or 2 (example: scorev2)\n");
         puts("ar_override, od_override, cs_override: overrides base ar/od/cs "
              "for the map. useful to quickly calculate how it would affect pp "
-             "without editing the actual map. (example: AR10 OD10 CS6.5)");
+             "without editing the actual map. (example: AR10 OD10 CS6.5)\n");
         puts("singletap_max_bpm: singletap bpm threshold, defaults to 240. "
              "this is used to count how many notes are within 1/2 singletaps "
-             "of this bpm.");
+             "of this bpm.\n");
 
         printf("output_module: the module that will be used to output the "
              "results (defaults to text). currently available modules: ");
@@ -584,27 +584,27 @@ int main(int argc, char* argv[])
             printf("%s ", m->name);
         }
 
-        puts("");
+        puts("\n");
 
         puts("-no-awkwardness: disables rhythm awkwardness calculation. since "
              "this is disabled by default as of 0.9.8, this flag is only kept "
-             "for backwards compatibility");
+             "for backwards compatibility\n");
 
         puts("-awkwardness: enables experimental rhythm awkwardness "
-             "calculations, ~10% slower");
+             "calculations, ~10% slower\n");
 
         puts("-no-cache: disables caching. since caching is disabled by "
              "default as of 0.9.7, this flag does nothing and is just kept "
-             "for backwards compatibility.");
+             "for backwards compatibility\n");
 
         puts("-cache: enables caching of pre-parsed beatmap data to the "
-             "oppai_cache folder where the oppai binary is located. This "
+             "oppai_cache folder where the oppai binary is located. this "
              "usually boosts performance by ~25% on reasonably fast drives.\n"
-             "Warning: the cache files might not be portable to different "
-             "machines and might cause incorrect calculations if corrupt.");
+             "WARNING: the cache files might not be portable to different "
+             "machines and might cause incorrect calculations if corrupt\n");
 
 
-        puts("\narguments in [square brackets] are optional");
+        puts("arguments in [square brackets] are optional");
         puts("(the order of the optional arguments does not matter)");
 
         return 1;
