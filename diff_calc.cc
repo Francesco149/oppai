@@ -304,7 +304,9 @@ f64 d_calc(
             ++*nsingles;
         }
 
-        i32 one_half_threshold = (i32)(b.timing(o.ho->time)->ms_per_beat / 2);
+        i32 one_half_threshold = (i32)(
+            b.parent_timing(b.timing(o.ho->time))->ms_per_beat / 2
+        );
 
         if (o.ho->type == obj::circle || o.ho->type == obj::slider)
         {
