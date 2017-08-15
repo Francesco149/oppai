@@ -1,5 +1,13 @@
 [![Build Status](https://travis-ci.org/Francesco149/oppai.svg?branch=master)](https://travis-ci.org/Francesco149/oppai)
 
+# NOTE
+oppai has been rewritten from scratch in pure C89 here:
+[here](https://github.com/Francesco149/oppai-ng). it's much smaller
+and faster than legacy oppai.
+
+this is now deprecated and not actively developed anymore.
+
+# Index
 osu! pp advanced inspector (oppai) is a difficulty and pp calculator for osu!
 standard beatmaps. It works on any map, even unsubmitted ones and all you have
 to do is supply it with the map's .osu file.
