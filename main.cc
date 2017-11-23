@@ -30,7 +30,7 @@ char tolower_wrapper(char c) { return (char)tolower(c); }
 #define VERSION_SUFFIX "-lib"
 #endif
 
-const char* version_string = "0.9.12" VERSION_SUFFIX;
+const char* version_string = "0.9.13" VERSION_SUFFIX;
 
 // -----------------------------------------------------------------------------
 

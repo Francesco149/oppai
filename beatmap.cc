@@ -856,6 +856,10 @@ object_type_done:
 
             // calculate slider end time
             f64 px_per_beat = b.sv * 100.0 * sv_multiplier;
+            if (b.format_version < 8) {
+                px_per_beat /= sv_multiplier;
+            }
+
             f64 num_beats = (sl.length * sl.repetitions) / px_per_beat;
             i32 duration = (i32)std::ceil(num_beats * parent->ms_per_beat);
             ho.end_time = ho.time + duration;
